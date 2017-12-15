@@ -16,7 +16,7 @@
     "build": "gulp",
     "watch": "gulp watch",
     "clean": "gulp clean",
-    "eslint": "./node_modules/eslint/bin/eslint.js src/**",
+    "eslint": "node node_modules/eslint/bin/eslint.js src/**",
     "test": "mocha --compilers js:babel-core/register --require babel-polyfill --require jsdom-global/register",
     "start": "web-ext run -s dist/ --start-url about:debugging --start-url about:addons --verbose",
     "lint": "web-ext lint -s dist/",
