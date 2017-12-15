@@ -1,0 +1,60 @@
+{
+    "manifest_version": 2,
+    "name": "Foxy Manga Reader",
+    "version": "0.1.0",
+
+    "description": "__MSG_extensionDescription__",
+	  "homepage_url": "https://github.com/enakada/foxy-manga-reader",
+    "author": "enakada",
+
+    "applications": {
+      "gecko": {
+        "id": "foxy-manga-reader@enakada",
+        "strict_min_version": "52.0"
+      }
+    },
+
+    "default_locale": "en",
+
+    "icons": {
+        "32": "icons/fmr-color-32.png",
+        "64": "icons/fmr-color-64.png"
+    },
+
+    "permissions": [
+        "*://mangafox.la/*",
+        "storage",
+        "alarms",
+        "notifications",
+        "activeTab",
+        "tabs"
+    ],
+
+    "background": {
+        "scripts": ["background_scripts/background.js"]
+    },
+
+    "browser_action": {
+        "browser_style": true,
+        "default_popup": "browser_actions/browser-action.html",
+        "default_icon": {
+            "64": "icons/fmr-color-64.png"
+        }
+    },
+
+    "page_action": {
+        "browser_style": true
+    },
+
+    "options_ui": {
+        "page": "options_ui/options.html",
+        "browser_style": true
+    },
+
+    "content_scripts": [
+        {
+            "matches": ["*://*.mangafox.la/manga/*"],
+            "js": ["content_scripts/mangafox.js"]
+        }
+    ]
+}

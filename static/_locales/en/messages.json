@@ -1,0 +1,122 @@
+{
+  "extensionDescription": {
+    "message": "Track new manga releases from all popular websites.",
+    "description": "The extension description"
+  },
+
+  "generalErrorNotificationTitle": {
+    "message": "Error on Foxy Manga Reader",
+    "description": "Notification title for general errors."
+  },
+  "generalErrorNotificationMessage": {
+    "message": "An internal error occurred on Foxy Manga Reader. Please contact the extension author.",
+    "description": "Notification message for general errors."
+  },
+
+  "optionsPageButtonErrorNotificationTitle": {
+    "message": "Error while opening options page",
+    "description": "Notification title when an error occurred while opening options page."
+  },
+  "optionsPageButtonErrorNotificationMessage": {
+    "message": "An error occurred while opening the Options page. Please contact the extension author.",
+    "description": "Notification message when an error occurred while opening options page."
+  },
+
+  "readChapterButtonErrorNotificationTitle": {
+    "message": "Error while opening manga chapter",
+    "description": "Notification title when an error occurred while opening a manga chapter from the browser action button."
+  },
+  "readChapterButtonErrorNotificationMessage": {
+    "message": "Error while retrieving manga chapter URL. Please contact the extension author.",
+    "description": "Notification message when an error occurred while opening a manga chapter from the browser action button."
+  },
+
+  "unbookmarkIconTitle": {
+    "message": "Remove Manga",
+    "description": "Page action unbookmark manga icon title."
+  },
+
+  "unbookmarkMangaNotificationTitle": {
+    "message": "Manga Unbookmarked!",
+    "description": "Manga unbookmarked notification title."
+  },
+  "unbookmarkMangaNotificationMessage": {
+    "message": "Manga was successfully unbookmarked.",
+    "description": "Manga unbookmarked notification message."
+  },
+
+  "unbookmarkMangaErrorNotificationTitle": {
+    "message": "Error unbookmarking manga!",
+    "description": "Notification title when an error occurred while unbookmarking a manga."
+  },
+  "unbookmarkMangaErrorNotificationMessage": {
+    "message": "Could not unbookmark manga. Please contact the extension author.",
+    "description": "Notification message when an error occurred while unbookmarking a manga."
+  },
+
+  "bookmarkIconTitle": {
+    "message": "Bookmark Manga",
+    "description": "Page action bookmark manga icon title."
+  },
+
+  "bookmarkMangaNotificationTitle": {
+    "message": "Manga Bookmarked!",
+    "description": "Manga bookmarked notification title."
+  },
+  "bookmarkMangaNotificationMessage": {
+    "message": "Manga $MANGA_NAME$ was successfully bookmarked.",
+    "description": "Manga bookmarked notification message.",
+    "placeholders": {
+      "manga_name": {
+        "content": "$1",
+        "example": "Nisekoi"
+      }
+    }
+  },
+
+  "bookmarkMangaErrorNotificationTitle": {
+    "message": "Error bookmarking manga!",
+    "description": "Notification title when an error occurred while bookmarking a manga."
+  },
+  "bookmarkMangaErrorNotificationMessage": {
+    "message": "Could not bookmark manga. Please contact the extension author.",
+    "description": "Notification message when an error occurred while bookmarking a manga."
+  },
+
+  "mangaChapterUpdateNotificationTitle": {
+    "message": "New chapter available",
+    "description": "New chapter notification title."
+  },
+  "mangaChapterUpdateNotificationMessage": {
+    "message": "$CHAPTER_COUNT$ new chapters available for $MANGA_NAME$.",
+    "description": "New chapter notification message.",
+    "placeholders": {
+      "chapter_count": {
+        "content": "$1",
+        "example": "2"
+      },
+      "manga_name": {
+        "content": "$2",
+        "example": "Nisekoi"
+      }
+    }
+  },
+
+  "backupFailureAlert": {
+    "message": "An error occurred while generating the backup file. Please contact the extension author.",
+    "description": "Alert message when an error occurred while generating backup file."
+  },
+
+  "restoreFailureAlert": {
+    "message": "An error occurred while restoring the backup file. Please contact the extension author.",
+    "description": "Alert message when an error occurred while restoring backup file."
+  },
+  "wrongRestoreFileAlert": {
+    "message": "The selected file is not a valid backup file.",
+    "description": "Alert message when trying to upload an invalid backup file."
+  },
+  "restoreSuccessAlert": {
+    "message": "The backup file was successfuly restored.",
+    "description": "Alert message when restoration was successful."
+  }
+}

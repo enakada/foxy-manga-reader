@@ -1,0 +1,130 @@
+@import 'variables';
+@import 'buttons';
+@import 'colors';
+
+/*
+ * General Layout
+ */
+
+ html, body {
+  width: 350px;
+  max-height: 500px;
+  background: url("../images/dust_scratches.png");
+  font-family: $font-family-base, serif;
+  color: $body-color;
+}
+
+h1, h2, h3,
+h4, h5, h6 {
+  font-family: $font-family-headings, sans-serif;
+  text-transform: uppercase;
+}
+
+/*
+  * Components Layout
+  */
+
+.flex {
+  display: flex;
+}
+
+.v-flex {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+  * Header Layout
+  */
+
+header {
+  padding: 5px 12px;
+  background-color: rgba(51, 153, 204, 0.75);
+  border-bottom: 1px solid darken($fmr-color-blue, 10%);
+  color: white;
+  align-items: center;
+}
+
+.logo {
+  height: 32px;
+  width: 32px;
+  // background: black;
+  background: url('../icons/fmr-color-64.png') no-repeat;
+  background-size: contain;
+  margin-right: 6px;
+}
+
+/*
+ * Section Layout
+*/
+
+#manga-list {
+  overflow-y: scroll;
+}
+
+.up-to-date {
+  order: 1;
+}
+
+.manga-row {
+  align-items: center;
+  width: 100%;
+  border-bottom: 2px solid lightgray;
+
+  &:last-child {
+    border: 0;
+  }
+
+  img, .manga-data {
+      position: relative;
+      padding: 5px;
+      overflow: hidden;
+  }
+
+  img {
+      width: 100px;
+  }
+
+  .manga-data {
+      overflow: hidden;
+
+      .title {
+          margin: 0;
+          margin-bottom: 5px;
+      }
+
+      &>span {
+          font-size: 10px;
+          color: gray;
+      }
+  }
+
+  .btn:nth-of-type(1) {
+      margin-left: 0;
+  }
+}
+
+.chapter-selector {
+  width: 200px;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+}
+
+/*
+  * Header Layout
+  */
+
+footer {
+  padding: 5px;
+  border-top: 1px solid lightgray;
+
+  .btn-link {
+    margin-left: auto;
+    background-color: transparent;
+    color: black;
+
+    &:hover {
+      color: darken($fmr-color-blue, 25%);
+    }
+  }
+}
