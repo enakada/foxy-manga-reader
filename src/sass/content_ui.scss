@@ -1,0 +1,53 @@
+@import 'variables';
+
+.fmr-btn {
+  padding: 16px;
+  border: 0;
+  background-color: rgba(0,0,0,0.8);
+  color: white;
+  cursor: pointer;
+
+  &.disabled {
+    cursor: inherit;
+    background-color:lighten(rgba(0,0,0,0.8), 5%);
+    color: darken(#fff, 25%);
+  }
+
+  &:hover:not(.disabled) {
+    background-color: lighten(rgba(0,0,0,0.8), 25%);
+  }
+
+  &.btn-gototop,
+  &.btn-reload {
+    border-radius: 5px;
+    z-index: 5000;
+  }
+
+  &.btn-gototop {
+    position: fixed;
+    right: 5%;
+    bottom: 5%;
+  }
+}
+
+#fmr-navbar {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  right: 0;
+  top: 20%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 5000;
+
+  > .fmr-btn > span {
+    font-size: 20px;
+  }
+
+  .bookmarked {
+    color: $fmr-color-orange;
+  }
+
+  button:nth-child(2) {
+    border-bottom: #fff solid 1px;
+  }
+}

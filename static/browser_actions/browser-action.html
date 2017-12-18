@@ -6,6 +6,7 @@
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather|Raleway:900">
     <link rel="stylesheet" href="../css/icomoon.css"/>
+    <link rel="stylesheet" href="../css/viewmode.css"/>
     <link rel="stylesheet" href="../css/browser-action.css"/>
   </head>
 
@@ -18,6 +19,19 @@
   <section id="manga-list" class="v-flex"></section>
 
   <footer class="footer flex">
+    <div id="view-mode-container" class="view-mode-container" data-toggle="buttons">
+      View Mode:
+      <label class="btn btn-link" title="Infinite Scrolling Mode">
+        <input type="radio" name="viewMode" id="infinite"><scan class="fmr-icon-infinite"></scan>
+      </label>
+      <label class="btn btn-link" title="Dual Page Mode">
+        <input type="radio" name="viewMode" id="dual"><scan class="fmr-icon-dual"></scan>
+      </label>
+      <label class="btn btn-link" title="Single Page Mode">
+        <input type="radio" name="viewMode" id="single"><scan class="fmr-icon-single"></scan>
+      </label>
+    </div>
+
     <a href="#" id="options-btn" class="btn btn-link"><span class="icon-cog"></span></a>
   </footer>
 

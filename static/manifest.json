@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Foxy Manga Reader",
-    "version": "0.1.0",
+    "version": "0.2.0",
 
     "description": "__MSG_extensionDescription__",
 	  "homepage_url": "https://github.com/enakada/foxy-manga-reader",
@@ -51,10 +51,15 @@
         "browser_style": true
     },
 
+    "web_accessible_resources": [
+      "fonts/icomoon.*"
+    ],
+
     "content_scripts": [
         {
             "matches": ["*://*.mangafox.la/manga/*"],
-            "js": ["content_scripts/mangafox.js"]
+            "js": ["content_scripts/mangafox.js"],
+            "css": ["css/content_ui.css", "css/icomoon.css", "css/mangafox.css"]
         }
     ]
 }
