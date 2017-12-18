@@ -426,14 +426,14 @@ async function restoreStorage(bookmarkList) {
 // Runtime messages
 // ////////////////////////////////////////////////////////////////
 
-browser.runtime.onMessage.addListener(async (message) => {
+browser.runtime.onMessage.addListener(async (message, sender) => {
   switch (message.type) {
     case 'bookmark':
-      return bookmarkManga(message.manga_url);
+      return (sender.tab) ? bookmarkActionListener(sender.tab) : bookmarkManga(message.manga_url);
     case 'unbookmark':
-      return unbookmarkManga(message.manga_url);
+      return (sender.tab) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url);
     case 'update-chapter':
-      return updateCurrentChapter(message.manga_url);
+      return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(Error('Message has no tab.URL'));
     case 'restore':
       return restoreStorage(message.bookmark_list);
     default:

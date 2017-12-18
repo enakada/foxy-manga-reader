@@ -123,8 +123,35 @@ footer {
     background-color: transparent;
     color: black;
 
-    &:hover {
-      color: darken($fmr-color-blue, 25%);
+    &:hover,
+    &.active {
+      color: $fmr-color-orange;
+    }
+
+    &:not(.active) {
+      cursor: pointer;
+    }
+  }
+
+  #view-mode-container {
+    .btn {
+      padding: 6px;
+    }
+
+    object {
+      height: 32px;
+    }
+  }
+}
+
+[data-toggle="buttons"] {
+  > .btn,
+  > .btn-group > .btn {
+    input[type="radio"],
+    input[type="checkbox"] {
+      position: absolute;
+      clip: rect(0,0,0,0);
+      pointer-events: none;
     }
   }
 }

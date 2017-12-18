@@ -118,5 +118,43 @@
   "restoreSuccessAlert": {
     "message": "The backup file was successfuly restored.",
     "description": "Alert message when restoration was successful."
+  },
+
+  "changeViewModeErrorNotificationTitle": {
+    "message": "View Mode Error",
+    "description": "Alert title when an error occurred while changing current view mode."
+  },
+  "changeViewModeErrorNotificationMessage": {
+    "message": "An error occurred while changing current view mode. Please contact the extension author.",
+    "description": "Alert message when an error occurred while changing current view mode."
+  },
+
+  "homeButtonTitle": {
+    "message": "Go to manga main page",
+    "description": "Button title for content_script navigation bar."
+  },
+  "bookmarkButtonTitle": {
+    "message": "Bookmark this manga",
+    "description": "Button title for content_script navigation bar."
+  },
+  "unbookmarkButtonTitle": {
+    "message": "Unbookmark this manga",
+    "description": "Button title for content_script navigation bar."
+  },
+  "previousChapterButtonTitle": {
+    "message": "Go to previous chapter",
+    "description": "Button title for content_script navigation bar."
+  },
+  "previousPageButtonTitle": {
+    "message": "Go to previous page",
+    "description": "Button title for content_script navigation bar."
+  },
+  "nextChapterButtonTitle": {
+    "message": "Go to next chapter",
+    "description": "Button title for content_script navigation bar."
+  },
+  "nextPageButtonTitle": {
+    "message": "Go to next page",
+    "description": "Button title for content_script navigation bar."
   }
 }

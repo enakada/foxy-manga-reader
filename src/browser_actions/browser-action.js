@@ -2,6 +2,101 @@ import moment from 'moment';
 import * as Notification from '../util/notification';
 import store from '../util/datastore';
 
+
+// Document startup and event listeners
+// ////////////////////////////////////////////////////////////////
+
+const mangaListDom = document.getElementById('manga-list');
+
+/**
+ * Opens new tab with the selected manga chapter when btn-read button is clicked.
+ */
+async function readButtonListener(e) {
+  try {
+    const select = e.target.parentElement.getElementsByTagName('select')[0];
+    await browser.tabs.create({ url: select.options[select.selectedIndex].dataset.url });
+  } catch (err) {
+    console.error(`Error while accessing chapter page: ${err}`); // eslint-disable-line no-console
+
+    // Notify user that an error occurred
+    Notification.error({
+      title: browser.i18n.getMessage('readChapterButtonErrorNotificationTitle'),
+      message: browser.i18n.getMessage('readChapterButtonErrorNotificationMessage'),
+    });
+  }
+}
+
+/**
+ * Unbookmarks manga when btn-remove button is clicked.
+ */
+async function unbookmarkButtonListener(e) {
+  const card = e.target.parentElement.parentElement;
+
+  try {
+    const result = await browser.runtime.sendMessage({
+      type: 'unbookmark',
+      manga_url: card.dataset.mangaUrl,
+    });
+
+    if (result) mangaListDom.removeChild(card);
+  } catch (err) {
+    console.error(`Error while unbookmarking manga from browser action script: ${err}`); // eslint-disable-line no-console
+
+    // Notify user that an error occurred
+    Notification.error({
+      title: browser.i18n.getMessage('unbookmarkMangaErrorNotificationTitle'),
+      message: browser.i18n.getMessage('unbookmarkMangaErrorNotificationmessage'),
+    });
+  }
+}
+
+/**
+ * Listens to 'click' events on options-btn. Opens new tab with the selected manga chapter when btn-read button is clicked.
+ */
+document.addEventListener('click', async (e) => {
+  if (e.target.id !== 'options-btn') return;
+
+  try {
+    await browser.runtime.openOptionsPage();
+  } catch (err) {
+    console.error(`Error while opening options page: ${err}`); // eslint-disable-line no-console
+
+    // Notify user that an error occurred
+    Notification.error({
+      title: browser.i18n.getMessage('optionsPageButtonErrorNotificationTitle'),
+      message: browser.i18n.getMessage('optionsPageButtonErrorNotificationMessage'),
+    });
+  }
+});
+
+/**
+ * Listens to 'click' events on options-btn.
+ */
+document.addEventListener('change', async (e) => {
+  try {
+    await browser.storage.sync.set({ view_mode: e.target.id });
+
+    const container = document.getElementById('view-mode-container');
+    const previousActive = container.getElementsByClassName('active')[0];
+
+    if (previousActive) previousActive.classList.remove('active');
+
+    e.target.parentNode.classList.add('active');
+  } catch (err) {
+    console.error(`Could not change the view mode: ${err}`); // eslint-disable-line no-console
+
+    // Notify user that an error occurred
+    Notification.error({
+      title: browser.i18n.getMessage('changeViewModeErrorNotificationTitle'),
+      message: browser.i18n.getMessage('changeViewModeErrorNotificationMessage'),
+    });
+  }
+});
+
+
+// DOM creation
+// ////////////////////////////////////////////////////////////////
+
 /**
  * Creates a new Manga <li> Element
  * @param {*} manga object defining the manga
@@ -64,6 +159,7 @@ function createMangaElement(bookmark, manga) {
   goBtn.className = 'btn btn-default btn-read';
   goBtn.innerHTML = 'Read';
   goBtn.href = '#';
+  goBtn.onclick = readButtonListener;
   mangaData.appendChild(goBtn);
 
   // Add Remove button
@@ -71,124 +167,13 @@ function createMangaElement(bookmark, manga) {
   removeBtn.className = 'btn btn-danger btn-remove';
   removeBtn.innerHTML = 'Remove';
   removeBtn.href = '#';
-  removeBtn.dataset.manga =
+  removeBtn.onclick = unbookmarkButtonListener;
   mangaData.appendChild(removeBtn);
 
   mangaDiv.appendChild(mangaData);
 
   return mangaDiv;
 }
-
-
-// Document startup and event listeners
-// ////////////////////////////////////////////////////////////////
-
-const mangaListDom = document.getElementById('manga-list');
-
-/**
- * On windown.onload event, clear any badge text and create the manga
- * list DOM tree.
- */
-window.onload = async () => {
-  try {
-    // Sanity check the DOM
-    if (!mangaListDom) throw new Error('manga-list element does not exist in DOM');
-
-    const storage = await browser.storage.sync.get(['bookmark_list', 'badge_count']);
-
-    // Update badge_count
-    if (storage && storage.badge_count > 0) {
-      browser.browserAction.setBadgeBackgroundColor({ color: '' });
-      browser.browserAction.setBadgeText({ text: '' });
-
-      storage.badge_count = 0;
-      await browser.storage.sync.set({ badge_count: storage.badge_count });
-    }
-
-    // console.debug(storage);
-
-    if (storage && storage.bookmark_list) {
-      storage.bookmark_list.forEach(async (bookmark) => {
-        const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
-
-        mangaListDom.appendChild(createMangaElement(bookmark, manga));
-      });
-    }
-  } catch (err) {
-    console.error(`Error while starting the browser action script: ${err}`); // eslint-disable-line no-console
-
-    // Notify user that an error occurred
-    Notification.error({
-      title: browser.i18n.getMessage('generalErrorNotificationTitle'),
-      message: browser.i18n.getMessage('generalErrorNotificationMessage'),
-    });
-  }
-};
-
-/**
- * Listens to 'click' events on options-btn.
- */
-document.addEventListener('click', async (e) => {
-  if (e.target.id !== 'options-btn') return;
-
-  try {
-    await browser.runtime.openOptionsPage();
-  } catch (err) {
-    console.error(`Error while opening options page: ${err}`); // eslint-disable-line no-console
-
-    // Notify user that an error occurred
-    Notification.error({
-      title: browser.i18n.getMessage('optionsPageButtonErrorNotificationTitle'),
-      message: browser.i18n.getMessage('optionsPageButtonErrorNotificationMessage'),
-    });
-  }
-});
-
-/**
- * Listens to 'click' events on btn-read.
- */
-document.addEventListener('click', async (e) => {
-  if (e.target.className !== 'btn btn-default btn-read') return;
-
-  try {
-    const select = e.target.parentElement.getElementsByTagName('select')[0];
-    await browser.tabs.create({ url: select.options[select.selectedIndex].dataset.url });
-  } catch (err) {
-    console.error(`Error while accessing chapter page: ${err}`); // eslint-disable-line no-console
-
-    // Notify user that an error occurred
-    Notification.error({
-      title: browser.i18n.getMessage('readChapterButtonErrorNotificationTitle'),
-      message: browser.i18n.getMessage('readChapterButtonErrorNotificationMessage'),
-    });
-  }
-});
-
-/**
- * Listens to 'click' events on btn-remove
- */
-document.addEventListener('click', async (e) => {
-  if (e.target.className !== 'btn btn-danger btn-remove') return;
-
-  const card = e.target.parentElement.parentElement;
-
-  try {
-    const result = await browser.runtime.sendMessage({
-      type: 'unbookmark',
-      manga_url: card.dataset.mangaUrl,
-    });
-
-    if (result) mangaListDom.removeChild(card);
-  } catch (err) {
-    console.error(`Error while unbookmarking manga from browser action script: ${err}`); // eslint-disable-line no-console
-
-    // Notify user that an error occurred
-    Notification.error({
-      title: browser.i18n.getMessage('unbookmarkMangaErrorNotificationTitle'),
-      message: browser.i18n.getMessage('unbookmarkMangaErrorNotificationmessage'),
-    });
-  }
-});
 
 
 // Runtime messages
@@ -249,3 +234,53 @@ browser.runtime.onMessage.addListener((message, sender) => {
       break;
   }
 });
+
+
+// On window load
+// ////////////////////////////////////////////////////////////////
+
+/**
+ * On windown.onload event, clear any badge text and create the manga
+ * list DOM tree.
+ */
+window.onload = async () => {
+  try {
+    // Sanity check the DOM
+    if (!mangaListDom) throw new Error('manga-list element does not exist in DOM');
+
+    const storage = await browser.storage.sync.get(['bookmark_list', 'badge_count', 'view_mode']);
+
+    // Select view mode
+    const radio = document.getElementById(storage.view_mode || 'single');
+    if (radio) radio.parentNode.className += ' active';
+
+    // Update badge_count
+    if (storage && storage.badge_count > 0) {
+      browser.browserAction.setBadgeBackgroundColor({ color: '' });
+      browser.browserAction.setBadgeText({ text: '' });
+
+      storage.badge_count = 0;
+      await browser.storage.sync.set({ badge_count: storage.badge_count });
+    }
+
+    // console.debug(storage);
+
+    // Append manga list
+    if (storage && storage.bookmark_list) {
+      storage.bookmark_list.forEach(async (bookmark) => {
+        const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
+        if (!manga) return;
+
+        mangaListDom.appendChild(createMangaElement(bookmark, manga));
+      });
+    }
+  } catch (err) {
+    console.error(`Error while starting the browser action script: ${err}`); // eslint-disable-line no-console
+
+    // Notify user that an error occurred
+    Notification.error({
+      title: browser.i18n.getMessage('generalErrorNotificationTitle'),
+      message: browser.i18n.getMessage('generalErrorNotificationMessage'),
+    });
+  }
+};
