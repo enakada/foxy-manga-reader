@@ -12,7 +12,7 @@ export const urlRegex = /(?:http\w*:\/\/)*(mangafox)\.\w+\/manga\/([\w_]+)\//;
  * @returns A string representing the chapter reference extracted from the URL or the defaultValue.
  */
 export function getChapterReference(url, defaultValue) {
-  const m = /[\w:/.]+\/manga\/\w+\/?(\S+)\/\d+\.html/.exec(url);
+  const m = /[\w:/.]+\/manga\/\w+\/(\S+)\/\d+\.html/.exec(url);
   return (m) ? { id: m[1] } : defaultValue;
 }
 

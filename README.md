@@ -12,11 +12,11 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 ## Supported Websites
 
 - [Mangafox](http://mangafox.la)
+- [MangaEden](http://www.mangaeden.com)
 
 ## Coming Soon
 
 - Support for other sources:
-  - MangaEden
   - Kiss Manga
   - Batoto
   - MangaReader

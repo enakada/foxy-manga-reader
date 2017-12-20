@@ -1,6 +1,6 @@
 import * as Util from './util';
 
-const pageRegex = /(((?:http\w*:\/\/)*mangafox\.\w+\/manga\/(\w+)\/)?(\S+)\/)(\d+)(\.html)/;
+const pageRegex = /((((?:http\w*:\/\/)*[\w.]*mangaeden\.\w{2,3})\/[\w/]+-manga\/([\w-]+)\/)([\d.]+)\/)(\d+)\//;
 
 
 // Page Utils
@@ -11,23 +11,8 @@ const pageRegex = /(((?:http\w*:\/\/)*mangafox\.\w+\/manga\/(\w+)\/)?(\S+)\/)(\d
  * @returns {int} The total number of pages of the current manga chapter.
  */
 function getNumberOfPages() {
-  const topBarElem = document.getElementById('top_bar');
-  if (!topBarElem) return 0;
-
-  const selectElemList = topBarElem.getElementsByTagName('select');
-  if (!selectElemList) return 0;
-
-  let selectElem;
-  for (let i = 0; i < selectElemList.length; i += 1) {
-    if (selectElemList[i].className === 'm') {
-      selectElem = selectElemList[i];
-      break;
-    }
-  }
-
-  if (!selectElem) return 0;
-
-  return selectElem.options.length - 1;
+  const pageList = document.getElementById('pageSelect').options;
+  return (pageList) ? pageList.length : 0;
 }
 
 /**
@@ -39,34 +24,26 @@ function getNumberOfPages() {
 function loadImages(element, start, end) {
   if (start > end) return;
 
-  const url = window.location.href.replace(pageRegex, `$1${start}$6`);
+  const parentDiv = document.getElementById('image');
+  if (!parentDiv) return;
 
-  const xhr = new XMLHttpRequest();
-  xhr.responseType = 'document';
-  xhr.withCredentials = true;
+  const imageListString = /var pages = (\[.+\])/g.exec(parentDiv.innerHTML);
+  if (!imageListString) return;
 
-  xhr.addEventListener('readystatechange', function process() {
-    if (this.readyState === 4) {
-      const div = document.createElement('div');
-      element.appendChild(div);
+  const imageList = JSON.parse(imageListString[1]);
+  if (!imageList || imageList.length < end) return;
 
-      if (this.status >= 400) {
-        div.appendChild(Util.generateReloadButton(start, loadImages));
-      } else {
-        const viewer = this.responseXML.getElementById('viewer');
-        const image = viewer.getElementsByTagName('img');
+  for (let i = start; i < end + 1; i += 1) {
+    const div = document.createElement('div');
+    element.appendChild(div);
 
-        div.appendChild(image[0]);
-      }
-
-      loadImages(element, start + 1, end);
-    }
-  });
-
-  xhr.open('GET', url);
-  xhr.setRequestHeader('Cache-Control', 'no-cache');
-
-  xhr.send();
+    const imgDiv = document.createElement('img');
+    imgDiv.alt = `Page ${i}`;
+    imgDiv.src = imageList[i - 1].fs;
+    imgDiv.height = imageList[i - 1].imageH;
+    imgDiv.width = imageList[i - 1].imageW;
+    element.appendChild(imgDiv);
+  }
 }
 
 /**
@@ -74,11 +51,15 @@ function loadImages(element, start, end) {
  * @param {object~DOMElement} viewerDiv The DOMElement to append the manga pages to.
  */
 async function removeImgLink(viewerDiv) {
-  const div = viewerDiv.getElementsByTagName('div')[0];
-  const image = viewerDiv.getElementsByTagName('img')[0];
+  const a = document.getElementById('nextA');
+  const img = document.getElementById('mainImg');
 
-  div.innerHTML = '';
-  div.appendChild(image);
+  const div = document.createElement('div');
+  div.appendChild(img);
+
+  a.innerHTML = '';
+
+  viewerDiv.appendChild(div);
 }
 
 
@@ -93,11 +74,7 @@ async function infiniteScrolling(viewerDiv) {
   // Find number of pages
   const pageCount = getNumberOfPages();
 
-  try {
-    await loadImages(viewerDiv, 1, pageCount);
-  } catch (err) {
-    throw err;
-  }
+  loadImages(viewerDiv, 1, pageCount);
 }
 
 /**
@@ -108,40 +85,32 @@ async function dualPage(viewerDiv) {
   // Find number of pages
   const pageCount = getNumberOfPages();
 
-  try {
-    const m = pageRegex.exec(window.location.href);
-    if (!m) throw Error('Could not parse current page number');
+  const m = pageRegex.exec(window.location.href);
+  if (!m) return;
 
-    const nextPage = parseInt(m[5], 10) + 1;
+  const nextPage = parseInt(m[6], 10) + 1;
 
-    if (nextPage > pageCount) return;
+  if (nextPage > pageCount) return;
 
-    await loadImages(viewerDiv, nextPage, nextPage);
-  } catch (err) {
-    throw err;
-  }
+  loadImages(viewerDiv, nextPage, nextPage);
 }
 
 // Other
 // ////////////////////////////////////////////////////////////////
 
 function displayMenu(matchUrl, viewMode) {
-  const chapterList = document.getElementById('top_chapter_list').options;
+  const chapterList = document.getElementById('combobox').options;
   if (!chapterList) return;
 
   // Parse chapter links
   const curChapterIndex = chapterList.selectedIndex;
   if (curChapterIndex === -1) return;
 
-  const nextChapter = (curChapterIndex < chapterList.length - 1)
-    ? `${matchUrl[2]}${chapterList[curChapterIndex + 1].value}/1.html` : '';
-  const previousChapter = (curChapterIndex > 0) ? `${matchUrl[2]}${chapterList[curChapterIndex - 1].value}/1.html` : '';
+  const nextChapter = (curChapterIndex > 0)
+    ? `${matchUrl[2]}${chapterList[curChapterIndex - 1].value}/1/` : '';
+  const previousChapter = (curChapterIndex < chapterList.length - 1) ? `${matchUrl[2]}${chapterList[curChapterIndex + 1].value}/1/` : '';
 
-  // Parse page links
-  const topBarElem = document.getElementById('top_bar');
-  if (!topBarElem) return;
-
-  const pageList = topBarElem.getElementsByTagName('select')[1];
+  const pageList = document.getElementById('pageSelect').options;
   if (!pageList) return;
 
   const pageIncrement = (viewMode !== 'dual') ? 1 : 2;
@@ -151,21 +120,21 @@ function displayMenu(matchUrl, viewMode) {
 
   let nextPage = '';
   if (curPageIndex < pageList.length - pageIncrement - 1) {
-    nextPage = `${matchUrl[1]}${pageList[curPageIndex + pageIncrement].value}.html`;
+    nextPage = `${matchUrl[3]}${pageList[curPageIndex + pageIncrement].value}`;
   } else if (pageIncrement > 1 && curPageIndex < pageList.length - 2) {
-    nextPage = `${matchUrl[1]}${pageList[curPageIndex + 1].value}.html`;
+    nextPage = `${matchUrl[3]}${pageList[curPageIndex + 1].value}`;
   }
 
   let previousPage = '';
   if (curPageIndex > pageIncrement - 1) {
-    previousPage = `${matchUrl[1]}${pageList[curPageIndex - pageIncrement].value}.html`;
+    previousPage = `${matchUrl[3]}${pageList[curPageIndex - pageIncrement].value}`;
   } else if (pageIncrement > 1 && curPageIndex > 0) {
-    previousPage = `${matchUrl[1]}${pageList[curPageIndex - 1].value}.html`;
+    previousPage = `${matchUrl[3]}${pageList[curPageIndex - 1].value}`;
   }
 
   const options = {
-    source: 'mangafox',
-    reference: matchUrl[3],
+    source: 'mangaeden',
+    reference: matchUrl[4],
     url: {
       current: matchUrl[0],
       home: matchUrl[2],
@@ -179,6 +148,7 @@ function displayMenu(matchUrl, viewMode) {
 
   Util.appendMenu(options);
 }
+
 
 // On load
 // ////////////////////////////////////////////////////////////////
@@ -195,10 +165,9 @@ document.onreadystatechange = async () => {
     const viewMode = await Util.getCurrentViewMode();
     if (!viewMode) throw Error('Could not load view mode');
 
-    const viewerDiv = document.getElementById('viewer');
+    const viewerDiv = document.getElementById('mainImgC');
     viewerDiv.classList.add('fmr-viewer');
     viewerDiv.scrollIntoView({ behavior: 'smooth' });
-    // viewerDiv.innerHTML = '';
 
     switch (viewMode) {
       case 'infinite':
@@ -209,6 +178,7 @@ document.onreadystatechange = async () => {
       case 'dual':
         removeImgLink(viewerDiv);
         viewerDiv.classList.add('dual-mode');
+        viewerDiv.parentElement.style = '';
         dualPage(viewerDiv);
         break;
       default:

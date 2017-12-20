@@ -1,20 +1,6 @@
 #viewer {
   background: transparent;
   border: 0;
-  width: auto;
-
-  &.dual-mode {
-    display: flex;
-    justify-content: center;
-    max-height: 100vh;
-    overflow: hidden;
-
-    img {
-      width: auto;
-      max-height: 100vh;
-      margin-bottom: 5px;
-    }
-  }
 }
 
 /* Chapter Bars */

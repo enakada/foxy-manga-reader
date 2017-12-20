@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- Support for MangaEden
+
+### Fix
+
+- Fix view mode option being reset when chapter is selected in browser action popup.
 
 ## [0.2.0] - 2017-12-18
 ### Added

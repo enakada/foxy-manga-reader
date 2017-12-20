@@ -23,6 +23,7 @@
 
     "permissions": [
         "*://mangafox.la/*",
+        "*://*.mangaeden.com/*",
         "storage",
         "alarms",
         "notifications",
@@ -57,9 +58,14 @@
 
     "content_scripts": [
         {
-            "matches": ["*://*.mangafox.la/manga/*"],
+            "matches": ["*://*.mangafox.la/*"],
             "js": ["content_scripts/mangafox.js"],
             "css": ["css/content_ui.css", "css/icomoon.css", "css/mangafox.css"]
-        }
+        },
+        {
+          "matches": ["*://*.mangaeden.com/*"],
+          "js": ["content_scripts/mangaeden.js"],
+          "css": ["css/content_ui.css", "css/icomoon.css", "css/mangaeden.css"]
+      }
     ]
 }
