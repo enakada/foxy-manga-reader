@@ -48,12 +48,16 @@
   }
 
   button:nth-child(2) {
-    border-bottom: #fff solid 1px;
+    border-bottom: darken(#fff, 25%) solid 1px;
   }
 }
 
 .fmr-viewer {
   width: auto !important;
+
+  img {
+    margin-bottom: 5px;
+  }
 
   &.dual-mode {
     display: flex;
@@ -64,7 +68,6 @@
     img {
       width: auto;
       max-height: 100vh;
-      margin-bottom: 5px;
     }
   }
 }

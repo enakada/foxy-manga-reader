@@ -24,6 +24,7 @@
     "permissions": [
         "*://mangafox.la/*",
         "*://*.mangaeden.com/*",
+        "*://*.mangahere.cc/*",
         "storage",
         "alarms",
         "notifications",
@@ -66,6 +67,11 @@
           "matches": ["*://*.mangaeden.com/*"],
           "js": ["content_scripts/mangaeden.js"],
           "css": ["css/content_ui.css", "css/icomoon.css", "css/mangaeden.css"]
-      }
+        },
+        {
+          "matches": ["*://*.mangahere.cc/*"],
+          "js": ["content_scripts/mangahere.js"],
+          "css": ["css/content_ui.css", "css/icomoon.css"]
+        }
     ]
 }
