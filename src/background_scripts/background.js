@@ -185,14 +185,19 @@ browser.runtime.onInstalled.addListener(init);
  * @param {alarms.Alarm} alarm The alarm that fired.
  */
 async function updateMangaChapterList(alarm) {
-  console.log('Running updater');
-
   if (alarm.name !== 'background_update') return;
 
   try {
     const storage = await browser.storage.sync.get(['bookmark_list', 'badge_count']);
 
-    await store.iterate(async (manga) => {
+    const keys = await store.keys();
+    if (!keys) return; // no manga to track
+
+    keys.forEach(async (key) => {
+      const manga = await store.getItem(key);
+
+      console.log(`Checking updates for '${manga.name}'`);
+
       const info = Extractor.parseUrl(manga.url);
       if (!info) throw Error(`Could not parse URL: ${manga.url}`);
 
@@ -215,7 +220,6 @@ async function updateMangaChapterList(alarm) {
       // Update db
       const mangaCopy = Object.assign(manga, { chapter_list: chapterList });
       await store.setItem(`${info.website}/${info.reference}`, mangaCopy);
-
 
       if (count === 0) return; // no new chapters
 
@@ -248,6 +252,7 @@ async function updateMangaChapterList(alarm) {
 browser.alarms.onAlarm.addListener(updateMangaChapterList);
 
 browser.alarms.create('background_update', {
+  delayInMinutes: 1,
   periodInMinutes: 30,
 });
 
