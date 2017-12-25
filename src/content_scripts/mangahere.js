@@ -1,6 +1,6 @@
 import * as Util from './util';
 
-const pageRegex = /(((?:http\w*:\/\/)*mangafox\.\w+\/manga\/(\w+)\/)(\S+)\/)(\d+)(\.html)/;
+const pageRegex = /(((?:http\w*:\/\/)*[\w.]*mangahere\.\w{2,3}\/manga\/(\w+)\/)(\S+)\/)(?:(\d+)\.html)?/;
 
 
 // Page Utils
@@ -11,23 +11,13 @@ const pageRegex = /(((?:http\w*:\/\/)*mangafox\.\w+\/manga\/(\w+)\/)(\S+)\/)(\d+
  * @returns {int} The total number of pages of the current manga chapter.
  */
 function getNumberOfPages() {
-  const topBarElem = document.getElementById('top_bar');
+  const topBarElem = document.getElementById('top_chapter_list').parentElement;
   if (!topBarElem) return 0;
 
-  const selectElemList = topBarElem.getElementsByTagName('select');
-  if (!selectElemList) return 0;
+  const pageList = topBarElem.getElementsByTagName('select')[1];
+  if (!pageList) return 0;
 
-  let selectElem;
-  for (let i = 0; i < selectElemList.length; i += 1) {
-    if (selectElemList[i].className === 'm') {
-      selectElem = selectElemList[i];
-      break;
-    }
-  }
-
-  if (!selectElem) return 0;
-
-  return selectElem.options.length - 1;
+  return pageList.options.length - 1;
 }
 
 /**
@@ -39,7 +29,8 @@ function getNumberOfPages() {
 function loadImages(element, start, end) {
   if (start > end) return;
 
-  const url = window.location.href.replace(pageRegex, `$1${start}$6`);
+  const url = (start === 1)
+    ? window.location.href.replace(pageRegex, '$1') : window.location.href.replace(pageRegex, `$1${start}.html`);
 
   const xhr = new XMLHttpRequest();
   xhr.responseType = 'document';
@@ -53,10 +44,9 @@ function loadImages(element, start, end) {
       if (this.status >= 400) {
         div.appendChild(Util.generateReloadButton(start, loadImages));
       } else {
-        const viewer = this.responseXML.getElementById('viewer');
-        const image = viewer.getElementsByTagName('img');
-
-        div.appendChild(image[0]);
+        const image = xhr.response.getElementById('image');
+        image.style = '';
+        div.appendChild(image);
       }
 
       loadImages(element, start + 1, end);
@@ -71,24 +61,26 @@ function loadImages(element, start, end) {
 
 /**
  * Removes the <a> tag from the current page <img>.
- * @param {object~DOMElement} viewerDiv The DOMElement to append the manga pages to.
  */
-async function removeImgLink(viewerDiv) {
-  const div = viewerDiv.getElementsByTagName('div')[0];
-  const image = viewerDiv.getElementsByTagName('img')[0];
+function removeImgLink() {
+  const viewerDiv = document.getElementById('viewer');
+  const image = document.getElementById('image');
 
-  div.innerHTML = '';
+  const div = document.createElement('div');
   div.appendChild(image);
+
+  viewerDiv.innerHTML = '';
+  viewerDiv.appendChild(div);
 }
 
 /**
  * Removes the page side ad bars
  */
 function removeSideAds() {
-  const rightAd = document.getElementById('right-skyscraper');
+  const rightAd = document.getElementById('right_skyscraper');
   if (rightAd) rightAd.style = 'display: none';
 
-  const leftAd = document.getElementById('left-skyscraper');
+  const leftAd = document.getElementById('left_skyscraper');
   if (leftAd) leftAd.style = 'display: none';
 }
 
@@ -96,9 +88,9 @@ function removeSideAds() {
  * Removes the page selector
  */
 function removePageSelector() {
-  const goPageList = document.getElementsByClassName('r m');
+  const goPageList = document.getElementsByClassName('go_page');
   for (let i = 0; i < goPageList.length; i += 1) {
-    const selector = goPageList.item(i);
+    const selector = goPageList.item(i).getElementsByTagName('span')[0];
     if (!selector) {
       console.error('Could not remove page selector'); // eslint-disable-line no-console
       return;
@@ -120,11 +112,7 @@ async function infiniteScrolling(viewerDiv) {
   // Find number of pages
   const pageCount = getNumberOfPages();
 
-  try {
-    await loadImages(viewerDiv, 1, pageCount);
-  } catch (err) {
-    throw err;
-  }
+  loadImages(viewerDiv, 1, pageCount);
 }
 
 /**
@@ -135,18 +123,17 @@ async function dualPage(viewerDiv) {
   // Find number of pages
   const pageCount = getNumberOfPages();
 
-  try {
-    const m = pageRegex.exec(window.location.href);
-    if (!m) throw Error('Could not parse current page number');
-
-    const nextPage = parseInt(m[5], 10) + 1;
-
-    if (nextPage > pageCount) return;
-
-    await loadImages(viewerDiv, nextPage, nextPage);
-  } catch (err) {
-    throw err;
+  const m = pageRegex.exec(window.location.href);
+  if (!m) {
+    console.error('Could not parse current page number'); // eslint-disable-line no-console
+    return;
   }
+
+  const nextPage = (m[5]) ? parseInt(m[5], 10) + 1 : 2;
+
+  if (nextPage > pageCount) return;
+
+  loadImages(viewerDiv, nextPage, nextPage);
 }
 
 // Other
@@ -161,11 +148,11 @@ function displayMenu(matchUrl, viewMode) {
   if (curChapterIndex === -1) return;
 
   const nextChapter = (curChapterIndex < chapterList.length - 1)
-    ? `${matchUrl[2]}${chapterList[curChapterIndex + 1].value}/1.html` : '';
-  const previousChapter = (curChapterIndex > 0) ? `${matchUrl[2]}${chapterList[curChapterIndex - 1].value}/1.html` : '';
+    ? `${chapterList[curChapterIndex + 1].value}` : '';
+  const previousChapter = (curChapterIndex > 0) ? `${chapterList[curChapterIndex - 1].value}` : '';
 
   // Parse page links
-  const topBarElem = document.getElementById('top_bar');
+  const topBarElem = document.getElementById('top_chapter_list').parentElement;
   if (!topBarElem) return;
 
   const pageList = topBarElem.getElementsByTagName('select')[1];
@@ -178,20 +165,20 @@ function displayMenu(matchUrl, viewMode) {
 
   let nextPage = '';
   if (curPageIndex < pageList.length - pageIncrement - 1) {
-    nextPage = `${matchUrl[1]}${pageList[curPageIndex + pageIncrement].value}.html`;
+    nextPage = `${pageList[curPageIndex + pageIncrement].value}`;
   } else if (pageIncrement > 1 && curPageIndex < pageList.length - 2) {
-    nextPage = `${matchUrl[1]}${pageList[curPageIndex + 1].value}.html`;
+    nextPage = `${pageList[curPageIndex + 1].value}`;
   }
 
   let previousPage = '';
   if (curPageIndex > pageIncrement - 1) {
-    previousPage = `${matchUrl[1]}${pageList[curPageIndex - pageIncrement].value}.html`;
+    previousPage = `${pageList[curPageIndex - pageIncrement].value}`;
   } else if (pageIncrement > 1 && curPageIndex > 0) {
-    previousPage = `${matchUrl[1]}${pageList[curPageIndex - 1].value}.html`;
+    previousPage = `${pageList[curPageIndex - 1].value}`;
   }
 
   const options = {
-    source: 'mangafox',
+    source: 'mangahere',
     reference: matchUrl[3],
     url: {
       current: matchUrl[0],
@@ -236,8 +223,8 @@ document.onreadystatechange = async () => {
         infiniteScrolling(viewerDiv);
         break;
       case 'dual':
-        removeImgLink(viewerDiv);
         removeSideAds();
+        removeImgLink();
         removePageSelector();
         viewerDiv.classList.add('dual-mode');
 

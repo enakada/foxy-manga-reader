@@ -3,7 +3,7 @@ import HttpRequest from '../../util/httpRequest';
 /**
  * Matches the URL of a manga page.
  */
-export const urlRegex = /(?:http\w*:\/\/)*(mangafox)\.\w+\/manga\/([\w_]+)\//;
+export const urlRegex = /(?:https*:\/\/[\w.]*)*(mangahere)\.\w{2,3}\/manga\/([\w_]+)\//;
 
 /**
  * Returns the chapter reference extracted from the URL or the defaultValue.
@@ -12,7 +12,7 @@ export const urlRegex = /(?:http\w*:\/\/)*(mangafox)\.\w+\/manga\/([\w_]+)\//;
  * @returns A string representing the chapter reference extracted from the URL or the defaultValue.
  */
 export function getChapterReference(url, defaultValue) {
-  const m = /[\w:/.]+\/manga\/\w+\/(\S+)\/\d+\.html/.exec(url);
+  const m = /[\w:/.]+\/manga\/\w+\/([\dc.]+)\/(?:\d+\.html)*/.exec(url);
   return (m) ? { id: m[1] } : defaultValue;
 }
 
@@ -23,20 +23,23 @@ export function getChapterReference(url, defaultValue) {
  * @returns {array} The array of chapter objects.
  */
 function getChapterList(mangaSid, mangaUrl, chapterList = []) {
-  const url = `http://mangafox.la/media/js/list.${mangaSid}.js`;
+  const url = `http://www.mangahere.cc/get_chapters${mangaSid}.js`;
 
   return HttpRequest(url, (response) => {
-    const regex = /\["(.+)","([\w/.]+)"\]/g;
+    const regex = /\["(.+)","[\w./"+]+\/([c\d.]+)\/"\]/g;
 
-    let m = regex.exec(response);
+    const body = response.body.innerHTML;
+    if (!body) return chapterList;
+
+    let m = regex.exec(body);
     while (m !== null) {
       chapterList.push({
         id: m[2],
         name: m[1],
-        url: new URL(`${m[2]}/1.html`, mangaUrl).toString(),
+        url: new URL(`${m[2]}/`, mangaUrl).toString(),
       });
 
-      m = regex.exec(response);
+      m = regex.exec(body);
     }
 
     return chapterList;
@@ -52,45 +55,35 @@ export function getMangaInfo(url) {
   // Sanity check
   if (!url) return null;
 
+  // Get information from url
+  let m = urlRegex.exec(url);
+  if (!m) return Promise.reject(Error(`Invalid url for mangahere: ${url}`));
+
+  const mangaUrl = m[0];
+  const mangaReference = m[2];
+
   // Return a promise which resolves to the manga data
-  return HttpRequest(url, async (response) => {
+  return HttpRequest(mangaUrl, async (response) => {
     if (!response || typeof response !== 'object') {
-      throw new Error(`Mangafox response is not a HTML: ${response}`);
+      throw new Error(`MangaHere response is not a HTML: ${response}`);
     }
-
-    // Get information from url
-    let m = urlRegex.exec(url);
-    if (!m) throw new Error(`Invalid url for mangafox: ${url}`);
-
-    const mangaUrl = m[0];
-    const mangaReference = m[2];
 
     const headerDom = response.getElementsByTagName('head')[0];
 
     // Get manga name from response
     const titleDom = response.evaluate('//meta[@property="og:title"]', headerDom, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    if (!titleDom.singleNodeValue) throw new Error('Mangafox: could not find DOM with property og:title');
+    if (!titleDom.singleNodeValue) throw new Error('MangaHere: could not find DOM with property og:title');
 
-    const name = /([\w\s]+) (?:[\d.]+ Page \d+|Manga)/.exec(titleDom.singleNodeValue.getAttribute('content'))[1];
-
-    const chapterRef = getChapterReference(url);
+    const name = titleDom.singleNodeValue.getAttribute('content');
 
     // Get manga SID and image URL from response
-    let imageUrl;
-    if (!chapterRef) {
-      const imageDom = response.evaluate('//div[@class="cover"]/img', headerDom, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-      if (!imageDom.singleNodeValue) throw new Error('Mangafox: could not find <img> DOM with "cover" class');
+    const imageDom = response.evaluate('//div[contains(@class,"manga_detail_top clearfix")]/img', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    if (!imageDom.singleNodeValue) throw new Error('MangaHere: could not find <img> DOM with "manga_detail_top" class');
 
-      imageUrl = imageDom.singleNodeValue.getAttribute('src');
-    } else {
-      const imageDom = response.evaluate('//meta[@property="og:image"]', headerDom, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-      if (!imageDom.singleNodeValue) throw new Error('Mangafox: could not find DOM with property og:image');
-
-      imageUrl = imageDom.singleNodeValue.getAttribute('content');
-    }
+    const imageUrl = imageDom.singleNodeValue.getAttribute('src');
 
     m = /\S+\/manga\/(\d+)\S+/.exec(imageUrl);
-    if (!m) throw new Error('Could not extract SID information from Mangafox response object');
+    if (!m) throw new Error('Could not extract SID information from MangaHere response object');
 
     const sid = m[1];
 
@@ -102,7 +95,7 @@ export function getMangaInfo(url) {
       const manga = {
         sid,
         name,
-        source: 'mangafox',
+        source: 'mangahere',
         reference: mangaReference,
         url: mangaUrl,
         cover: imageUrl,

@@ -48,6 +48,26 @@
   }
 
   button:nth-child(2) {
-    border-bottom: #fff solid 1px;
+    border-bottom: darken(#fff, 25%) solid 1px;
+  }
+}
+
+.fmr-viewer {
+  width: auto !important;
+
+  img {
+    margin-bottom: 5px;
+  }
+
+  &.dual-mode {
+    display: flex;
+    justify-content: center;
+    max-height: 100vh;
+    overflow: hidden;
+
+    img {
+      width: auto;
+      max-height: 100vh;
+    }
   }
 }

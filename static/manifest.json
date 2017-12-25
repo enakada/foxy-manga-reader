@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Foxy Manga Reader",
-    "version": "0.2.0",
+    "version": "0.3.0",
 
     "description": "__MSG_extensionDescription__",
 	  "homepage_url": "https://github.com/enakada/foxy-manga-reader",
@@ -23,6 +23,8 @@
 
     "permissions": [
         "*://mangafox.la/*",
+        "*://*.mangaeden.com/*",
+        "*://*.mangahere.cc/*",
         "storage",
         "alarms",
         "notifications",
@@ -57,9 +59,19 @@
 
     "content_scripts": [
         {
-            "matches": ["*://*.mangafox.la/manga/*"],
+            "matches": ["*://*.mangafox.la/*"],
             "js": ["content_scripts/mangafox.js"],
             "css": ["css/content_ui.css", "css/icomoon.css", "css/mangafox.css"]
+        },
+        {
+          "matches": ["*://*.mangaeden.com/*"],
+          "js": ["content_scripts/mangaeden.js"],
+          "css": ["css/content_ui.css", "css/icomoon.css", "css/mangaeden.css"]
+        },
+        {
+          "matches": ["*://*.mangahere.cc/*"],
+          "js": ["content_scripts/mangahere.js"],
+          "css": ["css/content_ui.css", "css/icomoon.css"]
         }
     ]
 }

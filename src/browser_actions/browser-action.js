@@ -70,9 +70,11 @@ document.addEventListener('click', async (e) => {
 });
 
 /**
- * Listens to 'click' events on options-btn.
+ * Listens to 'change' events on the view mode container.
  */
 document.addEventListener('change', async (e) => {
+  if (e.target.name !== 'viewMode') return;
+
   try {
     await browser.storage.sync.set({ view_mode: e.target.id });
 

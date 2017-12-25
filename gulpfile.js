@@ -14,6 +14,8 @@ const scriptList = [
   './src/browser_actions/browser-action.js',
   './src/options_ui/options.js',
   './src/content_scripts/mangafox.js',
+  './src/content_scripts/mangaeden.js',
+  './src/content_scripts/mangahere.js',
 ];
 
 
