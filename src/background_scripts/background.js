@@ -221,7 +221,7 @@ async function updateMangaChapterList(alarm) {
       const mangaCopy = Object.assign(manga, { chapter_list: chapterList });
       await store.setItem(`${info.website}/${info.reference}`, mangaCopy);
 
-      if (count === 0) return; // no new chapters
+      if (count <= 0) return; // no new chapters
 
       // Trigger notifications
       Notification.inform({
@@ -240,10 +240,12 @@ async function updateMangaChapterList(alarm) {
         bookmark: storage.bookmark_list[index],
         chapterList,
       });
+
+      // Update storage
+      await browser.storage.sync.set(storage);
     });
 
-    // Update storage
-    await browser.storage.sync.set(storage);
+    await browser.storage.sync.set({ last_chapter_update: new Date() });
   } catch (err) {
     console.error(`Foxy Manga Reader could not update chapter list: ${err}`); // eslint-disable-line no-console
   }
