@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- New sidebar for add-on control and manga statistics.
+- Bootstrap 4 for easier add-on layout.
 
 ## [0.3.0] - 2017-12-25
 ### Added
@@ -13,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for MangaEden
 - Support for MangaHere
 
-### Fix
+### Fixed
 
 - Fix view mode option being reset when chapter is selected in browser action popup.
 - Fix problem where manga chapters were not being updated if first bookmarked manga had no updates.

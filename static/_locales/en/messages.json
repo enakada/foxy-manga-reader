@@ -156,5 +156,16 @@
   "nextPageButtonTitle": {
     "message": "Go to next page",
     "description": "Button title for content_script navigation bar."
+  },
+
+  "lastUpdateText": {
+    "message": "Last Update: $DATE$.",
+    "description": "Tells the user the last time the add-on updated the manga list.",
+    "placeholders": {
+      "date" : {
+        "content" : "$1",
+        "example" : "1 hour ago"
+      }
+    }
   }
 }
