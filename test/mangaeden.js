@@ -144,7 +144,7 @@ describe('MangaEden', () => {
         <html>
           <head>
             <meta property="og:image" content="http://cdn.mangaeden.com/mangasimg/d5/d5d504279e9f99ac5270b098696a203535f55008064142c4fb321405.png" />
-            <meta property="og:title" content="Read Fairy Tail Manga Online Free in English - Manga Eden" />
+            <meta property="og:title" content="Read World's End Harem Manga Online Free in English - Manga Eden" />
           </head>
           <body>
           <div id="leftContent">
@@ -171,7 +171,7 @@ describe('MangaEden', () => {
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('fairy-tail');
-          manga.should.have.property('name').equal('Fairy Tail');
+          manga.should.have.property('name').equal('World\'s End Harem');
           manga.should.have.property('source').equal('mangaeden');
           manga.should.have.property('reference').equal('fairy-tail');
           manga.should.have.property('url').equal('http://www.mangaeden.com/en/en-manga/fairy-tail/');
@@ -190,7 +190,7 @@ describe('MangaEden', () => {
           <head>
             <meta property="og:image" content="http://cdn.mangaeden.com/mangasimg/5a/5a6d4e822f83c9ccfd54e6b17c8f40ddfa6aa4c422425789744ff8ce.jpg" />
             <meta property="og:image" content="http://cdn.mangaeden.com/mangasimg/58/5834bffd4d615bdc77c7eae56c61ead9577c49d1fef18d429e42b5ff.jpg" />
-            <meta property="og:title" content="Read Air Gear 287 Online For Free in English: 287 - page 1 - Manga Eden" />
+            <meta property="og:title" content="Read World's End Harem 31.1 Online For Free in English - page 1 - Manga Eden" />
           </head>
           <body>
           <div id="leftContent">
@@ -217,7 +217,7 @@ describe('MangaEden', () => {
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('air-gear');
-          manga.should.have.property('name').equal('Air Gear');
+          manga.should.have.property('name').equal('World\'s End Harem');
           manga.should.have.property('source').equal('mangaeden');
           manga.should.have.property('reference').equal('air-gear');
           manga.should.have.property('url').equal('http://www.mangaeden.com/en/en-manga/air-gear/');

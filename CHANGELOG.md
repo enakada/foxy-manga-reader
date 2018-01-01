@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Fix browser action notification count not reseting when button is clicked.
+- MangaEden: Fix problem where user was unable to bookmark manga with special characters in its name.
 
 ## [0.3.0] - 2017-12-25
 ### Added
