@@ -37,6 +37,50 @@ describe('MangaEden', () => {
     });
   });
 
+  // Test for #getMangaCover()
+  describe('#getMangaCover()', () => {
+    let parser;
+    before(() => {
+      parser = new DOMParser();
+    });
+
+    it('should throw error if response is not a DOM object', () => {
+      (MangaEden.getMangaCover).should.throw(Error, /MangaEden response is not a HTML/);
+    });
+
+    it('should throw error if no property og:image could be retrieved from response head', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+          </body>
+        <html>`, 'text/html');
+
+      const fn = () => { MangaEden.getMangaCover(response); };
+
+      (fn).should.throw(Error, 'MangaEden: could not find DOM with property og:image');
+    });
+
+    it('should return correct manga cover URL', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="http://cdn.mangaeden.com/mangasimg/d5/d5d504279e9f99ac5270b098696a203535f55008064142c4fb321405.png" />
+            <meta property="og:title" content="Read World's End Harem Manga Online Free in English - Manga Eden" />
+          </head>
+          <body></body>
+        <html>`, 'text/html');
+
+      const cover = MangaEden.getMangaCover(response);
+
+      should.exist(cover);
+      cover.should.be.equal('http://cdn.mangaeden.com/mangasimg/d5/d5d504279e9f99ac5270b098696a203535f55008064142c4fb321405.png');
+    });
+  });
+
   // Test for #getChapterReference()
   describe('#getChapterReference()', () => {
     it('should return defaultValue on http://www.mangaeden.com/en/en-manga/81/', () => {
@@ -117,24 +161,6 @@ describe('MangaEden', () => {
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('could not find DOM with property og:title');
-        });
-    });
-
-    it('should reject promise if no og:image could be retrieved from response body', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta property="og:title" content="Read Gantz Manga Online Free in English - Manga Eden" />
-          </head>
-          <body></body>
-        <html>`]);
-
-      return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/gantz/')
-        .catch((err) => {
-          should.exist(err);
-          err.should.be.an('error');
-          err.message.should.have.string('could not find DOM with property og:image');
         });
     });
 

@@ -1,3 +1,4 @@
+import HttpRequest from '../../util/httpRequest';
 import * as Mangafox from './mangafox';
 import * as MangaEden from './mangaeden';
 import * as MangaHere from './mangahere';
@@ -34,13 +35,14 @@ export function parseUrl(url) {
 }
 
 /**
- * Returns the list of chapters of a manga.
- * @param {object} manga The manga to search for chapters.
- * @returns {object} An array of objects defining all chapters of a manga.
+ * Returns a promise which resolves to the new cover URL.
+ * @param {string} source The name of the source to extract information from.
+ * @param {string} mangaUrl The URL for the manga which to extract information from.
+ * @returns Promise which resolves to the new cover URL.
  */
-export function getChapterList(manga) {
-  const extractor = providersMap.get(manga.source);
-  if (!extractor) return null;
+export async function getCurrentMangaCover(source, mangaUrl) {
+  const extractor = providersMap.get(source);
+  if (!extractor) return Promise.reject(Error(`Not a valid manga source: ${source}`));
 
-  return extractor.getChapterList(manga);
+  return HttpRequest(mangaUrl, extractor.getMangaCover);
 }

@@ -37,6 +37,52 @@ describe('Mangafox', () => {
     });
   });
 
+  // Test for #getMangaCover()
+  describe('#getMangaCover()', () => {
+    let parser;
+    before(() => {
+      parser = new DOMParser();
+    });
+
+    it('should throw error if response is not a DOM object', () => {
+      (Mangafox.getMangaCover).should.throw(Error, /Mangafox response is not a HTML/);
+    });
+
+    it('should throw error if no class="cover" could be retrieved from response body', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+          </body>
+        <html>`, 'text/html');
+
+      const fn = () => { Mangafox.getMangaCover(response); };
+
+      (fn).should.throw(Error, 'Mangafox: could not find <img> DOM with "cover" class');
+    });
+
+    it('should return correct manga cover URL', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="https://lmfcdn.secure.footprint.net/store/manga/5035/cover.jpg" />
+            <meta property="og:title" content="Manga Name 1 Page 1" />
+          </head>
+          <body>
+            <div class="cover"><img src="https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg"/></div>
+          </body>
+        <html>`, 'text/html');
+
+      const cover = Mangafox.getMangaCover(response);
+
+      should.exist(cover);
+      cover.should.be.equal('https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg');
+    });
+  });
+
   // Test for #getChapterReference()
   describe('#getChapterReference()', () => {
     it('should return defaultValue on http://mangafox.la/manga/any_name/', () => {
@@ -92,8 +138,17 @@ describe('Mangafox', () => {
       server.restore();
     });
 
-    it('should reject promise on Error 404', () => {
+    it('should reject promise on invalid URL', () => {
       return Mangafox.getMangaInfo('http://mangafox.la/manga/')
+        .catch((err) => {
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Invalid url');
+        });
+    });
+
+    it('should reject promise on Error 404', () => {
+      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
         .catch((err) => {
           should.exist(err);
           err.should.be.an('string');
@@ -104,22 +159,11 @@ describe('Mangafox', () => {
     it('should reject promise if response is empty', () => {
       server.respondWith([200, { 'Content-Type': 'text/html' }, '']); // 200
 
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/')
+      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
         .catch((err) => {
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Mangafox response is not a HTML');
-        });
-    });
-
-    it('should reject promise if cannot parse url', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '<!DOCTYPE html><html></html>']); // 200
-
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/')
-        .catch((err) => {
-          should.exist(err);
-          err.should.be.an('error');
-          err.message.should.have.string('Invalid url');
         });
     });
 
@@ -131,24 +175,6 @@ describe('Mangafox', () => {
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('could not find DOM with property og:title');
-        });
-    });
-
-    it('should reject promise if no og:image could be retrieved from response body', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta property="og:title" content="Manga Name 1 Page 1" />
-          </head>
-          <body></body>
-        <html>`]);
-
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/v001/c001/1.html')
-        .catch((err) => {
-          should.exist(err);
-          err.should.be.an('error');
-          err.message.should.have.string('could not find DOM with property og:image');
         });
     });
 
@@ -186,7 +212,9 @@ describe('Mangafox', () => {
                 <meta property="og:image" content="https://lmfcdn.secure.footprint.net/store/manga/5035/cover.jpg" />
                 <meta property="og:title" content="Manga Name 1 Page 1" />
               </head>
-              <body></body>
+              <body>
+                <div class="cover"><img src="https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg"/></div>
+              </body>
             <html>`);
         }
       });
@@ -200,7 +228,7 @@ describe('Mangafox', () => {
           manga.should.have.property('source').equal('mangafox');
           manga.should.have.property('reference').equal('12_manga');
           manga.should.have.property('url').equal('http://mangafox.la/manga/12_manga/');
-          manga.should.have.property('cover').equal('https://lmfcdn.secure.footprint.net/store/manga/5035/cover.jpg');
+          manga.should.have.property('cover').equal('https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg');
           manga.should.have.property('last_update');
           manga.should.have.property('chapter_list').with.lengthOf(2);
         }).catch((err) => {

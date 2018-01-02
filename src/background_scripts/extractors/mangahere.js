@@ -17,6 +17,23 @@ export function getChapterReference(url, defaultValue) {
 }
 
 /**
+ * Returns the Manga cover URL from the manga main page.
+ * @param {object} XMLResponse The XMLResponse object returned by XMLHttpRequest.
+ * @returns String representing the manga cover URL.
+ */
+export function getMangaCover(XMLResponse) {
+  if (!XMLResponse || typeof XMLResponse !== 'object') {
+    throw new Error(`MangaHere response is not a HTML: ${XMLResponse}`);
+  }
+
+  // Get manga image URL from response
+  const imageDom = XMLResponse.evaluate('//div[contains(@class,"manga_detail_top clearfix")]/img', XMLResponse, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+  if (!imageDom.singleNodeValue) throw new Error('MangaHere: could not find <img> DOM with "manga_detail_top" class');
+
+  return imageDom.singleNodeValue.getAttribute('src');
+}
+
+/**
  * Returns the manga chapter list
  * @param {object} manga The manga to retrieve its chapters
  * @param {array} chapterList A default chapterList array to start from. Defaults to an empty array
@@ -77,10 +94,7 @@ export function getMangaInfo(url) {
     const name = titleDom.singleNodeValue.getAttribute('content');
 
     // Get manga SID and image URL from response
-    const imageDom = response.evaluate('//div[contains(@class,"manga_detail_top clearfix")]/img', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    if (!imageDom.singleNodeValue) throw new Error('MangaHere: could not find <img> DOM with "manga_detail_top" class');
-
-    const imageUrl = imageDom.singleNodeValue.getAttribute('src');
+    const imageUrl = getMangaCover(response);
 
     m = /\S+\/manga\/(\d+)\S+/.exec(imageUrl);
     if (!m) throw new Error('Could not extract SID information from MangaHere response object');
