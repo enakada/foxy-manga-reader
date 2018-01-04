@@ -46,6 +46,52 @@ describe('MangaHere', () => {
     });
   });
 
+  // Test for #getMangaCover()
+  describe('#getMangaCover()', () => {
+    let parser;
+    before(() => {
+      parser = new DOMParser();
+    });
+
+    it('should throw error if response is not a DOM object', () => {
+      (MangaHere.getMangaCover).should.throw(Error, /MangaHere response is not a HTML/);
+    });
+
+    it('should throw error if no class="cover" could be retrieved from response body', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+          </body>
+        <html>`, 'text/html');
+
+      const fn = () => { MangaHere.getMangaCover(response); };
+
+      (fn).should.throw(Error, 'MangaHere: could not find <img> DOM with "manga_detail_top" class');
+    });
+
+    it('should return correct manga cover URL', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="http://c.mhcdn.net/store/manga/16143/cover.jpg?v=1513588040" />
+            <meta property="og:title" content="Manga Name" />
+          </head>
+          <body>
+            <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
+          </body>
+        <html>`, 'text/html');
+
+      const cover = MangaHere.getMangaCover(response);
+
+      should.exist(cover);
+      cover.should.be.equal('https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg');
+    });
+  });
+
   // Test for #getChapterReference()
   describe('#getChapterReference()', () => {
     it('should return defaultValue on http://www.mangahere.cc/manga/12_name/', () => {
@@ -124,24 +170,6 @@ describe('MangaHere', () => {
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('could not find DOM with property og:title');
-        });
-    });
-
-    it('should reject promise if no cover <img> could be retrieved from response body', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta property="og:title" content="Manga Name" />
-          </head>
-          <body></body>
-        <html>`]);
-
-      return MangaHere.getMangaInfo('http://www.mangahere.cc/manga/12_name/')
-        .catch((err) => {
-          should.exist(err);
-          err.should.be.an('error');
-          err.message.should.have.string('could not find <img> DOM with "manga_detail_top" class');
         });
     });
 

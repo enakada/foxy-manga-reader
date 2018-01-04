@@ -17,6 +17,26 @@ export function getChapterReference(url, defaultValue) {
 }
 
 /**
+ * Returns the Manga cover URL from the manga main page.
+ * @param {object} XMLResponse The XMLResponse object returned by XMLHttpRequest.
+ * @returns String representing the manga cover URL.
+ */
+export function getMangaCover(XMLResponse) {
+  if (!XMLResponse || typeof XMLResponse !== 'object') {
+    throw new Error(`MangaEden response is not a HTML: ${XMLResponse}`);
+  }
+
+  // Get manga image URL from response
+  const imageDomList = XMLResponse.evaluate('//meta[@property="og:image"]', XMLResponse, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+  if (imageDomList.snapshotLength <= 0) throw new Error('MangaEden: could not find DOM with property og:image');
+
+  const imageUrl = (imageDomList.snapshotLength > 1)
+    ? imageDomList.snapshotItem(1).getAttribute('content') : imageDomList.snapshotItem(0).getAttribute('content');
+
+  return imageUrl;
+}
+
+/**
  * Returns the manga chapter list
  * @param {object} mangaUrl The manga URL to retrieve its chapters.
  * @param {array} dom The document DOM to parse (if any).
@@ -92,14 +112,10 @@ export function getMangaInfo(url) {
     const titleDom = response.evaluate('//meta[@property="og:title"]', headerDom, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     if (!titleDom.singleNodeValue) throw new Error('MangaEden: could not find DOM with property og:title');
 
-    const name = /Read ([\w\s]+) (?:Manga|\d)/.exec(titleDom.singleNodeValue.getAttribute('content'))[1];
+    const name = /Read (.+) (?:Manga Online|[\d.]+ Online)/.exec(titleDom.singleNodeValue.getAttribute('content'))[1];
 
-    // Get manga SID and image URL from response
-    const imageDomList = response.evaluate('//meta[@property="og:image"]', headerDom, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    if (imageDomList.snapshotLength <= 0) throw new Error('MangaEden: could not find DOM with property og:image');
-
-    const imageUrl = (imageDomList.snapshotLength > 1)
-      ? imageDomList.snapshotItem(1).getAttribute('content') : imageDomList.snapshotItem(0).getAttribute('content');
+    // Get image URL from response
+    const imageUrl = getMangaCover(response);
 
     // Get chapter list and return
     try {

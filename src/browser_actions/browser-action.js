@@ -51,25 +51,6 @@ async function unbookmarkButtonListener(e) {
 }
 
 /**
- * Listens to 'click' events on options-btn. Opens new tab with the selected manga chapter when btn-read button is clicked.
- */
-document.addEventListener('click', async (e) => {
-  if (e.target.id !== 'options-btn') return;
-
-  try {
-    await browser.runtime.openOptionsPage();
-  } catch (err) {
-    console.error(`Error while opening options page: ${err}`); // eslint-disable-line no-console
-
-    // Notify user that an error occurred
-    Notification.error({
-      title: browser.i18n.getMessage('optionsPageButtonErrorNotificationTitle'),
-      message: browser.i18n.getMessage('optionsPageButtonErrorNotificationMessage'),
-    });
-  }
-});
-
-/**
  * Listens to 'change' events on the view mode container.
  */
 document.addEventListener('change', async (e) => {
@@ -246,6 +227,9 @@ browser.runtime.onMessage.addListener((message, sender) => {
  * list DOM tree.
  */
 window.onload = async () => {
+  const optBtn = document.getElementById('options-btn');
+  optBtn.onclick = () => { browser.runtime.openOptionsPage(); };
+
   try {
     // Sanity check the DOM
     if (!mangaListDom) throw new Error('manga-list element does not exist in DOM');

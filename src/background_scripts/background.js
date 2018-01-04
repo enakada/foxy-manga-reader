@@ -217,11 +217,15 @@ async function updateMangaChapterList(alarm) {
         storage.bookmark_list[index].last_read.chapter.index = lastReadIndex;
       }
 
+      // Update cover if it changed
+      const coverUrl = await Extractor.getCurrentMangaCover(manga.source, manga.url);
+      if (coverUrl && coverUrl !== manga.cover) manga.cover = coverUrl;
+
       // Update db
       const mangaCopy = Object.assign(manga, { chapter_list: chapterList });
       await store.setItem(`${info.website}/${info.reference}`, mangaCopy);
 
-      if (count === 0) return; // no new chapters
+      if (count <= 0) return; // no new chapters
 
       // Trigger notifications
       Notification.inform({
@@ -240,10 +244,12 @@ async function updateMangaChapterList(alarm) {
         bookmark: storage.bookmark_list[index],
         chapterList,
       });
+
+      // Update storage
+      await browser.storage.sync.set(storage);
     });
 
-    // Update storage
-    await browser.storage.sync.set(storage);
+    await browser.storage.sync.set({ last_chapter_update: new Date() });
   } catch (err) {
     console.error(`Foxy Manga Reader could not update chapter list: ${err}`); // eslint-disable-line no-console
   }
@@ -253,7 +259,7 @@ browser.alarms.onAlarm.addListener(updateMangaChapterList);
 
 browser.alarms.create('background_update', {
   delayInMinutes: 1,
-  periodInMinutes: 30,
+  periodInMinutes: 30, // Every 30 minutes
 });
 
 

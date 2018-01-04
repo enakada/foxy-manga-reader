@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.3.1] - 2018-01-04
+### Fixed
+
+- Fix browser action notification count not resetting when button is clicked.
+- MangaEden: User unable to bookmark manga with special characters in its name.
+- Manga cover not being updated.
+
+### Changed
+
+- Improve the response time of the options button in the add-on popup.
+
 ## [0.3.0] - 2017-12-25
 ### Added
 
