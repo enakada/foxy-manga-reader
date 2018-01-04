@@ -11,8 +11,78 @@ const mangaListDom = document.getElementById('manga-list');
 // ////////////////////////////////////////////////////////////////
 
 document.addEventListener('click', Sidebar.expandButtonListener);
-document.addEventListener('change', Sidebar.viewModeListener);
 
+
+// List view controller
+// ////////////////////////////////////////////////////////////////
+
+async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true) {
+  let readCount = 0;
+
+  try {
+    if (!bookmarkList) throw new Error('No available bookmarkList');
+
+    // Get the correct method to call
+    let fn;
+    switch (viewMode) {
+      case 'list':
+        fn = MangaList.createListCard;
+        break;
+      case 'list-rich':
+      default:
+        fn = MangaList.createListRichCard;
+        break;
+    }
+
+    // Append manga list
+    const promises = bookmarkList.map(async (bookmark) => {
+      const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
+      if (!manga) return;
+
+      const card = fn(bookmark, manga);
+      mangaListDom.appendChild(card);
+
+      if (card.classList.contains('flex-last')) readCount += 1;
+    });
+
+    await Promise.all(promises);
+
+    // Update chart
+    if (shouldUpdateChart) Sidebar.updateChart(mangaListDom.childElementCount - readCount, readCount);
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function listViewModeListener(e) {
+  try {
+    const storage = await browser.storage.sync.get(['view_mode', 'bookmark_list']);
+    storage.view_mode.list = e.target.id;
+
+    await browser.storage.sync.set({ view_mode: storage.view_mode });
+
+    // Clear previous list
+    mangaListDom.innerHTML = '';
+
+    // Append new list
+    await setListViewMode(storage.view_mode.list, storage.bookmark_list, false);
+
+    const container = document.getElementById('list-view-mode-container');
+    const previousActive = container.getElementsByClassName('active')[0];
+
+    if (previousActive) previousActive.classList.remove('active');
+
+    e.target.parentNode.classList.add('active');
+  } catch (err) {
+    console.error(`Could not change the view mode: ${err}`); // eslint-disable-line no-console
+
+    // Notify user that an error occurred
+    Notification.error({
+      title: browser.i18n.getMessage('changeViewModeErrorNotificationTitle'),
+      message: browser.i18n.getMessage('changeViewModeErrorNotificationMessage'),
+    });
+  }
+}
 
 // Runtime messages
 // ////////////////////////////////////////////////////////////////
@@ -97,9 +167,17 @@ window.onload = async () => {
       last_update: storage.last_chapter_update,
     });
 
+    // Initialize version
+    const versionDiv = document.getElementById('addon-version');
+    versionDiv.innerHTML = `v${browser.runtime.getManifest().version}`;
+
     // Select view mode
-    const radio = document.getElementById(storage.view_mode || 'single');
-    if (radio) radio.parentNode.className += ' active';
+    const radio = document.getElementById(storage.view_mode.manga || 'single');
+    if (radio) radio.parentNode.classList.add('active');
+
+    // Select manga list view mode
+    const listViewRadio = document.getElementById(storage.view_mode.list || 'list-rich');
+    if (listViewRadio) listViewRadio.parentNode.classList.add('active');
 
     // Select sidebar mode
     const iconBtn = document.getElementById('sidebar-expand-btn');
@@ -114,26 +192,14 @@ window.onload = async () => {
       await browser.storage.sync.set({ badge_count: storage.badge_count });
     }
 
-    // console.debug(storage);
-    let readCount = 0;
-
     // Append manga list
     if (storage && storage.bookmark_list) {
-      const promises = storage.bookmark_list.map(async (bookmark) => {
-        const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
-        if (!manga) return;
-
-        const card = MangaList.createMangaCard(bookmark, manga);
-        mangaListDom.appendChild(card);
-
-        if (card.classList.contains('flex-last')) readCount += 1;
-      });
-
-      await Promise.all(promises);
+      await setListViewMode(storage.view_mode.list, storage.bookmark_list);
     }
 
-    // Update chart
-    Sidebar.updateChart(mangaListDom.childElementCount - readCount, readCount);
+    // Add listener to list view radio button
+    const listViewMode = document.getElementById('list-view-mode-container');
+    listViewMode.onchange = listViewModeListener;
   } catch (err) {
     console.error(`Error while starting the browser action script: ${err}`); // eslint-disable-line no-console
 

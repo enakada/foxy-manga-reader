@@ -81,10 +81,11 @@ export function expandButtonListener(e) {
  * Listens to 'change' events on the view mode container.
  */
 export async function viewModeListener(e) {
-  if (e.target.name !== 'viewMode') return;
-
   try {
-    await browser.storage.sync.set({ view_mode: e.target.id });
+    const storage = await browser.storage.sync.get('view_mode');
+    storage.view_mode.manga = e.target.id;
+
+    await browser.storage.sync.set(storage);
 
     const container = document.getElementById('view-mode-container');
     const previousActive = container.getElementsByClassName('active')[0];
@@ -173,4 +174,8 @@ export function init(userConfig = {}) {
 
   const leftPanel = document.getElementById('left-panel');
   if (!leftPanel.classList.contains('collapsed')) lastUpdateDiv.insertAdjacentText('beforeend', ` ${lastUpdateText}`);
+
+  // Add listener to view-mode-container
+  const viewMode = document.getElementById('view-mode-container');
+  viewMode.onchange = viewModeListener;
 }

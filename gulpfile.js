@@ -41,6 +41,9 @@ gulp.task('copyStaticContent', () => {
 
   gulp.src('./node_modules/open-iconic/font/fonts/**')
     .pipe(gulp.dest(`${dist}/fonts`));
+
+  gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
+    .pipe(gulp.dest(`${dist}/js`));
 });
 
 gulp.task('copyStaticContent:watch', () => {

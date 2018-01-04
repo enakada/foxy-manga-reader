@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 
+- New manga list view mode: list mode. Now it should be easier to track lots of manga.
 - New sidebar for add-on control and manga statistics.
 - Bootstrap 4 for easier add-on layout.
 

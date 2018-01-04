@@ -25,6 +25,21 @@ h4, h5, h6 {
   width: 100%;
 }
 
+.btn.btn-link.btn-inverted,
+.link-inverted {
+  color: $body-color;
+
+  &.active,
+  &:hover {
+    color: $fmr-color-orange;
+    text-decoration: none;
+  }
+
+  &:not(.active) {
+    cursor: pointer;
+  }
+}
+
 /*
   * Header Layout
   */
@@ -63,20 +78,6 @@ header {
     font-size: 2em;
   }
 
-  .btn.btn-link {
-    color: $body-color;
-    text-decoration: none;
-
-    &.active,
-    &:hover {
-      color: $fmr-color-orange;
-    }
-
-    &:not(.active) {
-      cursor: pointer;
-    }
-  }
-
   #sidebar-expand-btn {
     position: absolute;
     top: 0%;
@@ -106,7 +107,7 @@ header {
 
 #manga-list-nav {
   height: $list-nav-height;
-  border-top: 2px solid #ddd;
+  border-bottom: 2px solid #ddd;
 }
 
 #manga-list {
@@ -135,4 +136,12 @@ header {
       color: gray;
     }
   }
+}
+
+/*
+ * Footer Layout
+*/
+
+#footer {
+  border-top: 2px solid #ddd;
 }
