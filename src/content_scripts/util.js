@@ -97,7 +97,7 @@ export async function updateCurrentChapter() {
 export function generateReloadButton(pageNumber, onclick) {
   const button = document.createElement('button');
   button.className = 'fmr-btn btn-reload';
-  button.innerHTML = '<span class="icon-loop2"></span>';
+  button.innerHTML = '<span class="oi" data-glyph="reload"></span>';
   button.onclick = (ev) => {
     const elem = ev.target.parentNode;
     elem.innerHTML = '';
@@ -130,7 +130,7 @@ export async function getCurrentViewMode() {
 export function appendScrollTopButton(topElem) {
   const button = document.createElement('button');
   button.className = 'fmr-btn btn-gototop';
-  button.innerHTML = '<span class="icon-arrow-up"></span>';
+  button.innerHTML = '<span class="oi" data-glyph="arrow-circle-top"></span>';
   button.onclick = () => {
     topElem.scrollIntoView({ behavior: 'smooth' });
   };
@@ -169,7 +169,7 @@ export async function appendMenu(options) {
     const homeBtn = document.createElement('button');
     navDiv.appendChild(homeBtn);
     homeBtn.title = browser.i18n.getMessage('homeButtonTitle');
-    homeBtn.innerHTML = '<span class="icon-home"></span>';
+    homeBtn.innerHTML = '<span class="oi" data-glyph="home" aria-hidden="true"></span>';
     homeBtn.className = 'fmr-btn';
     homeBtn.onclick = () => {
       window.location.href = opts.url.home;
@@ -178,7 +178,7 @@ export async function appendMenu(options) {
     const bookmarkBtn = document.createElement('button');
     navDiv.appendChild(bookmarkBtn);
     bookmarkBtn.id = 'fmr-bookmark-btn';
-    bookmarkBtn.innerHTML = '<span class="icon-bookmark"></span>';
+    bookmarkBtn.innerHTML = '<span class="oi" data-glyph="bookmark" aria-hidden="true"></span>';
     bookmarkBtn.className = 'fmr-btn';
     bookmarkBtn.dataset.mangaUrl = opts.url.current;
     bookmarkBtn.title = (bookmarked) ? browser.i18n.getMessage('unbookmarkButtonTitle') : browser.i18n.getMessage('bookmarkButtonTitle');
@@ -187,7 +187,7 @@ export async function appendMenu(options) {
     const prevChapterBtn = document.createElement('button');
     navDiv.appendChild(prevChapterBtn);
     prevChapterBtn.title = browser.i18n.getMessage('previousChapterButtonTitle');
-    prevChapterBtn.innerHTML = '<span class="icon-previous2"></span>';
+    prevChapterBtn.innerHTML = '<span class="oi" data-glyph="media-step-backward" aria-hidden="true"></span>';
     prevChapterBtn.className = (opts.url.previousChapter) ? 'fmr-btn' : 'fmr-btn disabled';
     if (opts.url.previousChapter) {
       prevChapterBtn.onclick = () => {
@@ -199,7 +199,7 @@ export async function appendMenu(options) {
       const prevPageBtn = document.createElement('button');
       navDiv.appendChild(prevPageBtn);
       prevPageBtn.title = browser.i18n.getMessage('previousPageButtonTitle');
-      prevPageBtn.innerHTML = '<span class="icon-arrow-left"></span>';
+      prevPageBtn.innerHTML = '<span class="oi" data-glyph="chevron-left" aria-hidden="true"></span>';
       prevPageBtn.className = (opts.url.previousPage) ? 'fmr-btn' : 'fmr-btn disabled';
       if (opts.url.previousPage) {
         prevPageBtn.onclick = () => {
@@ -211,7 +211,7 @@ export async function appendMenu(options) {
     const nextChapterBtn = document.createElement('button');
     navDiv.appendChild(nextChapterBtn);
     nextChapterBtn.title = browser.i18n.getMessage('nextChapterButtonTitle');
-    nextChapterBtn.innerHTML = '<span class="icon-next2"></span>';
+    nextChapterBtn.innerHTML = '<span class="oi" data-glyph="media-step-forward" aria-hidden="true"></span>';
     nextChapterBtn.className = (opts.url.nextChapter) ? 'fmr-btn' : 'fmr-btn disabled';
     if (opts.url.nextChapter) {
       nextChapterBtn.onclick = () => {
@@ -223,7 +223,7 @@ export async function appendMenu(options) {
       const nextPageBtn = document.createElement('button');
       navDiv.appendChild(nextPageBtn);
       nextPageBtn.title = browser.i18n.getMessage('nextPageButtonTitle');
-      nextPageBtn.innerHTML = '<span class="icon-arrow-right"></span>';
+      nextPageBtn.innerHTML = '<span class="oi" data-glyph="chevron-right"></span>';
       nextPageBtn.className = (opts.url.nextPage) ? 'fmr-btn' : 'fmr-btn disabled';
       if (opts.url.nextPage) {
         nextPageBtn.onclick = () => {

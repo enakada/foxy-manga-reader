@@ -1,8 +1,10 @@
 @import 'variables';
+@import '../../node_modules/open-iconic/font/css/open-iconic.scss';
 
 .fmr-btn {
-  padding: 16px;
+  padding: 12px;
   border: 0;
+  font-size: 2em;
   background-color: rgba(0,0,0,0.8);
   color: white;
   cursor: pointer;
@@ -38,10 +40,6 @@
   top: 20%;
   background-color: rgba(0,0,0,0.5);
   z-index: 5000;
-
-  > .fmr-btn > span {
-    font-size: 20px;
-  }
 
   .bookmarked {
     color: $fmr-color-orange;

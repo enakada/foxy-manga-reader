@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - New sidebar for add-on control and manga statistics.
 - Bootstrap 4 for easier add-on layout.
 
+### Changed
+
+- Replaced Icomoon icons for Open Iconic icons.
+
 ## [0.3.0] - 2017-12-25
 ### Added
 
