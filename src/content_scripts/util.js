@@ -117,7 +117,7 @@ export async function getCurrentViewMode() {
   try {
     const storage = await browser.storage.sync.get('view_mode');
 
-    return Promise.resolve(storage.view_mode || 'single');
+    return Promise.resolve(storage.view_mode.manga || 'single');
   } catch (err) {
     return Promise.reject(err);
   }
