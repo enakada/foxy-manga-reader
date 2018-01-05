@@ -53,6 +53,18 @@
 .fmr-viewer {
   width: auto !important;
 
+  .fmr-img-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .btn-reload {
+    position: relative;
+    top: -180px;
+  }
+
   img {
     margin-bottom: 5px;
   }

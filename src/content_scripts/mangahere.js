@@ -38,14 +38,23 @@ function loadImages(element, start, end) {
 
   xhr.addEventListener('readystatechange', function process() {
     if (this.readyState === 4) {
-      const div = document.createElement('div');
-      element.appendChild(div);
+      let div = element;
+      if (element.classList.contains('fmr-viewer')) {
+        div = document.createElement('div');
+        div.classList.add('fmr-img-container');
+        element.appendChild(div);
+      }
 
       if (this.status >= 400) {
-        div.appendChild(Util.generateReloadButton(start, loadImages));
+        Util.appendReloadDiv(div, start, loadImages);
       } else {
         const image = xhr.response.getElementById('image');
         image.style = '';
+        image.onerror = () => {
+          div.innerHTML = '';
+          Util.appendReloadDiv(div, start, loadImages);
+        };
+
         div.appendChild(image);
       }
 

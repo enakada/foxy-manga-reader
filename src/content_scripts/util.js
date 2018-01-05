@@ -88,13 +88,21 @@ export async function updateCurrentChapter() {
 }
 
 /**
- * Creates a reload button for when a manga page could not be retrieved.
+ * Creates and appends an image placeholder and the reload button for when a manga page could not be retrieved.
  * Also attaches a reload function to the onclick event.
  * @param {int} pageNumber The page which this button represents.
  * @param {function} onclick The reload function to trigger when button is clicked.
  * @returns {object~DOMElement} The DOMElement of the reload button.
  */
-export function generateReloadButton(pageNumber, onclick) {
+export function appendReloadDiv(parent, pageNumber, onclick) {
+  const placeholderUrl = browser.extension.getURL('images/page-default-placeholder.png');
+
+  // Append placeholder image
+  const imgTag = document.createElement('img');
+  imgTag.src = placeholderUrl;
+  parent.appendChild(imgTag);
+
+  // Append reload button
   const button = document.createElement('button');
   button.className = 'fmr-btn btn-reload';
   button.innerHTML = '<span class="oi" data-glyph="reload"></span>';
@@ -105,7 +113,7 @@ export function generateReloadButton(pageNumber, onclick) {
     onclick(elem, pageNumber, pageNumber);
   };
 
-  return button;
+  parent.appendChild(button);
 }
 
 /**

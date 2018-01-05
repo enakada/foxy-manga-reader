@@ -34,14 +34,23 @@ function loadImages(element, start, end) {
   if (!imageList || imageList.length < end) return;
 
   for (let i = start; i < end + 1; i += 1) {
-    const div = document.createElement('div');
-    element.appendChild(div);
+    let div = element;
+    if (element.classList.contains('fmr-viewer')) {
+      div = document.createElement('div');
+      div.classList.add('fmr-img-container');
+      element.appendChild(div);
+    }
 
     const imgDiv = document.createElement('img');
     imgDiv.alt = `Page ${i}`;
     imgDiv.src = imageList[i - 1].fs;
     imgDiv.height = imageList[i - 1].imageH;
     imgDiv.width = imageList[i - 1].imageW;
+    imgDiv.onerror = () => {
+      div.innerHTML = '';
+      Util.appendReloadDiv(div, start, loadImages);
+    };
+
     element.appendChild(imgDiv);
   }
 }

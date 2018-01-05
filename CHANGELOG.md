@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Replaced Icomoon icons for Open Iconic icons.
 
+### Fixed
+
+- Fix problem in which the reload button does not appear if the page fails to load.
+
 ## [0.3.0] - 2017-12-25
 ### Added
 
