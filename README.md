@@ -22,4 +22,3 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
   - Batoto
   - MangaReader
   - MangaPark
-- New improved interface
