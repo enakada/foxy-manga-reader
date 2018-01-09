@@ -169,7 +169,7 @@ window.onload = async () => {
 
     // Initialize version
     const versionDiv = document.getElementById('addon-version');
-    versionDiv.innerHTML = `v${browser.runtime.getManifest().version}`;
+    versionDiv.innerText = `v${browser.runtime.getManifest().version}`;
 
     // Select view mode
     const radio = document.getElementById(storage.view_mode.manga || 'single');

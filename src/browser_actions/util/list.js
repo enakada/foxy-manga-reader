@@ -63,7 +63,6 @@ function createRemoveButton(options = {}) {
   const defaults = {
     class: ['p-0'],
     title: 'Remove Manga',
-    innerHTML: '<span class="oi oi-trash" aria-hidden="true"></span>',
     target: '',
     url: '',
   };
@@ -76,7 +75,7 @@ function createRemoveButton(options = {}) {
   removeBtn.className = 'btn btn-link btn-inverted';
   removeBtn.classList.add(...opts.class);
   removeBtn.title = opts.title;
-  removeBtn.innerHTML = opts.innerHTML;
+  removeBtn.innerHTML = '<span class="oi oi-trash" aria-hidden="true"></span>';
   removeBtn.onclick = unbookmarkButtonListener;
 
   removeBtn.dataset.target = opts.target;
@@ -248,12 +247,12 @@ export function createListCard(bookmark, manga) {
   headerLink.href = `#collapse-${bookmark.source}-${bookmark.reference}`;
   headerLink.setAttribute('aria-expanded', 'false');
   headerLink.setAttribute('aria-controls', `collapse-${bookmark.source}-${bookmark.reference}`);
-  headerLink.innerHTML = manga.name;
+  headerLink.innerText = manga.name;
   titleCol.appendChild(headerLink);
 
   const chapterCol = document.createElement('div');
   chapterCol.className = 'col-2';
-  chapterCol.innerHTML = `${bookmark.last_read.chapter.index + 1}/${manga.chapter_list.length}`;
+  chapterCol.innerText = `${bookmark.last_read.chapter.index + 1}/${manga.chapter_list.length}`;
   headerRow.appendChild(chapterCol);
   if (upToDate) chapterCol.classList.add('text-success');
   else chapterCol.classList.add('text-danger');
