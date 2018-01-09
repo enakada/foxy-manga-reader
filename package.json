@@ -28,6 +28,7 @@
     "test"
   ],
   "dependencies": {
+    "chart.js": "^2.7.1",
     "localforage": "^1.5.5",
     "moment": "^2.19.3"
   },
@@ -49,6 +50,7 @@
     "jsdom": "^11.5.1",
     "jsdom-global": "^3.0.2",
     "mocha": "^3.3.0",
+    "open-iconic": "^1.1.1",
     "pre-commit": "^1.2.2",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-builtins": "^2.1.2",

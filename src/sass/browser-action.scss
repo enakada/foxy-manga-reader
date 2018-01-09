@@ -1,17 +1,18 @@
 @import 'variables';
-@import 'buttons';
-@import 'colors';
+@import '../../node_modules/open-iconic/font/css/open-iconic-bootstrap.scss';
+@import '../../node_modules/bootstrap/scss/bootstrap';
 
 /*
  * General Layout
  */
 
- html, body {
-  width: 350px;
-  max-height: 500px;
+ body {
+  width: $body-width;
+  max-height: $body-max-height;
   background: url("../images/dust_scratches.png");
   font-family: $font-family-base, serif;
   color: $body-color;
+  overflow: hidden;
 }
 
 h1, h2, h3,
@@ -20,17 +21,23 @@ h4, h5, h6 {
   text-transform: uppercase;
 }
 
-/*
-  * Components Layout
-  */
-
-.flex {
-  display: flex;
+.container-fluid {
+  width: 100%;
 }
 
-.v-flex {
-  display: flex;
-  flex-direction: column;
+.btn.btn-link.btn-inverted,
+.link-inverted {
+  color: $body-color;
+
+  &.active,
+  &:hover {
+    color: $fmr-color-orange;
+    text-decoration: none;
+  }
+
+  &:not(.active) {
+    cursor: pointer;
+  }
 }
 
 /*
@@ -38,120 +45,103 @@ h4, h5, h6 {
   */
 
 header {
-  padding: 5px 12px;
   background-color: rgba(51, 153, 204, 0.75);
-  border-bottom: 1px solid darken($fmr-color-blue, 10%);
+  border-bottom: 1px solid darken($fmr-color-blue, 8%);
   color: white;
-  align-items: center;
 }
 
 .logo {
   height: 32px;
   width: 32px;
-  // background: black;
   background: url('../icons/fmr-color-64.png') no-repeat;
   background-size: contain;
-  margin-right: 6px;
 }
 
 /*
- * Section Layout
+ * Left panel Layout
 */
 
-#manga-list {
-  overflow-y: scroll;
-}
+#left-panel {
+  border-right: 2px solid #ddd;
 
-.up-to-date {
-  order: 1;
-}
-
-.manga-row {
-  align-items: center;
-  width: 100%;
-  border-bottom: 2px solid lightgray;
-
-  &:last-child {
-    border: 0;
+  hr {
+    width: 100%;
+    border-top: 1px solid #ddd;
   }
 
-  img, .manga-data {
+  .update-text {
+    font-size: 0.8em;
+    color: lighten($body-color, 20%);
+  }
+
+  #view-mode-container label span {
+    font-size: 2em;
+  }
+
+  #sidebar-expand-btn {
+    position: absolute;
+    top: 0%;
+    right: 0;
+  }
+
+  // Collapsed sidebar
+  &.collapsed {
+    hr {
+      border-top: 2px solid #ddd;
+    }
+
+    .update-text,
+    .btn > span {
+      font-size: 1.5em;
+    }
+
+    #sidebar-expand-btn {
       position: relative;
-      padding: 5px;
-      overflow: hidden;
+    }
   }
+}
 
-  img {
-      width: 100px;
+/*
+ * Right panel Layout
+*/
+
+#manga-list-nav {
+  height: $list-nav-height;
+  border-bottom: 2px solid #ddd;
+}
+
+#manga-list {
+  position: relative;
+  height: $list-height;
+  // background: url("../images/memphis-colorful.png");
+  overflow-y: auto;
+
+  & > .row {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: rgba(254,254,254,0.7);
+
+    .input-group-sm {
+      height: $input-height-sm;
+    }
+
+    img {
+      display: inline-block;
+    }
   }
 
   .manga-data {
-      overflow: hidden;
-
-      .title {
-          margin: 0;
-          margin-bottom: 5px;
-      }
-
-      &>span {
-          font-size: 10px;
-          color: gray;
-      }
+    span {
+      font-size: 10px;
+      color: gray;
+    }
   }
-
-  .btn:nth-of-type(1) {
-      margin-left: 0;
-  }
-}
-
-.chapter-selector {
-  width: 200px;
-  border: 1px solid lightgray;
-  border-radius: 5px;
 }
 
 /*
-  * Header Layout
-  */
+ * Footer Layout
+*/
 
-footer {
-  padding: 5px;
-  border-top: 1px solid lightgray;
-
-  .btn-link {
-    margin-left: auto;
-    background-color: transparent;
-    color: black;
-
-    &:hover,
-    &.active {
-      color: $fmr-color-orange;
-    }
-
-    &:not(.active) {
-      cursor: pointer;
-    }
-  }
-
-  #view-mode-container {
-    .btn {
-      padding: 6px;
-    }
-
-    object {
-      height: 32px;
-    }
-  }
-}
-
-[data-toggle="buttons"] {
-  > .btn,
-  > .btn-group > .btn {
-    input[type="radio"],
-    input[type="checkbox"] {
-      position: absolute;
-      clip: rect(0,0,0,0);
-      pointer-events: none;
-    }
-  }
+#footer {
+  border-top: 2px solid #ddd;
 }

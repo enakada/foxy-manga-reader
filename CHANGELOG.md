@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- New manga list view mode: list mode. Now it should be easier to track lots of manga.
+- New sidebar for add-on control and manga statistics.
+- Bootstrap 4 for easier add-on layout.
+
+### Changed
+
+- Replaced Icomoon icons for Open Iconic icons.
+
+### Fixed
+
+- Fix problem in which the reload button does not appear if the page fails to load.
 
 ## [0.3.1] - 2018-01-04
 ### Fixed
@@ -24,7 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for MangaEden
 - Support for MangaHere
 
-### Fix
+### Fixed
 
 - Fix view mode option being reset when chapter is selected in browser action popup.
 - Fix problem where manga chapters were not being updated if first bookmarked manga had no updates.

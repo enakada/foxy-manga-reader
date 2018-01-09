@@ -17,8 +17,19 @@ $success-color: lightgreen;
 
 $body-color: #737373;
 
+$brand-primary: $fmr-color-orange;
+
 /*
 * Fonts
 */
 $font-family-base: Merriweather, serif;
 $font-family-headings: Raleway, sans-serif;
+
+/*
+* DOM Sizes
+*/
+$body-width:        500px;
+$body-max-height:   500px;
+$content-height:    380px;
+$list-nav-height:   32px;
+$list-height:       $content-height - $list-nav-height;
