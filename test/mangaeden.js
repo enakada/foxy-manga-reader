@@ -1,5 +1,6 @@
 import chai from 'chai';
-import sinon from 'sinon';
+import 'whatwg-fetch';
+import * as MockFetch from './mockFetch';
 import * as MangaEden from '../src/background_scripts/extractors/mangaeden';
 
 const should = chai.should();
@@ -113,29 +114,61 @@ describe('MangaEden', () => {
 
   // Test for #getMangaInfo()
   describe('#getMangaInfo()', () => {
-    // Mock HttpRequest
-    let server;
-    before(() => {
-      server = sinon.createFakeServer({ respondImmediately: true });
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
     });
-    after(() => {
-      server.restore();
+    afterEach(() => {
+      MockFetch.restore();
     });
 
     it('should reject promise on invalid URL', () => {
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Invalid url');
         });
     });
 
-    it('should reject promise if response is empty', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '']); // 200
+    it('should reject promise on Error 404', () => {
+      return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/gantz/')
+        .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(err);
+          err.should.be.an('string');
+          err.should.have.string('Not Found');
+        });
+    });
+
+    it('should retry 3 times and reject promise on Error 502', function test() {
+      this.timeout(4000);
+
+      window.fetch.callsFake(MockFetch.error('', {
+        status: 502,
+        statusText: 'Bad Gateway',
+      }));
 
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/gantz/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(3);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Bad Gateway');
+        });
+    });
+
+    it('should reject promise if response is empty with no headers', () => {
+      window.fetch.callsFake(MockFetch.ok('', { headers: {} }));
+
+      return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/gantz/')
+        .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('MangaEden response is not a HTML');
@@ -143,10 +176,10 @@ describe('MangaEden', () => {
     });
 
     it('should reject promise if cannot parse url', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '<!DOCTYPE html><html></html>']); // 200
-
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-directory/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Invalid url');
@@ -154,10 +187,13 @@ describe('MangaEden', () => {
     });
 
     it('should reject promise if no og:title could be retrieved from response body', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '<!DOCTYPE html><html></html>']); // 200
+      // server.respondWith([200, { 'Content-Type': 'text/html' }, '<!DOCTYPE html><html></html>']); // 200
+      window.fetch.callsFake(MockFetch.ok('<!DOCTYPE html><html></html>'));
 
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/gantz/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('could not find DOM with property og:title');
@@ -165,7 +201,7 @@ describe('MangaEden', () => {
     });
 
     it('should return the correct manga object structure for main page', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
+      window.fetch.callsFake(MockFetch.ok(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -190,10 +226,12 @@ describe('MangaEden', () => {
           </table>
           </div>
           </body>
-        <html>`]);
+        <html>`));
 
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/fairy-tail/')
         .then((manga) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('fairy-tail');
@@ -210,7 +248,7 @@ describe('MangaEden', () => {
     });
 
     it('should return the correct manga object structure for chapter page', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
+      window.fetch.callsFake(MockFetch.ok(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -236,10 +274,12 @@ describe('MangaEden', () => {
           </table>
           </div>
           </body>
-        <html>`]);
+        <html>`));
 
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/air-gear/287/1/')
         .then((manga) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('air-gear');
@@ -258,13 +298,12 @@ describe('MangaEden', () => {
 
   // Test for #updateChapters()
   describe('#updateChapters()', () => {
-    // Mock HttpRequest
-    let server;
-    before(() => {
-      server = sinon.createFakeServer({ respondImmediately: true });
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
     });
-    after(() => {
-      server.restore();
+    afterEach(() => {
+      MockFetch.restore();
     });
 
     it('should reject promise if manga object is invalid', () => {
@@ -272,9 +311,11 @@ describe('MangaEden', () => {
         .then((data) => {
           should.not.exist(data);
         }).catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: "Not Found"');
+          err.message.should.have.string('Error while retrieving chapter list: Wrong argument');
         });
     });
 
@@ -282,12 +323,15 @@ describe('MangaEden', () => {
       const promise = MangaEden.updateChapters({
         sid: 'gantz',
         url: 'http://www.mangaeden.com/en/en-manga/gantz/',
+        chapter_list: [],
       });
 
       return promise
         .then((data) => {
           should.not.exist(data);
         }).catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Error while retrieving chapter list: "Not Found"');
@@ -295,16 +339,7 @@ describe('MangaEden', () => {
     });
 
     it('should return an empty array if no page is returned by found in response object', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
-        <!DOCTYPE html>
-        <html>
-          <head></head>
-          <body>
-          <div id="leftContent">
-          <table></table>
-          </div>
-          </body>
-        </html>`]); // 200
+      window.fetch.callsFake(MockFetch.ok('<!DOCTYPE html><html></html>'));
 
       const promise = MangaEden.updateChapters({
         sid: 'gantz',
@@ -314,6 +349,8 @@ describe('MangaEden', () => {
 
       return promise
         .then((data) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(data);
           data.should.be.an('object');
           data.should.have.property('count').equal(0);
@@ -324,29 +361,29 @@ describe('MangaEden', () => {
     });
 
     it('should return the correct object structure', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
-      <!DOCTYPE html>
-      <html>
-        <head></head>
-        <body>
-        <div id="leftContent">
-        <table>
-          <tbody>
-            <tr id="c1" data-id="51c9560345b9ef1874b2aebc">
-              <td>
-                <a href="/en/en-manga/gantz/1/1/"><b>1</b></a>
-              </td>
-            </tr>
-            <tr id="c2.5" data-id="51c95603335b9ef1874b2aebc">
-              <td>
-                <a href="/en/en-manga/gantz/2.5/1/"><b>2.5: Chapter</b></a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
-        </body>
-      </html>`]);
+      window.fetch.callsFake(MockFetch.ok(`
+        <!DOCTYPE html>
+        <html>
+          <head></head>
+          <body>
+          <div id="leftContent">
+          <table>
+            <tbody>
+              <tr id="c1" data-id="51c9560345b9ef1874b2aebc">
+                <td>
+                  <a href="/en/en-manga/gantz/1/1/"><b>1</b></a>
+                </td>
+              </tr>
+              <tr id="c2.5" data-id="51c95603335b9ef1874b2aebc">
+                <td>
+                  <a href="/en/en-manga/gantz/2.5/1/"><b>2.5: Chapter</b></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          </body>
+        </html>`));
 
       const promise = MangaEden.updateChapters({
         sid: 'gantz',
@@ -356,6 +393,8 @@ describe('MangaEden', () => {
 
       return promise
         .then((data) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(data);
           data.should.be.an('object');
           data.should.have.property('count').equal(2);

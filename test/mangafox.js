@@ -1,7 +1,9 @@
 import chai from 'chai';
-import sinon from 'sinon';
+import 'whatwg-fetch';
+import * as MockFetch from './mockFetch';
 import * as Mangafox from '../src/background_scripts/extractors/mangafox';
 
+// sinonStubPromise(sinon);
 const should = chai.should();
 
 describe('Mangafox', () => {
@@ -129,18 +131,19 @@ describe('Mangafox', () => {
 
   // Test for #getMangaInfo()
   describe('#getMangaInfo()', () => {
-    // Mock HttpRequest
-    let server;
-    before(() => {
-      server = sinon.createFakeServer({ respondImmediately: true });
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
     });
-    after(() => {
-      server.restore();
+    afterEach(() => {
+      MockFetch.restore();
     });
 
     it('should reject promise on invalid URL', () => {
       return Mangafox.getMangaInfo('http://mangafox.la/manga/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Invalid url');
@@ -150,17 +153,39 @@ describe('Mangafox', () => {
     it('should reject promise on Error 404', () => {
       return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('string');
           err.should.have.string('Not Found');
         });
     });
 
-    it('should reject promise if response is empty', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '']); // 200
+    it('should retry 3 times and reject promise on Error 502', function test() {
+      this.timeout(4000);
+
+      window.fetch.callsFake(MockFetch.error('', {
+        status: 502,
+        statusText: 'Bad Gateway',
+      }));
 
       return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(3);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Bad Gateway');
+        });
+    });
+
+    it('should reject promise if response is empty with no headers', () => {
+      window.fetch.callsFake(MockFetch.ok('', { headers: {} }));
+
+      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
+        .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Mangafox response is not a HTML');
@@ -168,10 +193,12 @@ describe('Mangafox', () => {
     });
 
     it('should reject promise if no og:title could be retrieved from response body', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '<!DOCTYPE html><html></html>']); // 200
+      window.fetch.callsFake(MockFetch.ok('<!DOCTYPE html><html></html>'));
 
       return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('could not find DOM with property og:title');
@@ -179,17 +206,19 @@ describe('Mangafox', () => {
     });
 
     it('should reject promise if no cover <img> could be retrieved from response body', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
+      window.fetch.callsFake(MockFetch.ok(`
         <!DOCTYPE html>
         <html>
           <head>
             <meta property="og:title" content="Manga Name 1 Page 1" />
           </head>
           <body></body>
-        <html>`]);
+        <html>`));
 
       return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('could not find <img> DOM with "cover" class');
@@ -197,30 +226,29 @@ describe('Mangafox', () => {
     });
 
     it('should return the correct manga object structure for chapter page', () => {
-      let count = 0;
-      server.respondWith((req) => {
-        if (count > 0) {
-          req.respond(200, { 'Content-Type': 'application/x-javascript' }, `
-            ["Title 1","v01/c001"],
-            ["Title 2","v01/c002.5"]`);
-        } else {
-          count += 1;
-          req.respond(200, { 'Content-Type': 'text/html' }, `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta property="og:image" content="https://lmfcdn.secure.footprint.net/store/manga/5035/cover.jpg" />
-                <meta property="og:title" content="Manga Name 1 Page 1" />
-              </head>
-              <body>
-                <div class="cover"><img src="https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg"/></div>
-              </body>
-            <html>`);
-        }
-      });
+      const res1 = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="https://lmfcdn.secure.footprint.net/store/manga/5035/cover.jpg" />
+            <meta property="og:title" content="Manga Name 1 Page 1" />
+          </head>
+          <body>
+            <div class="cover"><img src="https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg"/></div>
+          </body>
+        <html>`;
+      const res2 = `
+        ["Title 1","v01/c001"],
+        ["Title 2","v01/c002.5"]`;
+
+      window.fetch
+        .onFirstCall().callsFake(MockFetch.ok(res1))
+        .onSecondCall().callsFake(MockFetch.ok(res2, { headers: { 'Content-Type': 'application/x-javascript' } }));
 
       return Mangafox.getMangaInfo('http://mangafox.la/manga/12_manga/v001/c001/1.html')
         .then((manga) => {
+          MockFetch.callCount().should.be.equal(2);
+
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('5035');
@@ -237,30 +265,29 @@ describe('Mangafox', () => {
     });
 
     it('should return the correct manga object structure for main page', () => {
-      let count = 0;
-      server.respondWith((req) => {
-        if (count > 0) {
-          req.respond(200, { 'Content-Type': 'application/x-javascript' }, `
-            ["Title 1","v01/c001"],
-            ["Title 2","v01/c002.5"]`);
-        } else {
-          count += 1;
-          req.respond(200, { 'Content-Type': 'text/html' }, `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta property="og:image" content="https://lmfcdn.secure.footprint.net/store/manga/5035/cover.jpg" />
-                <meta property="og:title" content="Manga Name 1 Page 1" />
-              </head>
-              <body>
-                <div class="cover"><img src="https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg"/></div>
-              </body>
-            <html>`);
-        }
-      });
+      const res1 = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="https://lmfcdn.secure.footprint.net/store/manga/5035/cover.jpg" />
+            <meta property="og:title" content="Manga Name 1 Page 1" />
+          </head>
+          <body>
+            <div class="cover"><img src="https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg"/></div>
+          </body>
+        <html>`;
+      const res2 = `
+        ["Title 1","v01/c001"],
+        ["Title 2","v01/c002.5"]`;
+
+      window.fetch
+        .onFirstCall().callsFake(MockFetch.ok(res1))
+        .onSecondCall().callsFake(MockFetch.ok(res2, { headers: { 'Content-Type': 'application/x-javascript' } }));
 
       return Mangafox.getMangaInfo('http://mangafox.la/manga/12_manga/')
         .then((manga) => {
+          MockFetch.callCount().should.be.equal(2);
+
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('5035');
@@ -279,13 +306,12 @@ describe('Mangafox', () => {
 
   // Test for #updateChapters()
   describe('#updateChapters()', () => {
-    // Mock HttpRequest
-    let server;
-    before(() => {
-      server = sinon.createFakeServer({ respondImmediately: true });
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
     });
-    after(() => {
-      server.restore();
+    afterEach(() => {
+      MockFetch.restore();
     });
 
     it('should reject promise if manga object is invalid', () => {
@@ -293,31 +319,15 @@ describe('Mangafox', () => {
         .then((data) => {
           should.not.exist(data);
         }).catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: Not Found');
+          err.message.should.have.string('Error while retrieving chapter list: Wrong argument');
         });
     });
 
     it('should reject promise on Error 404', () => {
-      const promise = Mangafox.updateChapters({
-        sid: '1',
-        url: 'http://mangafox.la/manga/12_manga/',
-      });
-
-      return promise
-        .then((data) => {
-          should.not.exist(data);
-        }).catch((err) => {
-          should.exist(err);
-          err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: Not Found');
-        });
-    });
-
-    it('should return an empty array if no chapters pattern found in response object', () => {
-      server.respondWith(''); // 200
-
       const promise = Mangafox.updateChapters({
         sid: '1',
         url: 'http://mangafox.la/manga/12_manga/',
@@ -326,6 +336,30 @@ describe('Mangafox', () => {
 
       return promise
         .then((data) => {
+          should.not.exist(data);
+        }).catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Error while retrieving chapter list: Not Found');
+        });
+    });
+
+    it('should return an empty array if no chapters pattern found in response object', () => {
+      window.fetch.callsFake(MockFetch.ok('', { headers: { 'Content-Type': 'application/x-javascript' } }));
+
+      const promise = Mangafox.updateChapters({
+        sid: '1',
+        url: 'http://mangafox.la/manga/12_manga/',
+        chapter_list: [],
+      });
+
+
+      return promise
+        .then((data) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(data);
           data.should.be.an('object');
           data.should.have.property('count').equal(0);
@@ -336,9 +370,9 @@ describe('Mangafox', () => {
     });
 
     it('should return the correct object structure', () => {
-      server.respondWith([200, { 'Content-Type': 'application/x-javascript' }, `
+      window.fetch.callsFake(MockFetch.ok(`
         ["Title 1","v01/c001"],
-        ["Title 2","v01/c002.5"]`]);
+        ["Title 2","v01/c002.5"]`, { headers: { 'Content-Type': 'application/x-javascript' } }));
 
       const promise = Mangafox.updateChapters({
         sid: '1',
@@ -348,6 +382,8 @@ describe('Mangafox', () => {
 
       return promise
         .then((data) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(data);
           data.should.be.an('object');
           data.should.have.property('count').equal(2);

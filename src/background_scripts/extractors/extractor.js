@@ -1,4 +1,4 @@
-import HttpRequest from '../../util/httpRequest';
+import HttpFetch from '../../util/http';
 import * as Mangafox from './mangafox';
 import * as MangaEden from './mangaeden';
 import * as MangaHere from './mangahere';
@@ -44,5 +44,5 @@ export async function getCurrentMangaCover(source, mangaUrl) {
   const extractor = providersMap.get(source);
   if (!extractor) return Promise.reject(Error(`Not a valid manga source: ${source}`));
 
-  return HttpRequest(mangaUrl, extractor.getMangaCover);
+  return HttpFetch(mangaUrl, extractor.getMangaCover);
 }
