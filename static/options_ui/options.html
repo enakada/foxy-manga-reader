@@ -1,58 +1,93 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="../css/options.css"/>
-  </head>
+  <link rel="stylesheet" href="../css/options.css" />
+</head>
 
 <body>
-  <div id="loading-overlay" class="overlay">
-    <div class="sk-circle">
-      <div class="sk-circle1 sk-child"></div>
-      <div class="sk-circle2 sk-child"></div>
-      <div class="sk-circle3 sk-child"></div>
-      <div class="sk-circle4 sk-child"></div>
-      <div class="sk-circle5 sk-child"></div>
-      <div class="sk-circle6 sk-child"></div>
-      <div class="sk-circle7 sk-child"></div>
-      <div class="sk-circle8 sk-child"></div>
-      <div class="sk-circle9 sk-child"></div>
-      <div class="sk-circle10 sk-child"></div>
-      <div class="sk-circle11 sk-child"></div>
-      <div class="sk-circle12 sk-child"></div>
-    </div>
-  </div>
-
   <div id="alerts"></div>
 
-  <h1>Backup and Restore</h1>
-  <hr>
-
-  <div class="d-flex justify-content-between">
-    <div class="p-2">
-      <h3>Backup your bookmarks</h3>
-      <p>Export all your current bookmarks.</p>
-      <button id="backup-btn" type="button" class="btn btn-primary">Backup</button>
+  <div class="card text-center">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#backup">Export</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#restore">Import</a>
+        </li>
+      </ul>
     </div>
 
-    <div class="p-2">
-      <h3>Restore your bookmarks</h3>
-      <p>Restore a previous backup of your bookmarks.</p>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <!-- Export -->
+      <div class="card-block tab-pane active" id="backup">
+        <h4 class="card-title">Backup your bookmarks</h4>
+        <p class="card-text">Export all your current bookmarks.</p>
+        <button id="export-btn" type="button" class="btn btn-primary">Backup</button>
+      </div>
 
-      <form>
-        <div class="form-group">
-          <input type="file" class="form-control-file" id="restore-file" aria-describedby="fileHelp" multiple="false">
-          <small id="fileHelp" class="form-text text-muted">Select the file previously exported by this add-on and click the button bellow.</small>
+      <!-- Import -->
+      <div class="card-block tab-pane" id="restore">
+        <div id="loading-overlay" class="overlay">
+          <div class="sk-circle">
+            <div class="sk-circle1 sk-child"></div>
+            <div class="sk-circle2 sk-child"></div>
+            <div class="sk-circle3 sk-child"></div>
+            <div class="sk-circle4 sk-child"></div>
+            <div class="sk-circle5 sk-child"></div>
+            <div class="sk-circle6 sk-child"></div>
+            <div class="sk-circle7 sk-child"></div>
+            <div class="sk-circle8 sk-child"></div>
+            <div class="sk-circle9 sk-child"></div>
+            <div class="sk-circle10 sk-child"></div>
+            <div class="sk-circle11 sk-child"></div>
+            <div class="sk-circle12 sk-child"></div>
+          </div>
         </div>
-        <button id="restore-btn" type="button" class="btn btn-primary" disabled>Restore</button>
-      </form>
+
+        <h4 class="card-title">Restore your bookmarks</h4>
+        <p class="card-text">Import a previous backup of your bookmarks.</p>
+
+        <form>
+          <div class="form-group">
+            <input type="file" class="form-control-file" id="import-file" aria-describedby="fileHelp" multiple="false">
+            <small id="fileHelp" class="form-text text-muted">Select the file previously exported by this add-on and click the Import button.</small>
+          </div>
+
+          <div id="restore-table" style="display: none">
+            <table class="table table-hover table-sm">
+              <thead>
+                <tr>
+                  <th>
+                    <label class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" id="main-import-checkbox" checked>
+                      <span class="custom-control-indicator"></span>
+                    </label>
+                  </th>
+                  <th>Status</th>
+                  <th>Source</th>
+                  <th>Name</th>
+                </tr>
+              </thead>
+              <tbody id="import-table-body"></tbody>
+            </table>
+            <button id="import-btn" type="button" class="btn btn-primary" disabled>Import</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
+  <script type="text/javascript" src="../js/jquery-3.1.1.slim.min.js"></script>
+  <script type="text/javascript" src="../js/tether.min.js"></script>
+  <script type="text/javascript" src="../js/bootstrap.min.js"></script>
   <script type="text/javascript" src="options.js"></script>
 </body>
 

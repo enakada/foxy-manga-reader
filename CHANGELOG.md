@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 
-- Replaced the XMLHttpRequest API for the newer Fetch API in order to implement connection retry in case of Error 500.
+- Replaced the XMLHttpRequest API with the newer Fetch API in order to implement connection retry in case of Error 500.
+- Modified the options page layout.
+- Renamed 'backup' and 'restore' to 'export' and 'import'.
+- Replaced the import (restore) operation with a new selective operation.
 
 ### Fixed
 
@@ -23,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Replaced Icomoon icons for Open Iconic icons.
+- Replaced Icomoon icons with Open Iconic icons.
 
 ### Fixed
 
