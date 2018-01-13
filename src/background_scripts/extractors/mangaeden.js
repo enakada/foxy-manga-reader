@@ -112,7 +112,7 @@ export function getMangaInfo(url) {
     const titleDom = response.evaluate('//meta[@property="og:title"]', headerDom, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     if (!titleDom.singleNodeValue) throw new Error('MangaEden: could not find DOM with property og:title');
 
-    const name = /Read (.+) (?:Manga Online|[\d.]+ Online)/.exec(titleDom.singleNodeValue.getAttribute('content'))[1];
+    const name = /Read (.+) (?:Manga|Manhwa|[\d.]+) Online/.exec(titleDom.singleNodeValue.getAttribute('content'))[1];
 
     // Get image URL from response
     const imageUrl = getMangaCover(response);

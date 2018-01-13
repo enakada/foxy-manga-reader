@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+
+- Replaced the XMLHttpRequest API for the newer Fetch API in order to implement connection retry in case of Error 500.
+
+### Fixed
+
+- Fix problem in which user was not able to bookmark Manhwa from MangaEden.
 
 ## [0.4.0] - 2018-01-09
 ### Added
