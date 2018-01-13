@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.4.0] - 2018-01-09
+### Added
+
+- New manga list view mode: list mode. Now it should be easier to track lots of manga.
+- New sidebar for add-on control and manga statistics.
+- Bootstrap 4 for easier add-on layout.
+
+### Changed
+
+- Replaced Icomoon icons for Open Iconic icons.
+
+### Fixed
+
+- Fix problem in which the reload button does not appear if the page fails to load.
+
 ## [0.3.1] - 2018-01-04
 ### Fixed
 
@@ -24,7 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for MangaEden
 - Support for MangaHere
 
-### Fix
+### Fixed
 
 - Fix view mode option being reset when chapter is selected in browser action popup.
 - Fix problem where manga chapters were not being updated if first bookmarked manga had no updates.
@@ -47,3 +62,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
+[0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
+[0.4.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.1...v0.4.0

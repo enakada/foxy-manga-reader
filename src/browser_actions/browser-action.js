@@ -1,65 +1,73 @@
 import moment from 'moment';
+import * as Sidebar from './util/sidebar';
+import * as MangaList from './util/list';
 import * as Notification from '../util/notification';
 import store from '../util/datastore';
 
-
-// Document startup and event listeners
-// ////////////////////////////////////////////////////////////////
-
 const mangaListDom = document.getElementById('manga-list');
 
-/**
- * Opens new tab with the selected manga chapter when btn-read button is clicked.
- */
-async function readButtonListener(e) {
-  try {
-    const select = e.target.parentElement.getElementsByTagName('select')[0];
-    await browser.tabs.create({ url: select.options[select.selectedIndex].dataset.url });
-  } catch (err) {
-    console.error(`Error while accessing chapter page: ${err}`); // eslint-disable-line no-console
 
-    // Notify user that an error occurred
-    Notification.error({
-      title: browser.i18n.getMessage('readChapterButtonErrorNotificationTitle'),
-      message: browser.i18n.getMessage('readChapterButtonErrorNotificationMessage'),
+// Event listeners
+// ////////////////////////////////////////////////////////////////
+
+document.addEventListener('click', Sidebar.expandButtonListener);
+
+
+// List view controller
+// ////////////////////////////////////////////////////////////////
+
+async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true) {
+  let readCount = 0;
+
+  try {
+    if (!bookmarkList) throw new Error('No available bookmarkList');
+
+    // Get the correct method to call
+    let fn;
+    switch (viewMode) {
+      case 'list':
+        fn = MangaList.createListCard;
+        break;
+      case 'list-rich':
+      default:
+        fn = MangaList.createListRichCard;
+        break;
+    }
+
+    // Append manga list
+    const promises = bookmarkList.map(async (bookmark) => {
+      const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
+      if (!manga) return;
+
+      const card = fn(bookmark, manga);
+      mangaListDom.appendChild(card);
+
+      if (card.classList.contains('flex-last')) readCount += 1;
     });
+
+    await Promise.all(promises);
+
+    // Update chart
+    if (shouldUpdateChart) Sidebar.updateChart(mangaListDom.childElementCount - readCount, readCount);
+  } catch (err) {
+    throw err;
   }
 }
 
-/**
- * Unbookmarks manga when btn-remove button is clicked.
- */
-async function unbookmarkButtonListener(e) {
-  const card = e.target.parentElement.parentElement;
-
+async function listViewModeListener(e) {
   try {
-    const result = await browser.runtime.sendMessage({
-      type: 'unbookmark',
-      manga_url: card.dataset.mangaUrl,
-    });
+    const storage = await browser.storage.sync.get(['view_mode', 'bookmark_list']);
+    storage.view_mode.list = e.target.id;
 
-    if (result) mangaListDom.removeChild(card);
-  } catch (err) {
-    console.error(`Error while unbookmarking manga from browser action script: ${err}`); // eslint-disable-line no-console
+    await browser.storage.sync.set({ view_mode: storage.view_mode });
 
-    // Notify user that an error occurred
-    Notification.error({
-      title: browser.i18n.getMessage('unbookmarkMangaErrorNotificationTitle'),
-      message: browser.i18n.getMessage('unbookmarkMangaErrorNotificationmessage'),
-    });
-  }
-}
+    // Clear previous list
+    mangaListDom.innerHTML = '';
 
-/**
- * Listens to 'change' events on the view mode container.
- */
-document.addEventListener('change', async (e) => {
-  if (e.target.name !== 'viewMode') return;
+    // Append new list
+    await setListViewMode(storage.view_mode.list, storage.bookmark_list, false);
 
-  try {
-    await browser.storage.sync.set({ view_mode: e.target.id });
-
-    const container = document.getElementById('view-mode-container');
+    const container = document.getElementById('list-view-mode-container');
     const previousActive = container.getElementsByClassName('active')[0];
 
     if (previousActive) previousActive.classList.remove('active');
@@ -74,90 +82,7 @@ document.addEventListener('change', async (e) => {
       message: browser.i18n.getMessage('changeViewModeErrorNotificationMessage'),
     });
   }
-});
-
-
-// DOM creation
-// ////////////////////////////////////////////////////////////////
-
-/**
- * Creates a new Manga <li> Element
- * @param {*} manga object defining the manga
- * @returns <li> html element
- */
-function createMangaElement(bookmark, manga) {
-  const upToDate = bookmark.last_read.chapter.id === manga.chapter_list[manga.chapter_list.length - 1].id;
-
-  const mangaDiv = document.createElement('li');
-  mangaDiv.id = `${bookmark.source}-${bookmark.reference}`;
-  mangaDiv.className = 'manga-row flex';
-  mangaDiv.dataset.mangaUrl = manga.url;
-  mangaDiv.dataset.mangaSid = manga.sid;
-
-  if (upToDate) mangaDiv.className += ' up-to-date';
-
-  // Add cover image
-  const mangaCover = document.createElement('img');
-  mangaCover.src = manga.cover;
-  mangaCover.width = '100';
-
-  mangaDiv.appendChild(mangaCover);
-
-  const mangaData = document.createElement('div');
-  mangaData.className = 'manga-data';
-
-  // Add Manga title
-  const title = document.createElement('h4');
-  title.textContent = manga.name;
-  title.className = 'title';
-  mangaData.appendChild(title);
-
-  // Add Manga metadata
-  const meta = document.createElement('span');
-  meta.textContent = `Last read: ${moment(bookmark.last_read.date).format('LL')}`;
-  mangaData.appendChild(meta);
-
-  // Add chapters
-  const chapterSelect = document.createElement('select');
-  mangaData.appendChild(chapterSelect);
-  if (upToDate) {
-    chapterSelect.className = 'chapter-selector bg-success';
-  } else {
-    chapterSelect.className = 'chapter-selector bg-danger';
-  }
-
-  manga.chapter_list.slice().reverse().forEach((chapter) => {
-    const option = document.createElement('option');
-    option.value = chapter.id;
-    option.text = chapter.name;
-    option.dataset.url = chapter.url;
-
-    if (chapter.id === bookmark.last_read.chapter.id) option.selected = true;
-
-    chapterSelect.appendChild(option);
-  });
-
-  // Add Read button
-  const goBtn = document.createElement('a');
-  goBtn.className = 'btn btn-default btn-read';
-  goBtn.innerHTML = 'Read';
-  goBtn.href = '#';
-  goBtn.onclick = readButtonListener;
-  mangaData.appendChild(goBtn);
-
-  // Add Remove button
-  const removeBtn = document.createElement('a');
-  removeBtn.className = 'btn btn-danger btn-remove';
-  removeBtn.innerHTML = 'Remove';
-  removeBtn.href = '#';
-  removeBtn.onclick = unbookmarkButtonListener;
-  mangaData.appendChild(removeBtn);
-
-  mangaDiv.appendChild(mangaData);
-
-  return mangaDiv;
 }
-
 
 // Runtime messages
 // ////////////////////////////////////////////////////////////////
@@ -174,21 +99,25 @@ function updateCurrentChapter(bookmark) {
 
   const uptodate = bookmark.last_read.chapter.index === chapterSel.options.length - 1;
   if (uptodate) {
-    chapterSel.className = 'chapter-selector bg-success';
-    mangaDom.className += ' up-to-date';
+    chapterSel.classList.replace('bg-danger', 'bg-success');
+    mangaDom.classList.add('flex-last');
+    Sidebar.updateChart(-1, 1);
   }
 }
 
 function updateChapterList(bookmark, chapterList) {
   const mangaDom = document.getElementById(`${bookmark.source}-${bookmark.reference}`);
-  const wasUptodate = mangaDom.className.includes('up-to-date');
+  const wasUptodate = mangaDom.classList.contains('flex-last');
 
-  if (wasUptodate) mangaDom.className = 'manga-row flex';
+  const chapterSel = mangaDom.getElementsByTagName('select')[0];
+
+  if (wasUptodate) {
+    mangaDom.classList.remove('flex-last');
+    chapterSel.classList.replace('bg-success', 'bg-danger');
+    Sidebar.updateChart(1, -1);
+  }
 
   // Modify chapters
-  const chapterSel = mangaDom.getElementsByTagName('select')[0];
-  if (wasUptodate) chapterSel.className = 'chapter-selector bg-danger';
-
   chapterSel.options.length = 0;
   chapterList.slice().reverse().forEach((chapter) => {
     const option = document.createElement('option');
@@ -227,18 +156,32 @@ browser.runtime.onMessage.addListener((message, sender) => {
  * list DOM tree.
  */
 window.onload = async () => {
-  const optBtn = document.getElementById('options-btn');
-  optBtn.onclick = () => { browser.runtime.openOptionsPage(); };
-
   try {
     // Sanity check the DOM
     if (!mangaListDom) throw new Error('manga-list element does not exist in DOM');
 
-    const storage = await browser.storage.sync.get(['bookmark_list', 'badge_count', 'view_mode']);
+    const storage = await browser.storage.sync.get();
+
+    // Initialize sidebar
+    Sidebar.init({
+      last_update: storage.last_chapter_update,
+    });
+
+    // Initialize version
+    const versionDiv = document.getElementById('addon-version');
+    versionDiv.innerText = `v${browser.runtime.getManifest().version}`;
 
     // Select view mode
-    const radio = document.getElementById(storage.view_mode || 'single');
-    if (radio) radio.parentNode.className += ' active';
+    const radio = document.getElementById(storage.view_mode.manga || 'single');
+    if (radio) radio.parentNode.classList.add('active');
+
+    // Select manga list view mode
+    const listViewRadio = document.getElementById(storage.view_mode.list || 'list-rich');
+    if (listViewRadio) listViewRadio.parentNode.classList.add('active');
+
+    // Select sidebar mode
+    const iconBtn = document.getElementById('sidebar-expand-btn');
+    if (storage.sidebar_collapsed) Sidebar.collapse(iconBtn.firstElementChild);
 
     // Update badge_count
     if (storage && storage.badge_count > 0) {
@@ -249,17 +192,14 @@ window.onload = async () => {
       await browser.storage.sync.set({ badge_count: storage.badge_count });
     }
 
-    // console.debug(storage);
-
     // Append manga list
     if (storage && storage.bookmark_list) {
-      storage.bookmark_list.forEach(async (bookmark) => {
-        const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
-        if (!manga) return;
-
-        mangaListDom.appendChild(createMangaElement(bookmark, manga));
-      });
+      await setListViewMode(storage.view_mode.list, storage.bookmark_list);
     }
+
+    // Add listener to list view radio button
+    const listViewMode = document.getElementById('list-view-mode-container');
+    listViewMode.onchange = listViewModeListener;
   } catch (err) {
     console.error(`Error while starting the browser action script: ${err}`); // eslint-disable-line no-console
 

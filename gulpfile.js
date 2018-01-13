@@ -38,6 +38,12 @@ gulp.task('sass:watch', () => {
 gulp.task('copyStaticContent', () => {
   gulp.src('./static/**')
     .pipe(gulp.dest(dist));
+
+  gulp.src('./node_modules/open-iconic/font/fonts/**')
+    .pipe(gulp.dest(`${dist}/fonts`));
+
+  gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
+    .pipe(gulp.dest(`${dist}/js`));
 });
 
 gulp.task('copyStaticContent:watch', () => {

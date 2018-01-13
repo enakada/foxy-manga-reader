@@ -162,12 +162,23 @@ async function updateCurrentChapter(url) {
 async function init() {
   try {
     const storage = await browser.storage.sync.get();
+
+    // v1.0.0 transition - inclusion of manga list view mode
+    if (typeof storage.view_mode === 'string') {
+      await browser.storage.sync.set({
+        view_mode: {
+          manga: storage.view_mode,
+        },
+      });
+    }
+
     if (storage.bookmark_list) return;
 
     // await store.clear(); // Debugging and development
     await browser.storage.sync.set({
       bookmark_list: [],
       badge_count: 0,
+      view_mode: {},
     });
   } catch (err) {
     console.error(`An error occurred while initializing extension: ${err}`); // eslint-disable-line no-console

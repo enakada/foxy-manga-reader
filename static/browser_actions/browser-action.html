@@ -4,37 +4,88 @@
   <head>
     <meta charset="utf-8">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather|Raleway:900">
-    <link rel="stylesheet" href="../css/icomoon.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather|Raleway:900"/>
     <link rel="stylesheet" href="../css/viewmode.css"/>
     <link rel="stylesheet" href="../css/browser-action.css"/>
   </head>
 
 <body>
-  <header class="flex">
-    <div class="logo"></div>
-    <h2>Foxy Manga Reader</h2>
-  </header>
+  <div class="container-fluid">
+    <header class="row p-3">
+      <div class="logo mr-3"></div>
+      <h2>Foxy Manga Reader</h2>
+    </header>
 
-  <section id="manga-list" class="v-flex"></section>
+    <div id="content" class="row">
+      <section id="left-panel" class="col-4">
+        <div class="d-flex flex-column align-items-center">
+          <button id="sidebar-expand-btn" class="btn btn-link btn-inverted"><span class="oi oi-chevron-left" aria-hidden="true"></span></button>
 
-  <footer class="footer flex">
-    <div id="view-mode-container" class="view-mode-container" data-toggle="buttons">
-      View Mode:
-      <label class="btn btn-link" title="Infinite Scrolling Mode">
-        <input type="radio" name="viewMode" id="infinite"><scan class="fmr-icon-infinite"></scan>
-      </label>
-      <label class="btn btn-link" title="Dual Page Mode">
-        <input type="radio" name="viewMode" id="dual"><scan class="fmr-icon-dual"></scan>
-      </label>
-      <label class="btn btn-link" title="Single Page Mode">
-        <input type="radio" name="viewMode" id="single"><scan class="fmr-icon-single"></scan>
-      </label>
+          <div id="chart-container" class="p-2">
+            <h6 class="text-center">Progress</h6>
+            <canvas id="progress-chart" width="150" height="150"></canvas>
+          </div>
+
+          <div id="last-update" class="update-text text-center mt-3">
+            <span class="oi oi-reload" aria-hidden="true"></span>
+          </div>
+          <hr>
+
+          <div>
+            <h6 class="text-center">View Mode</h6>
+            <div id="view-mode-container" class="btn-group" data-toggle="buttons">
+              <label class="btn btn-link btn-inverted mb-0">
+                <input type="radio" name="viewMode" id="infinite" autocomplete="off" checked>
+                <span class="fmr-icon-infinite" title="Infinite Scrolling Mode" aria-hidden="true"></span>
+              </label>
+              <label class="btn btn-link btn-inverted mb-0">
+                <input type="radio" name="viewMode" id="dual" autocomplete="off">
+                <span class="fmr-icon-dual" title="Dual Page Mode" aria-hidden="true"></span>
+              </label>
+              <label class="btn btn-link btn-inverted mb-0">
+                <input type="radio" name="viewMode" id="single" autocomplete="off">
+                <span class="fmr-icon-single" title="Single Page Mode" aria-hidden="true"></span>
+              </label>
+            </div>
+          </div>
+          <hr>
+
+          <button type="button" id="options-btn" class="btn btn-link btn-inverted mb-3">
+            <span class="oi oi-cog" title="Settings" aria-hidden="true"></span> Settings
+          </button>
+        </div>
+      </section>
+
+      <section id="right-panel" class="col-8 px-0">
+        <div id="manga-list-nav" class="d-flex">
+          <div id="list-view-mode-container" class="btn-group ml-auto" data-toggle="buttons">
+            <label class="btn btn-link btn-inverted mb-0 px-2">
+              <input type="radio" name="listViewMode" id="list" autocomplete="off">
+              <span class="oi oi-list" title="List View" aria-hidden="true"></span>
+            </label>
+            <label class="btn btn-link btn-inverted mb-0 px-2">
+              <input type="radio" name="listViewMode" id="list-rich" autocomplete="off">
+              <span class="oi oi-list-rich" title="List Rich View" aria-hidden="true"></span>
+            </label>
+            <!-- <label class="btn btn-link btn-inverted mb-0">
+              <input type="radio" name="listViewMode" id="grid" autocomplete="off" checked>
+              <span class="oi oi-grid-two-up" title="Grid View" aria-hidden="true"></span>
+            </label> -->
+          </div>
+        </div>
+
+        <div id="manga-list" class="d-flex flex-column py-1"></div>
+      </section><!-- /#right-panel -->
+    </div><!-- /.row -->
+
+    <div id="footer" class="row py-1 justify-content-end">
+      <div id="addon-version" class="col-2"></div>
     </div>
+  </div><!-- /.container-fluid -->
 
-    <a href="#" id="options-btn" class="btn btn-link"><span class="icon-cog"></span></a>
-  </footer>
-
+  <script type="text/javascript" src="../js/jquery-3.1.1.slim.min.js"></script>
+  <script type="text/javascript" src="../js/tether.min.js"></script>
+  <script type="text/javascript" src="../js/bootstrap.min.js"></script>
   <script type="text/javascript" src="browser-action.js"></script>
 </body>
 

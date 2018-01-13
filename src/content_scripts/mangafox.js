@@ -47,14 +47,22 @@ function loadImages(element, start, end) {
 
   xhr.addEventListener('readystatechange', function process() {
     if (this.readyState === 4) {
-      const div = document.createElement('div');
-      element.appendChild(div);
+      let div = element;
+      if (element.classList.contains('fmr-viewer')) {
+        div = document.createElement('div');
+        div.classList.add('fmr-img-container');
+        element.appendChild(div);
+      }
 
       if (this.status >= 400) {
-        div.appendChild(Util.generateReloadButton(start, loadImages));
+        Util.appendReloadDiv(div, start, loadImages);
       } else {
         const viewer = this.responseXML.getElementById('viewer');
         const image = viewer.getElementsByTagName('img');
+        image[0].onerror = () => {
+          div.innerHTML = '';
+          Util.appendReloadDiv(div, start, loadImages);
+        };
 
         div.appendChild(image[0]);
       }
@@ -226,6 +234,8 @@ document.onreadystatechange = async () => {
     viewerDiv.classList.add('fmr-viewer');
     viewerDiv.scrollIntoView({ behavior: 'smooth' });
 
+    displayMenu(match, viewMode);
+
     switch (viewMode) {
       case 'infinite':
         removePageSelector();
@@ -247,8 +257,6 @@ document.onreadystatechange = async () => {
         Util.appendScrollTopButton(viewerDiv);
         break;
     }
-
-    displayMenu(match, viewMode);
   } catch (err) {
     console.error(`Could not load the view mode: ${err}`); // eslint-disable-line no-console
   }
