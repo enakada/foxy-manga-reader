@@ -1,10 +1,21 @@
+import Export from './util/export';
+import * as Import from './util/import';
+
 // Page alerts
 // ////////////////////////////////////////////////////////////////
 
 function appendAlert(type, text) {
+  const dismisssBtn = document.createElement('button');
+  dismisssBtn.type = 'button';
+  dismisssBtn.className = 'close';
+  dismisssBtn.dataset.dismiss = 'alert';
+  dismisssBtn.innerHTML = '<span aria-hidden="true">&times;</span>';
+
   const alert = document.createElement('div');
-  alert.className = `alert alert-${type}`;
+  alert.className = `alert alert-${type} alert-dismissible fade show`;
   alert.setAttribute('role', 'alert');
+
+  alert.appendChild(dismisssBtn);
   alert.appendChild(document.createTextNode(text));
 
   const alertDiv = document.getElementById('alerts');
@@ -12,64 +23,19 @@ function appendAlert(type, text) {
   alertDiv.appendChild(alert);
 }
 
-// Backup
+// Listeners
 // ////////////////////////////////////////////////////////////////
 
-async function backupBookmarks() {
-  // Create a hidden <a> tag
-  const a = document.createElement('a');
-  document.body.appendChild(a);
-  a.style = 'display: none';
-
-  try {
-    const storage = await browser.storage.sync.get('bookmark_list');
-
-    const backup = {
-      version: '1.0',
-    };
-    backup.bookmark_list = storage.bookmark_list;
-
-    // Create timestamp
-    const date = new Date();
-    const timestamp = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`;
-
-    // Create the file
-    const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = `foxy-manga-reader-${timestamp}.bkp`;
-
-    // Click the <a> tag
-    a.click();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    throw err;
-  }
-}
-
-document.addEventListener('click', async (e) => {
-  if (e.target.id !== 'backup-btn') return;
-
-  try {
-    await backupBookmarks();
-  } catch (err) {
-    console.error(`Could not generate backup file: ${err}`); // eslint-disable-line no-console
-    appendAlert('danger', browser.i18n.getMessage('backupFailureAlert'));
-  }
-});
-
-
-// Restore
-// ////////////////////////////////////////////////////////////////
-
-let restoreFile;
-
-const fileUpload = document.getElementById('restore-file');
-
-fileUpload.addEventListener('change', (evt) => {
-  const restoreBtn = document.getElementById('restore-btn');
-
+/**
+ * Listens to changes to the FileBrowser and parses the selected file into a table.
+ * @param {*} evt
+ */
+async function importFileBrowserListener(evt) {
+  const restoreBtn = document.getElementById('import-btn');
   const { files } = evt.target;
+
+  const tbody = document.getElementById('import-table-body');
+  tbody.innerHTML = '';
 
   if (!files) {
     restoreBtn.disabled = true;
@@ -78,42 +44,84 @@ fileUpload.addEventListener('change', (evt) => {
 
   const file = files[0];
 
-  const reader = new FileReader();
-  reader.onload = (load) => {
-    try {
-      restoreFile = JSON.parse(load.target.result);
-    } catch (err) {
-      appendAlert('danger', browser.i18n.getMessage('wrongRestoreFileAlert'));
-    }
-  };
-
-  reader.readAsText(file);
-
-  restoreBtn.disabled = false;
-});
-
-document.addEventListener('click', async (e) => {
-  if (e.target.id !== 'restore-btn') return;
-
-  if (!restoreFile || !restoreFile.bookmark_list) return;
-
   try {
-    const overlay = document.getElementById('loading-overlay');
-    overlay.style.display = 'inherit';
+    await Import.parseFile(file, tbody);
 
-    const result = await browser.runtime.sendMessage({
-      type: 'restore',
-      bookmark_list: restoreFile.bookmark_list,
-    });
+    // Show the table
+    const table = document.getElementById('restore-table');
+    table.style.display = 'inherit';
 
-    overlay.style.display = 'none';
-
-    if (result) appendAlert('success', browser.i18n.getMessage('restoreSuccessAlert'));
+    restoreBtn.disabled = false;
   } catch (err) {
-    console.error(`Could not restore backup file: ${err}`); // eslint-disable-line no-console
-    appendAlert('danger', browser.i18n.getMessage('restoreFailureAlert'));
-  } finally {
-    const overlay = document.getElementById('loading-overlay');
-    overlay.style.display = 'none';
+    appendAlert('danger', browser.i18n.getMessage('wrongRestoreFileAlert'));
   }
-});
+}
+
+/**
+ * Listens to the import button. When clicked, runs through the whole table importing the selected manga.
+ */
+async function importButtonListener() {
+  const checkList = document.getElementsByName('manga-import');
+
+  const overlay = document.getElementById('loading-overlay');
+  overlay.style.display = 'inherit';
+
+  for (let i = 0; i < checkList.length; i += 1) {
+    const row = checkList[i].parentElement.parentElement.parentElement;
+    const status = row.children.item(1).children.item(0);
+
+    if (checkList[i].checked) {
+      try {
+        await Import.importManga(checkList[i].dataset); // eslint-disable-line no-await-in-loop
+
+        checkList[i].checked = false;
+        status.className = 'badge badge-success';
+        status.innerText = 'Imported';
+      } catch (err) {
+        status.className = 'badge badge-danger';
+        status.innerText = 'Error';
+
+        console.error(`Could not restore backup file: ${err}`); // eslint-disable-line no-console
+        appendAlert('danger', err);
+      }
+    }
+  }
+
+  overlay.style.display = 'none';
+}
+
+/**
+ * Listens to the Export button. When clicked, generates an JSON file with all bookmarks.
+ */
+async function exportButtonListener() {
+  try {
+    await Export();
+  } catch (err) {
+    console.error(`Could not generate backup file: ${err}`); // eslint-disable-line no-console
+    appendAlert('danger', browser.i18n.getMessage('backupFailureAlert'));
+  }
+}
+
+
+// Script initialization
+// ////////////////////////////////////////////////////////////////
+
+(() => {
+  // Add listener to export button
+  const exportBtn = document.getElementById('export-btn');
+  exportBtn.onclick = exportButtonListener;
+
+  // Add listener to import changes
+  const fileUpload = document.getElementById('import-file');
+  fileUpload.addEventListener('change', importFileBrowserListener);
+
+  // Add listener to import button
+  const importBtn = document.getElementById('import-btn');
+  importBtn.onclick = importButtonListener;
+
+  // Add listener to main checkbox
+  const importCheckbox = document.getElementById('main-import-checkbox');
+  importCheckbox.onclick = (event) => {
+    Import.toggleCheckbox(event.target.checked);
+  };
+})();

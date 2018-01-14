@@ -1,4 +1,4 @@
-import HttpRequest from '../../util/httpRequest';
+import HttpFetch from '../../util/http';
 
 /**
  * Matches the URL of a manga page.
@@ -18,16 +18,16 @@ export function getChapterReference(url, defaultValue) {
 
 /**
  * Returns the Manga cover URL from the manga main page.
- * @param {object} XMLResponse The XMLResponse object returned by XMLHttpRequest.
+ * @param {object} response The Fetch API response object.
  * @returns String representing the manga cover URL.
  */
-export function getMangaCover(XMLResponse) {
-  if (!XMLResponse || typeof XMLResponse !== 'object') {
-    throw new Error(`Mangafox response is not a HTML: ${XMLResponse}`);
+export function getMangaCover(response) {
+  if (!response || typeof response !== 'object') {
+    throw new Error(`Mangafox response is not a HTML: ${response}`);
   }
 
   // Get manga image URL from response
-  const imageDom = XMLResponse.evaluate('//div[@class="cover"]/img', XMLResponse, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+  const imageDom = response.evaluate('//div[@class="cover"]/img', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
   if (!imageDom.singleNodeValue) throw new Error('Mangafox: could not find <img> DOM with "cover" class');
 
   return imageDom.singleNodeValue.getAttribute('src');
@@ -42,7 +42,7 @@ export function getMangaCover(XMLResponse) {
 function getChapterList(mangaSid, mangaUrl, chapterList = []) {
   const url = `http://mangafox.la/media/js/list.${mangaSid}.js`;
 
-  return HttpRequest(url, (response) => {
+  return HttpFetch(url, (response) => {
     const regex = /\["(.+)","([\w/.]+)"\]/g;
 
     let m = regex.exec(response);
@@ -77,7 +77,7 @@ export function getMangaInfo(url) {
   const mangaReference = m[2];
 
   // Return a promise which resolves to the manga data
-  return HttpRequest(mangaUrl, async (response) => {
+  return HttpFetch(mangaUrl, async (response) => {
     if (!response || typeof response !== 'object') {
       throw new Error(`Mangafox response is not a HTML: ${response}`);
     }
@@ -126,6 +126,10 @@ export function getMangaInfo(url) {
  * @returns {object} The updated manga object.
  */
 export async function updateChapters(manga) {
+  if (!manga || !manga.url || !manga.sid || !manga.chapter_list) {
+    throw new Error(`Error while retrieving chapter list: Wrong argument '${manga}'`);
+  }
+
   try {
     const chapterList = await getChapterList(manga.sid, manga.url);
 

@@ -1,5 +1,6 @@
 import chai from 'chai';
-import sinon from 'sinon';
+import 'whatwg-fetch';
+import * as MockFetch from './mockFetch';
 import * as MangaHere from '../src/background_scripts/extractors/mangahere';
 
 const should = chai.should();
@@ -124,29 +125,50 @@ describe('MangaHere', () => {
 
   // Test for #getMangaInfo()
   describe('#getMangaInfo()', () => {
-    // Mock HttpRequest
-    let server;
-    before(() => {
-      server = sinon.createFakeServer({ respondImmediately: true });
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
     });
-    after(() => {
-      server.restore();
+    afterEach(() => {
+      MockFetch.restore();
     });
 
     it('should reject promise on Error 404', () => {
       return MangaHere.getMangaInfo('http://www.mangahere.cc/manga/12_name/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('string');
           err.should.have.string('Not Found');
         });
     });
 
-    it('should reject promise if response is empty', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '']); // 200
+    it('should retry 3 times and reject promise on Error 502', function test() {
+      this.timeout(4000);
+
+      window.fetch.callsFake(MockFetch.error('', {
+        status: 502,
+        statusText: 'Bad Gateway',
+      }));
 
       return MangaHere.getMangaInfo('http://www.mangahere.cc/manga/12_name/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(3);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Bad Gateway');
+        });
+    });
+
+    it('should reject promise if response is empty with no headers', () => {
+      window.fetch.callsFake(MockFetch.ok('', { headers: {} }));
+
+      return MangaHere.getMangaInfo('http://www.mangahere.cc/manga/12_name/')
+        .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('MangaHere response is not a HTML');
@@ -163,10 +185,12 @@ describe('MangaHere', () => {
     });
 
     it('should reject promise if no og:title could be retrieved from response body', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, '<!DOCTYPE html><html></html>']); // 200
+      window.fetch.callsFake(MockFetch.ok('<!DOCTYPE html><html></html>'));
 
       return MangaHere.getMangaInfo('http://www.mangahere.cc/manga/12_name/')
         .catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('could not find DOM with property og:title');
@@ -174,30 +198,29 @@ describe('MangaHere', () => {
     });
 
     it('should return the correct manga object structure for chapter page', () => {
-      let count = 0;
-      server.respondWith((req) => {
-        if (count > 0) {
-          req.respond(200, { 'Content-Type': 'text/html' }, `
-            ["Title 1","//www.mangahere.cc/manga/"+series_name+"/c001/"],
-            ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`);
-        } else {
-          count += 1;
-          req.respond(200, { 'Content-Type': 'text/html' }, `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta property="og:image" content="http://c.mhcdn.net/store/manga/16143/cover.jpg?v=1513588040" />
-                <meta property="og:title" content="Manga Name" />
-              </head>
-              <body>
-              <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
-              </body>
-            <html>`);
-        }
-      });
+      const res1 = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="http://c.mhcdn.net/store/manga/16143/cover.jpg?v=1513588040" />
+            <meta property="og:title" content="Manga Name" />
+          </head>
+          <body>
+          <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
+          </body>
+        <html>`;
+      const res2 = `
+        ["Title 1","//www.mangahere.cc/manga/"+series_name+"/c001/"],
+        ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`;
+
+      window.fetch
+        .onFirstCall().callsFake(MockFetch.ok(res1))
+        .onSecondCall().callsFake(MockFetch.ok(res2));
 
       return MangaHere.getMangaInfo('http://www.mangahere.cc/manga/12_manga/v001/c001/1.html')
         .then((manga) => {
+          MockFetch.callCount().should.be.equal(2);
+
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('16143');
@@ -214,30 +237,29 @@ describe('MangaHere', () => {
     });
 
     it('should return the correct manga object structure for main page', () => {
-      let count = 0;
-      server.respondWith((req) => {
-        if (count > 0) {
-          req.respond(200, { 'Content-Type': 'text/html' }, `
-            ["Title 1","//www.mangahere.cc/manga/"+series_name+"/c001/"],
-            ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`);
-        } else {
-          count += 1;
-          req.respond(200, { 'Content-Type': 'text/html' }, `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta property="og:image" content="http://c.mhcdn.net/store/manga/16143/cover.jpg?v=1513588040" />
-                <meta property="og:title" content="Manga Name" />
-              </head>
-              <body>
-                <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
-              </body>
-            <html>`);
-        }
-      });
+      const res1 = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="http://c.mhcdn.net/store/manga/16143/cover.jpg?v=1513588040" />
+            <meta property="og:title" content="Manga Name" />
+          </head>
+          <body>
+            <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
+          </body>
+        <html>`;
+      const res2 = `
+        ["Title 1","//www.mangahere.cc/manga/"+series_name+"/c001/"],
+        ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`;
+
+      window.fetch
+        .onFirstCall().callsFake(MockFetch.ok(res1))
+        .onSecondCall().callsFake(MockFetch.ok(res2));
 
       return MangaHere.getMangaInfo('http://www.mangahere.cc/manga/12_manga/')
         .then((manga) => {
+          MockFetch.callCount().should.be.equal(2);
+
           should.exist(manga);
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('16143');
@@ -256,13 +278,12 @@ describe('MangaHere', () => {
 
   // Test for #updateChapters()
   describe('#updateChapters()', () => {
-    // Mock HttpRequest
-    let server;
-    before(() => {
-      server = sinon.createFakeServer({ respondImmediately: true });
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
     });
-    after(() => {
-      server.restore();
+    afterEach(() => {
+      MockFetch.restore();
     });
 
     it('should reject promise if manga object is invalid', () => {
@@ -270,9 +291,11 @@ describe('MangaHere', () => {
         .then((data) => {
           should.not.exist(data);
         }).catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: Not Found');
+          err.message.should.have.string('Error while retrieving chapter list: Wrong argument');
         });
     });
 
@@ -280,12 +303,15 @@ describe('MangaHere', () => {
       const promise = MangaHere.updateChapters({
         sid: '1',
         url: 'http://www.mangahere.cc/manga/12_manga/',
+        chapter_list: [],
       });
 
       return promise
         .then((data) => {
           should.not.exist(data);
         }).catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Error while retrieving chapter list: Not Found');
@@ -293,7 +319,7 @@ describe('MangaHere', () => {
     });
 
     it('should return an empty array if no chapters pattern found in response object', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, 'no value']); // 200
+      window.fetch.callsFake(MockFetch.ok('no value'));
 
       const promise = MangaHere.updateChapters({
         sid: '1',
@@ -313,9 +339,9 @@ describe('MangaHere', () => {
     });
 
     it('should return the correct object structure', () => {
-      server.respondWith([200, { 'Content-Type': 'text/html' }, `
+      window.fetch.callsFake(MockFetch.ok(`
         ["Title 1","//www.mangahere.cc/manga/"+series_name+"/c001/"],
-        ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`]);
+        ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`));
 
       const promise = MangaHere.updateChapters({
         sid: '1',

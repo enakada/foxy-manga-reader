@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.0] - 2018-01-14
+### Changed
+
+- Replaced the XMLHttpRequest API with the newer Fetch API in order to implement connection retry in case of Error 500.
+- Modified the options page layout.
+- Renamed 'backup' and 'restore' to 'export' and 'import'.
+- Replaced the import (restore) operation with a new selective operation.
+
+### Fixed
+
+- Fix problem in which user was not able to bookmark Manhwa from MangaEden.
+
 ## [0.4.0] - 2018-01-09
 ### Added
 
@@ -16,7 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Replaced Icomoon icons for Open Iconic icons.
+- Replaced Icomoon icons with Open Iconic icons.
 
 ### Fixed
 
@@ -64,3 +76,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
 [0.4.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.1...v0.4.0
+[0.5.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.4.0...v0.5.0

@@ -425,18 +425,21 @@ browser.tabs.onUpdated.addListener(pageActionListener);
 // ////////////////////////////////////////////////////////////////
 
 /**
- * Recursevely restore all bookmarks.
- * @param {array} bookmarkList
+ * Imports a manga. If manga bookmark already exists, just update the values.
+ * @param {object} bookmark The manga bookmark information to import
  */
-async function restoreStorage(bookmarkList) {
+async function importManga(bookmark) {
   try {
-    // Clear storages
-    await store.clear();
-    await browser.storage.sync.set({ bookmark_list: [] });
+    const storage = await browser.storage.sync.get('bookmark_list');
+    const index = storage.bookmark_list.findIndex((elem) => {
+      return elem.source === bookmark.source && elem.reference === bookmark.reference;
+    });
 
-    for (let i = 0; i < bookmarkList.length; i += 1) {
-      const bookmark = bookmarkList[i];
-      await bookmarkManga(bookmark.url, bookmark); // eslint-disable-line no-await-in-loop
+    if (index !== -1) {
+      storage.bookmark_list[index] = bookmark;
+      await browser.storage.sync.set(storage);
+    } else {
+      await bookmarkManga(bookmark.url, bookmark);
     }
 
     return Promise.resolve(true);
@@ -456,8 +459,8 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       return (sender.tab) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url);
     case 'update-chapter':
       return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(Error('Message has no tab.URL'));
-    case 'restore':
-      return restoreStorage(message.bookmark_list);
+    case 'import-single':
+      return importManga(message.bookmark);
     default:
       return Promise.reject(new Error(`Unsupported message type: ${message.type}`));
   }
