@@ -4,31 +4,35 @@
     "description": "The extension description"
   },
 
-  "generalErrorNotificationTitle": {
-    "message": "Error on Foxy Manga Reader",
-    "description": "Notification title for general errors."
-  },
-  "generalErrorNotificationMessage": {
-    "message": "An internal error occurred on Foxy Manga Reader. Please contact the extension author.",
-    "description": "Notification message for general errors."
-  },
-
-  "optionsPageButtonErrorNotificationTitle": {
-    "message": "Error while opening options page",
-    "description": "Notification title when an error occurred while opening options page."
-  },
-  "optionsPageButtonErrorNotificationMessage": {
-    "message": "An error occurred while opening the Options page. Please contact the extension author.",
-    "description": "Notification message when an error occurred while opening options page."
+  "errorMessage": {
+    "message": "Please contact the extension author. (Details: $ERR$)",
+    "description": "Notification body for add-on errors.",
+    "placeholders": {
+      "err": {
+        "content": "$1",
+        "example": "No property X"
+      }
+    }
   },
 
-  "readChapterButtonErrorNotificationTitle": {
-    "message": "Error while opening manga chapter",
-    "description": "Notification title when an error occurred while opening a manga chapter from the browser action button."
+  "alertErrorTitle": {
+    "message": "Something went wrong!",
+    "description": "Alert title for add-on errors."
   },
-  "readChapterButtonErrorNotificationMessage": {
-    "message": "Error while retrieving manga chapter URL. Please contact the extension author.",
-    "description": "Notification message when an error occurred while opening a manga chapter from the browser action button."
+
+  "alertErrorMessage": {
+    "message": "$CODE$. Please contact the extension author. (Details: $ERR$)",
+    "description": "Alert body for add-on errors.",
+    "placeholders": {
+      "code": {
+        "content": "$1",
+        "example": "Foxy Error #100 - Wrong name"
+      },
+      "err": {
+        "content": "$2",
+        "example": "No property X"
+      }
+    }
   },
 
   "unbookmarkIconTitle": {
@@ -43,15 +47,6 @@
   "unbookmarkMangaNotificationMessage": {
     "message": "Manga was successfully unbookmarked.",
     "description": "Manga unbookmarked notification message."
-  },
-
-  "unbookmarkMangaErrorNotificationTitle": {
-    "message": "Error unbookmarking manga!",
-    "description": "Notification title when an error occurred while unbookmarking a manga."
-  },
-  "unbookmarkMangaErrorNotificationMessage": {
-    "message": "Could not unbookmark manga. Please contact the extension author.",
-    "description": "Notification message when an error occurred while unbookmarking a manga."
   },
 
   "bookmarkIconTitle": {
@@ -74,15 +69,6 @@
     }
   },
 
-  "bookmarkMangaErrorNotificationTitle": {
-    "message": "Error bookmarking manga!",
-    "description": "Notification title when an error occurred while bookmarking a manga."
-  },
-  "bookmarkMangaErrorNotificationMessage": {
-    "message": "Could not bookmark manga. Please contact the extension author.",
-    "description": "Notification message when an error occurred while bookmarking a manga."
-  },
-
   "mangaChapterUpdateNotificationTitle": {
     "message": "New chapter available",
     "description": "New chapter notification title."
@@ -102,31 +88,9 @@
     }
   },
 
-  "backupFailureAlert": {
-    "message": "An error occurred while generating the backup file. Please contact the extension author.",
-    "description": "Alert message when an error occurred while generating backup file."
-  },
-
-  "restoreFailureAlert": {
-    "message": "An error occurred while restoring the backup file. Please contact the extension author.",
-    "description": "Alert message when an error occurred while restoring backup file."
-  },
-  "wrongRestoreFileAlert": {
-    "message": "The selected file is not a valid backup file.",
-    "description": "Alert message when trying to upload an invalid backup file."
-  },
   "restoreSuccessAlert": {
     "message": "The backup file was successfuly restored.",
     "description": "Alert message when restoration was successful."
-  },
-
-  "changeViewModeErrorNotificationTitle": {
-    "message": "View Mode Error",
-    "description": "Alert title when an error occurred while changing current view mode."
-  },
-  "changeViewModeErrorNotificationMessage": {
-    "message": "An error occurred while changing current view mode. Please contact the extension author.",
-    "description": "Alert message when an error occurred while changing current view mode."
   },
 
   "homeButtonTitle": {

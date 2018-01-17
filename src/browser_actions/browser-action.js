@@ -1,7 +1,8 @@
 import moment from 'moment';
+import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
+import * as Notification from '../util/notification';
 import * as Sidebar from './util/sidebar';
 import * as MangaList from './util/list';
-import * as Notification from '../util/notification';
 import store from '../util/datastore';
 
 const mangaListDom = document.getElementById('manga-list');
@@ -20,7 +21,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
   let readCount = 0;
 
   try {
-    if (!bookmarkList) throw new Error('No available bookmarkList');
+    if (!bookmarkList) throw FoxyError(ErrorCode.NO_STORAGE_BOOKMARK, 'Empty Storage');
 
     // Get the correct method to call
     let fn;
@@ -37,7 +38,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
     // Append manga list
     const promises = bookmarkList.map(async (bookmark) => {
       const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
-      if (!manga) return;
+      if (!manga) throw FoxyError(ErrorCode.STORE_ERROR, `${bookmark.source}/${bookmark.reference}`); // return;
 
       const card = fn(bookmark, manga);
       mangaListDom.appendChild(card);
@@ -74,12 +75,12 @@ async function listViewModeListener(e) {
 
     e.target.parentNode.classList.add('active');
   } catch (err) {
-    console.error(`Could not change the view mode: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('changeViewModeErrorNotificationTitle'),
-      message: browser.i18n.getMessage('changeViewModeErrorNotificationMessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 }
@@ -158,7 +159,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 window.onload = async () => {
   try {
     // Sanity check the DOM
-    if (!mangaListDom) throw new Error('manga-list element does not exist in DOM');
+    if (!mangaListDom) throw FoxyError(ErrorCode.DOM_MISSING, 'manga-list');
 
     const storage = await browser.storage.sync.get();
 
@@ -201,12 +202,12 @@ window.onload = async () => {
     const listViewMode = document.getElementById('list-view-mode-container');
     listViewMode.onchange = listViewModeListener;
   } catch (err) {
-    console.error(`Error while starting the browser action script: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('generalErrorNotificationTitle'),
-      message: browser.i18n.getMessage('generalErrorNotificationMessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 };

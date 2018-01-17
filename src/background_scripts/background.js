@@ -1,3 +1,4 @@
+import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
 import * as Extractor from './extractors/extractor';
 import * as Notification from '../util/notification';
 import store from '../util/datastore';
@@ -19,10 +20,10 @@ import store from '../util/datastore';
 async function bookmarkManga(url, bookmark) {
   try {
     const info = Extractor.parseUrl(url);
-    if (!info) throw new Error(`Could not parse URL: ${url}`);
+    if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
     const manga = await info.extractor.getMangaInfo(url);
-    if (!manga) throw new Error(`Could not get manga information from url: ${url}`);
+    if (!manga) throw FoxyError(ErrorCode.WRONG_MANGA_URL, url);
 
     // Save manga information
     await store.setItem(`${manga.source}/${manga.reference}`, manga);
@@ -78,7 +79,7 @@ async function bookmarkManga(url, bookmark) {
 async function unbookmarkManga(url) {
   try {
     const info = Extractor.parseUrl(url);
-    if (!info) throw new Error(`Could not parse URL: ${url}`);
+    if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
     const storage = await browser.storage.sync.get('bookmark_list');
 
@@ -113,7 +114,7 @@ async function unbookmarkManga(url) {
 async function updateCurrentChapter(url) {
   try {
     const info = Extractor.parseUrl(url);
-    if (!info) throw new Error(`Could not parse URL: ${url}`);
+    if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
     const storage = await browser.storage.sync.get('bookmark_list');
     const index = storage.bookmark_list.findIndex((elem) => {
@@ -123,10 +124,10 @@ async function updateCurrentChapter(url) {
     if (index < 0) return Promise.resolve(false);
 
     const manga = await store.getItem(`${info.website}/${info.reference}`);
-    if (!manga) throw new Error(`Could not retrieve manga '${info.website}/${info.reference}' from datastore.`);
+    if (!manga) throw FoxyError(ErrorCode.STORE_ERROR, `${info.website}/${info.reference}`);
 
     const chapter = info.extractor.getChapterReference(url);
-    if (!chapter) throw new Error(`Chapter ID could not be extracted from url: ${url}`);
+    if (!chapter) throw FoxyError(ErrorCode.NO_CHAPTER_REF, url);
 
     const chapterIndex = manga.chapter_list.findIndex(elem => elem.id === chapter.id);
 
@@ -163,7 +164,7 @@ async function init() {
   try {
     const storage = await browser.storage.sync.get();
 
-    // v1.0.0 transition - inclusion of manga list view mode
+    // v0.4.0 transition - inclusion of manga list view mode
     if (typeof storage.view_mode === 'string') {
       await browser.storage.sync.set({
         view_mode: {
@@ -210,14 +211,14 @@ async function updateMangaChapterList(alarm) {
       console.log(`Checking updates for '${manga.name}'`);
 
       const info = Extractor.parseUrl(manga.url);
-      if (!info) throw Error(`Could not parse URL: ${manga.url}`);
+      if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, manga.url);
 
       const { count, chapterList } = await info.extractor.updateChapters(manga);
       const index = storage.bookmark_list.findIndex((elem) => {
         return elem.source === manga.source && elem.reference === manga.reference;
       });
 
-      if (index < 0) throw new Error(`Could not find manga in bookmark list: ${manga}`);
+      if (index < 0) throw FoxyError(ErrorCode.NO_BOOKMARK_ERROR, manga.name);
 
       // Update current chapter tracker
       const lastReadCh = storage.bookmark_list[index].last_read.chapter;
@@ -262,7 +263,7 @@ async function updateMangaChapterList(alarm) {
 
     await browser.storage.sync.set({ last_chapter_update: new Date() });
   } catch (err) {
-    console.error(`Foxy Manga Reader could not update chapter list: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
   }
 }
 
@@ -325,11 +326,11 @@ async function bookmarkActionListener(tab) {
       displayUnbookmarkIcon(tab.id);
     }
   } catch (err) {
-    console.error(`An error occurred while bookmarking manga: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     Notification.error({
-      title: browser.i18n.getMessage('bookmarkMangaErrorNotificationTitle'),
-      message: browser.i18n.getMessage('bookmarkMangaErrorNotificationMessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 }
@@ -352,11 +353,11 @@ async function unbookmarkActionListener(tab) {
       displayBookmarkIcon(tab.id);
     }
   } catch (err) {
-    console.error(`An error occurred while unbookmarking manga: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     Notification.error({
-      title: browser.i18n.getMessage('unbookmarkMangaErrorNotificationTitle'),
-      message: browser.i18n.getMessage('unbookmarkMangaErrorNotificationMessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 }
@@ -370,11 +371,11 @@ browser.pageAction.onClicked.addListener(async (tab) => {
       unbookmarkActionListener(tab);
     }
   } catch (err) {
-    console.error(`An error occurred: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     Notification.error({
-      title: browser.i18n.getMessage('generalErrorNotificationTitle'),
-      message: browser.i18n.getMessage('generalErrorNotificationMessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 });
@@ -397,9 +398,6 @@ async function pageActionListener(tabId, changeInfo) {
 
   try {
     const storage = await browser.storage.sync.get('bookmark_list');
-    if (!storage || typeof storage.bookmark_list === 'undefined') {
-      throw Error('Could not validate storage data');
-    }
 
     const index = storage.bookmark_list.findIndex((elem) => {
       return elem.source === info.website && elem.reference === info.reference;
@@ -414,7 +412,7 @@ async function pageActionListener(tabId, changeInfo) {
     // Show Icon
     await browser.pageAction.show(tabId);
   } catch (err) {
-    console.error(`Foxy Manga Reader could not access storage data: ${err}`); // eslint-disable-line no-console
+    console.error(`pageActionListener(): ${err}`); // eslint-disable-line no-console
   }
 }
 
@@ -458,10 +456,10 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
     case 'unbookmark':
       return (sender.tab) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url);
     case 'update-chapter':
-      return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(Error('Message has no tab.URL'));
+      return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(TypeError('message has no property tab.url'));
     case 'import-single':
       return importManga(message.bookmark);
     default:
-      return Promise.reject(new Error(`Unsupported message type: ${message.type}`));
+      return Promise.reject(new TypeError(`Unsupported message type: ${message.type}`));
   }
 });

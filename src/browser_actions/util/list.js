@@ -1,4 +1,6 @@
 import moment from 'moment';
+import { getError as FoxyError } from '../../util/foxyErrors';
+import * as Notification from '../../util/notification';
 import * as Sidebar from './sidebar';
 
 // Event Listeners
@@ -12,12 +14,12 @@ async function readButtonListener(e) {
     const select = e.target.parentElement.parentElement.firstElementChild;
     await browser.tabs.create({ url: select.options[select.selectedIndex].dataset.url });
   } catch (err) {
-    console.error(`Error while accessing chapter page: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('readChapterButtonErrorNotificationTitle'),
-      message: browser.i18n.getMessage('readChapterButtonErrorNotificationMessage'),
+      title: FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', err.message),
     });
   }
 }
@@ -40,14 +42,20 @@ async function unbookmarkButtonListener(e) {
 
       if (card.classList.contains('flex-last')) Sidebar.updateChart(0, -1);
       else Sidebar.updateChart(-1, 0);
+
+      // Notify user
+      Notification.inform({
+        title: browser.i18n.getMessage('unbookmarkMangaNotificationTitle'),
+        message: browser.i18n.getMessage('unbookmarkMangaNotificationMessage'),
+      });
     }
   } catch (err) {
-    console.error(`Error while unbookmarking manga from browser action script: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('unbookmarkMangaErrorNotificationTitle'),
-      message: browser.i18n.getMessage('unbookmarkMangaErrorNotificationmessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 }

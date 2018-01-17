@@ -1,5 +1,7 @@
 import moment from 'moment';
 import Chart from 'chart.js';
+import { getError as FoxyError } from '../../util/foxyErrors';
+import * as Notification from '../../util/notification';
 
 /**
  * Expands the sidebar.
@@ -98,8 +100,8 @@ export async function viewModeListener(e) {
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('changeViewModeErrorNotificationTitle'),
-      message: browser.i18n.getMessage('changeViewModeErrorNotificationMessage'),
+      title: FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', err.message),
     });
   }
 }

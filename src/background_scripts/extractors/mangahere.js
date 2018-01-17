@@ -1,3 +1,4 @@
+import { ErrorCode, getError as FoxyError } from '../../util/foxyErrors';
 import HttpFetch from '../../util/http';
 
 /**
@@ -19,16 +20,17 @@ export function getChapterReference(url, defaultValue) {
 /**
  * Returns the Manga cover URL from the manga main page.
  * @param {object} response The Fetch API response object.
+ * @param {string} url Optional. The URL to print with errors.
  * @returns String representing the manga cover URL.
  */
-export function getMangaCover(response) {
+export function getMangaCover(response, url) {
   if (!response || typeof response !== 'object') {
-    throw new Error(`MangaHere response is not a HTML: ${response}`);
+    throw FoxyError(ErrorCode.RESPONSE_NOT_HTML, url);
   }
 
   // Get manga image URL from response
   const imageDom = response.evaluate('//div[contains(@class,"manga_detail_top clearfix")]/img', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-  if (!imageDom.singleNodeValue) throw new Error('MangaHere: could not find <img> DOM with "manga_detail_top" class');
+  if (!imageDom.singleNodeValue) throw FoxyError(ErrorCode.NO_MANGA_COVER, url);
 
   return imageDom.singleNodeValue.getAttribute('src');
 }
@@ -70,11 +72,11 @@ function getChapterList(mangaSid, mangaUrl, chapterList = []) {
  */
 export function getMangaInfo(url) {
   // Sanity check
-  if (!url) return null;
+  if (!url) return Promise.reject(new TypeError('getMangaInfo() argument is null'));
 
   // Get information from url
   let m = urlRegex.exec(url);
-  if (!m) return Promise.reject(Error(`Invalid url for mangahere: ${url}`));
+  if (!m) return Promise.reject(FoxyError(ErrorCode.UNPARSE_URL, url));
 
   const mangaUrl = m[0];
   const mangaReference = m[2];
@@ -82,22 +84,22 @@ export function getMangaInfo(url) {
   // Return a promise which resolves to the manga data
   return HttpFetch(mangaUrl, async (response) => {
     if (!response || typeof response !== 'object') {
-      throw new Error(`MangaHere response is not a HTML: ${response}`);
+      throw FoxyError(ErrorCode.RESPONSE_NOT_HTML, mangaUrl);
     }
 
     const headerDom = response.getElementsByTagName('head')[0];
 
     // Get manga name from response
     const titleDom = response.evaluate('//meta[@property="og:title"]', headerDom, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    if (!titleDom.singleNodeValue) throw new Error('MangaHere: could not find DOM with property og:title');
+    if (!titleDom.singleNodeValue) throw FoxyError(ErrorCode.NO_MANGA_NAME, mangaUrl);
 
     const name = titleDom.singleNodeValue.getAttribute('content');
 
     // Get manga SID and image URL from response
-    const imageUrl = getMangaCover(response);
+    const imageUrl = getMangaCover(response, mangaUrl);
 
     m = /\S+\/manga\/(\d+)\S+/.exec(imageUrl);
-    if (!m) throw new Error('Could not extract SID information from MangaHere response object');
+    if (!m) throw FoxyError(ErrorCode.NO_MANGA_SID, mangaUrl);
 
     const sid = m[1];
 
@@ -119,7 +121,7 @@ export function getMangaInfo(url) {
 
       return manga;
     } catch (err) {
-      throw new Error(`Error while retrieving chapter list: ${err}`);
+      throw err;
     }
   });
 }
@@ -131,7 +133,7 @@ export function getMangaInfo(url) {
  */
 export async function updateChapters(manga) {
   if (!manga || !manga.url || !manga.sid || !manga.chapter_list) {
-    throw new Error(`Error while retrieving chapter list: Wrong argument '${manga}'`);
+    throw new TypeError(`updateChapters() argument is invalid: ${JSON.stringify(manga)}`);
   }
 
   try {
@@ -144,6 +146,6 @@ export async function updateChapters(manga) {
 
     return data;
   } catch (err) {
-    throw new Error(`Error while retrieving chapter list: ${err}`);
+    throw err;
   }
 }

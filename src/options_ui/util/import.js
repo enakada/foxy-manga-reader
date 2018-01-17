@@ -7,7 +7,7 @@ let importFile;
  * @returns A promise which resolves to null when complete.
  */
 function createTable(tbody, bookmarkList) {
-  if (!importFile || !importFile.bookmark_list) return Promise.reject(Error('Import file has not bookmark_list'));
+  if (!importFile || !importFile.bookmark_list) return Promise.reject(TypeError('Import file has no property bookmark_list'));
 
   importFile.bookmark_list.forEach((element) => {
     const exists = bookmarkList.find((bookmark) => {
