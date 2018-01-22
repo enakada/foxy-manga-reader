@@ -30,8 +30,10 @@ async function bookmarkManga(url, bookmark) {
 
     const storage = await browser.storage.sync.get('bookmark_list');
 
+    // Get the bookmarkEntry
+    let bookmarkEntry;
     if (bookmark) {
-      storage.bookmark_list.push(bookmark);
+      bookmarkEntry = bookmark;
     } else {
       const currentChapter = info.extractor.getChapterReference(url, manga.chapter_list[0]);
       if (!currentChapter.index) {
@@ -39,7 +41,7 @@ async function bookmarkManga(url, bookmark) {
         currentChapter.index = index;
       }
 
-      storage.bookmark_list.push({
+      bookmarkEntry = {
         source: manga.source,
         reference: manga.reference,
         url: manga.url,
@@ -47,17 +49,28 @@ async function bookmarkManga(url, bookmark) {
           date: new Date(),
           chapter: currentChapter,
         },
-      });
+      };
     }
 
-    // Sort bookmark_list
-    storage.bookmark_list.sort((a, b) => {
-      const refA = a.reference.toUpperCase();
-      const refB = b.reference.toUpperCase();
-      if (refA < refB) return -1;
-      if (refA > refB) return 1;
-      return 0;
+    // Check if bookmark already exists
+    const i = storage.bookmark_list.findIndex((elem) => {
+      return elem.source === info.website && elem.reference === info.reference;
     });
+
+    if (i !== -1) {
+      storage.bookmark_list[i] = bookmarkEntry;
+    } else {
+      storage.bookmark_list.push(bookmarkEntry);
+
+      // Sort bookmark_list
+      storage.bookmark_list.sort((a, b) => {
+        const refA = a.reference.toUpperCase();
+        const refB = b.reference.toUpperCase();
+        if (refA < refB) return -1;
+        if (refA > refB) return 1;
+        return 0;
+      });
+    }
 
     // Save bookmark to storage.sync
     await browser.storage.sync.set(storage);

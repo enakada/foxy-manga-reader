@@ -19,7 +19,6 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 
 - Support for other sources:
   - Kiss Manga
-  - Batoto
   - MangaReader
   - MangaPark
 

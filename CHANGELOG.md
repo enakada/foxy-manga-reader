@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Foxy custom error codes. Every user operation should now return a custom error code, making life easier when debugging for errors.
 
+### Fixed
+
+- Prevent manga bookmarks from being duplicated due to slow network connections.
+
+### Removed
+
+- Batoto as a potential source due to Batoto shutting its service down on January, 2018.
+
 ## [0.5.0] - 2018-01-14
 ### Changed
 
