@@ -85,6 +85,9 @@ export function expandButtonListener(e) {
 export async function viewModeListener(e) {
   try {
     const storage = await browser.storage.sync.get('view_mode');
+
+    // Initialize storage.view_mode
+    if (!storage.view_mode) storage.view_mode = {};
     storage.view_mode.manga = e.target.id;
 
     await browser.storage.sync.set(storage);

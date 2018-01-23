@@ -9,6 +9,7 @@ export default async function exportBookmarks() {
 
   try {
     const storage = await browser.storage.sync.get('bookmark_list');
+    if (!storage.bookmark_list) storage.bookmark_list = [];
 
     const backup = {
       version: '1.0',

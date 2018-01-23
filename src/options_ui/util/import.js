@@ -67,7 +67,7 @@ export async function parseFile(file, tbody) {
 
         const storage = await browser.storage.sync.get('bookmark_list');
 
-        await createTable(tbody, storage.bookmark_list);
+        await createTable(tbody, storage.bookmark_list || []);
 
         resolve(true);
       } catch (err) {

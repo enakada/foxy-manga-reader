@@ -58,8 +58,12 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 async function listViewModeListener(e) {
   try {
     const storage = await browser.storage.sync.get(['view_mode', 'bookmark_list']);
-    storage.view_mode.list = e.target.id;
 
+    // Initializes the view_mode and bookmark_list
+    if (!storage.view_mode) storage.view_mode = {};
+    if (!storage.bookmark_list) storage.bookmark_list = [];
+
+    storage.view_mode.list = e.target.id;
     await browser.storage.sync.set({ view_mode: storage.view_mode });
 
     // Clear previous list
@@ -168,6 +172,9 @@ window.onload = async () => {
       last_update: storage.last_chapter_update,
     });
 
+    // Initialize storage.view_mode
+    if (!storage.view_mode) storage.view_mode = {};
+
     // Initialize version
     const versionDiv = document.getElementById('addon-version');
     versionDiv.innerText = `v${browser.runtime.getManifest().version}`;
@@ -185,7 +192,7 @@ window.onload = async () => {
     if (storage.sidebar_collapsed) Sidebar.collapse(iconBtn.firstElementChild);
 
     // Update badge_count
-    if (storage && storage.badge_count > 0) {
+    if (storage.badge_count > 0) {
       browser.browserAction.setBadgeBackgroundColor({ color: '' });
       browser.browserAction.setBadgeText({ text: '' });
 
@@ -194,8 +201,8 @@ window.onload = async () => {
     }
 
     // Append manga list
-    if (storage && storage.bookmark_list) {
-      await setListViewMode(storage.view_mode.list, storage.bookmark_list);
+    if (storage.bookmark_list) {
+      await setListViewMode(storage.view_mode.list || 'list-rich', storage.bookmark_list);
     }
 
     // Add listener to list view radio button

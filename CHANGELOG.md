@@ -10,9 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Foxy custom error codes. Every user operation should now return a custom error code, making life easier when debugging for errors.
 
+### Changed
+
+- Raised the minimun Firefox version supported to 53.0 due to `storage.sync` support.
+
 ### Fixed
 
 - Prevent manga bookmarks from being duplicated due to slow network connections.
+- Manga bookmarks not being synced correctly due to how Foxy initialized the `storage.sync`.
 
 ### Removed
 

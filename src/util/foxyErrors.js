@@ -11,6 +11,8 @@ export const ErrorCode = {
   NO_BOOKMARK_ERROR: [107, 'Cannot Find Manga Bookmark'],
   INVALID_SOURCE: [108, 'Invalid Manga Source'],
   NO_STORAGE_BOOKMARK: [109, 'Cannot Find the Bookmark List'],
+  BOOKMARK_SYNC_ERROR: [110, 'Cannot Sync Bookmark Data'],
+  NO_BOOKMARK_TO_EXPORT: [111, 'No Bookmarks to Export'],
 
   // DOM Related errors
   DOM_MISSING: [200, 'DOM Missing From Page'],

@@ -15,9 +15,11 @@ import store from '../util/datastore';
  * - Save manga info to indexedDB
  * @param {string} url The url of the manga.
  * @param {object} bookmark The bookmark object of a previous backup.
+ * @param {object} options Optional. Contains property `skipSave`: defines whether or not the method should save
+ *  bookmarks to the `storage.sync`.
  * @returns {Promise} A promise which resolves to the manga object.
  */
-async function bookmarkManga(url, bookmark) {
+async function bookmarkManga(url, bookmark, options = {}) {
   try {
     const info = Extractor.parseUrl(url);
     if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
@@ -29,6 +31,7 @@ async function bookmarkManga(url, bookmark) {
     await store.setItem(`${manga.source}/${manga.reference}`, manga);
 
     const storage = await browser.storage.sync.get('bookmark_list');
+    if (!storage.bookmark_list) storage.bookmark_list = [];
 
     // Get the bookmarkEntry
     let bookmarkEntry;
@@ -73,7 +76,7 @@ async function bookmarkManga(url, bookmark) {
     }
 
     // Save bookmark to storage.sync
-    await browser.storage.sync.set(storage);
+    if (!options.skipSave) await browser.storage.sync.set(storage);
 
     return Promise.resolve(manga);
   } catch (err) {
@@ -95,6 +98,7 @@ async function unbookmarkManga(url) {
     if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
     const storage = await browser.storage.sync.get('bookmark_list');
+    if (!storage.bookmark_list) storage.bookmark_list = [];
 
     // Remove from storage.sync
     const index = storage.bookmark_list.findIndex((elem) => {
@@ -130,6 +134,8 @@ async function updateCurrentChapter(url) {
     if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
     const storage = await browser.storage.sync.get('bookmark_list');
+    if (!storage.bookmark_list) storage.bookmark_list = [];
+
     const index = storage.bookmark_list.findIndex((elem) => {
       return elem.source === info.website && elem.reference === info.reference;
     });
@@ -167,7 +173,7 @@ async function updateCurrentChapter(url) {
 }
 
 
-// On Installation
+// On Installation and Sync
 // ////////////////////////////////////////////////////////////////
 
 /**
@@ -185,21 +191,46 @@ async function init() {
         },
       });
     }
-
-    if (storage.bookmark_list) return;
-
-    // await store.clear(); // Debugging and development
-    await browser.storage.sync.set({
-      bookmark_list: [],
-      badge_count: 0,
-      view_mode: {},
-    });
   } catch (err) {
     console.error(`An error occurred while initializing extension: ${err}`); // eslint-disable-line no-console
   }
 }
 
 browser.runtime.onInstalled.addListener(init);
+
+/**
+ * Handles the sync of new manga bookmarks.
+ * @param {object} changes Object describing the change. This contains one property for each key that changed.
+ *  The name of the property is the name of the key that changed, and its value is a storage.StorageChange object describing the change to that item.
+ * @param {string} areaName The name of the storage area ("sync", "local" or "managed") to which the changes were made.
+ */
+async function syncHandler(changes, areaName) {
+  // Handle only changes to bookmark_list in the sync storage.
+  if (areaName !== 'sync' || !changes.bookmark_list) return;
+
+  try {
+    const keys = await store.keys();
+
+    // Add manga information for each new entry in the bookmarklist
+    changes.bookmark_list.newValue.forEach(async (bookmark) => {
+      const storeKey = `${bookmark.source}/${bookmark.reference}`;
+
+
+      if (keys.indexOf(storeKey) === -1) {
+        await bookmarkManga(bookmark.url, bookmark, { skipSave: true });
+      }
+    });
+  } catch (err) {
+    console.error(`An error occurred while syncing extension data: ${err}`); // eslint-disable-line no-console
+
+    Notification.error({
+      title: FoxyError(ErrorCode.BOOKMARK_SYNC_ERROR).message,
+      message: browser.i18n.getMessage('errorMessage', err.message),
+    });
+  }
+}
+
+browser.storage.onChanged.addListener(syncHandler);
 
 
 // Alarms
@@ -214,6 +245,8 @@ async function updateMangaChapterList(alarm) {
 
   try {
     const storage = await browser.storage.sync.get(['bookmark_list', 'badge_count']);
+    if (!storage.bookmark_list) storage.bookmark_list = [];
+    if (!storage.badge_count) storage.badge_count = 0;
 
     const keys = await store.keys();
     if (!keys) return; // no manga to track
@@ -411,6 +444,7 @@ async function pageActionListener(tabId, changeInfo) {
 
   try {
     const storage = await browser.storage.sync.get('bookmark_list');
+    if (!storage.bookmark_list) storage.bookmark_list = [];
 
     const index = storage.bookmark_list.findIndex((elem) => {
       return elem.source === info.website && elem.reference === info.reference;
@@ -442,6 +476,8 @@ browser.tabs.onUpdated.addListener(pageActionListener);
 async function importManga(bookmark) {
   try {
     const storage = await browser.storage.sync.get('bookmark_list');
+    if (!storage.bookmark_list) storage.bookmark_list = [];
+
     const index = storage.bookmark_list.findIndex((elem) => {
       return elem.source === bookmark.source && elem.reference === bookmark.reference;
     });
