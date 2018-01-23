@@ -95,7 +95,7 @@ async function listViewModeListener(e) {
 function updateCurrentChapter(bookmark) {
   const mangaDom = document.getElementById(`${bookmark.source}-${bookmark.reference}`);
 
-  const meta = mangaDom.getElementsByTagName('span')[0];
+  const meta = mangaDom.getElementsByClassName('last-read-span')[0];
   meta.textContent = `Last read: ${moment(bookmark.last_read.date).format('LL')}`;
 
   const chapterSel = mangaDom.getElementsByTagName('select')[0];

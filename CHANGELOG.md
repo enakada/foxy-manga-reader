@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Prevent manga bookmarks from being duplicated due to slow network connections.
 - Manga bookmarks not being synced correctly due to how Foxy initialized the `storage.sync`.
+- Fix chapter last read string appearing besides the trash bin icon in the browser action pop-up when receiving `update-current-chapter` internal message.
 
 ### Removed
 

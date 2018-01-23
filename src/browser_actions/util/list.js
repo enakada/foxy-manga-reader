@@ -186,6 +186,7 @@ function createMangaBlock(bookmark, manga, isUpToDate, userOptions = {}) {
   // Add Manga metadata
   if (displayOpts.last_read) {
     const meta = document.createElement('span');
+    meta.className = 'last-read-span';
     meta.textContent = `Last read: ${moment(bookmark.last_read.date).format('LL')}`;
     mangaData.appendChild(meta);
   }
