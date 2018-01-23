@@ -100,7 +100,7 @@ function updateCurrentChapter(bookmark) {
 
   const chapterSel = mangaDom.getElementsByTagName('select')[0];
 
-  chapterSel.selectedIndex = bookmark.last_read.chapter.id;
+  chapterSel.selectedIndex = bookmark.last_read.chapter.index;
 
   const uptodate = bookmark.last_read.chapter.index === chapterSel.options.length - 1;
   if (uptodate) {

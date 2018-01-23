@@ -12,15 +12,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Raised the minimun Firefox version supported to 53.0 due to `storage.sync` support.
-- Improved Foxy's update process. This change can prevent future problems when updating the add-on version.
+- Raise the minimun Firefox version supported to 53.0 due to `storage.sync` support.
+- Improve Foxy's update process. This change can prevent future problems when updating the add-on version.
 - MangaHere source identification due to two manga sources having the same name ([mangahere.cc](http://www.mangahere.cc/) and [manga-here.io](https://manga-here.io/)).
 
 ### Fixed
 
 - Prevent manga bookmarks from being duplicated due to slow network connections.
 - Manga bookmarks not being synced correctly due to how Foxy initialized the `storage.sync`.
-- Fix chapter last read string appearing besides the trash bin icon in the browser action pop-up when receiving `update-current-chapter` internal message.
+- Fix chapter `last read` string appearing besides the trash bin icon in the browser action pop-up after receiving `update-current-chapter` internal message.
+- Fix chapter selector updating to invalid index in the browser action pop-up after receiving `update-current-chapter` internal message.
 
 ### Removed
 
@@ -29,10 +30,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.5.0] - 2018-01-14
 ### Changed
 
-- Replaced the XMLHttpRequest API with the newer Fetch API in order to implement connection retry in case of Error 500.
-- Modified the options page layout.
-- Renamed 'backup' and 'restore' to 'export' and 'import'.
-- Replaced the import (restore) operation with a new selective operation.
+- Replace the XMLHttpRequest API with the newer Fetch API in order to implement connection retry in case of Error 500.
+- Modify the options page layout.
+- Rename 'backup' and 'restore' to 'export' and 'import'.
+- Replace the import (restore) operation with a new selective operation.
 
 ### Fixed
 
@@ -47,7 +48,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Replaced Icomoon icons with Open Iconic icons.
+- Replace Icomoon icons with Open Iconic icons.
 
 ### Fixed
 
