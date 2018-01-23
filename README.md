@@ -13,7 +13,7 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 
 - [Mangafox](http://mangafox.la)
 - [MangaEden](http://www.mangaeden.com)
-- [MangaHere](http://www.mangahere.cc)
+- [MangaHere.cc](http://www.mangahere.cc)
 
 ## Coming Soon
 

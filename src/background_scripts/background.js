@@ -177,19 +177,26 @@ async function updateCurrentChapter(url) {
 // ////////////////////////////////////////////////////////////////
 
 /**
- * Initializes the storage data when extension is installed.
+ * Initializes and/or upgrades the storage data when extension is installed.
+ * @param {object} details An object with the following properties: previousVersion, reason and temporary.
  */
-async function init() {
+async function init(details) {
+  if (details.reason !== 'update') return;
+
+  const [major, minor] = details.previousVersion.split('.');
+
   try {
     const storage = await browser.storage.sync.get();
 
-    // v0.4.0 transition - inclusion of manga list view mode
-    if (typeof storage.view_mode === 'string') {
-      await browser.storage.sync.set({
-        view_mode: {
-          manga: storage.view_mode,
-        },
-      });
+    // Handle transition to v0.4.0 - inclusion of manga list view mode
+    if (parseInt(major, 10) === 0 && parseInt(minor, 10) <= 3) {
+      if (typeof storage.view_mode === 'string') {
+        await browser.storage.sync.set({
+          view_mode: {
+            manga: storage.view_mode,
+          },
+        });
+      }
     }
   } catch (err) {
     console.error(`An error occurred while initializing extension: ${err}`); // eslint-disable-line no-console

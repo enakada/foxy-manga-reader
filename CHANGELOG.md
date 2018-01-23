@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Raised the minimun Firefox version supported to 53.0 due to `storage.sync` support.
+- Improved Foxy's update process. This change can prevent future problems when updating the add-on version.
+- MangaHere source identification due to two manga sources having the same name ([mangahere.cc](http://www.mangahere.cc/) and [manga-here.io](https://manga-here.io/)).
 
 ### Fixed
 
