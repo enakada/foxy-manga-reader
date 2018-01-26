@@ -55,7 +55,7 @@ describe('MangaHere', () => {
     });
 
     it('should throw error if response is not a DOM object', () => {
-      (MangaHere.getMangaCover).should.throw(Error, /MangaHere response is not a HTML/);
+      (MangaHere.getMangaCover).should.throw(Error, /Foxy Error #300/);
     });
 
     it('should throw error if no class="cover" could be retrieved from response body', () => {
@@ -70,7 +70,7 @@ describe('MangaHere', () => {
 
       const fn = () => { MangaHere.getMangaCover(response); };
 
-      (fn).should.throw(Error, 'MangaHere: could not find <img> DOM with "manga_detail_top" class');
+      (fn).should.throw(Error, /Foxy Error #104/);
     });
 
     it('should return correct manga cover URL', () => {
@@ -139,8 +139,9 @@ describe('MangaHere', () => {
           MockFetch.callCount().should.be.equal(1);
 
           should.exist(err);
-          err.should.be.an('string');
-          err.should.have.string('Not Found');
+          err.should.be.an('error');
+          err.message.should.have.string('Foxy Error #302');
+          err.params.should.have.string('Not Found');
         });
     });
 
@@ -158,7 +159,8 @@ describe('MangaHere', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Bad Gateway');
+          err.message.should.have.string('Foxy Error #301');
+          err.params.should.have.string('Bad Gateway');
         });
     });
 
@@ -171,7 +173,8 @@ describe('MangaHere', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('MangaHere response is not a HTML');
+          err.message.should.have.string('Foxy Error #300');
+          err.params.should.be.equal('http://www.mangahere.cc/manga/12_name/');
         });
     });
 
@@ -180,7 +183,8 @@ describe('MangaHere', () => {
         .catch((err) => {
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Invalid url');
+          err.message.should.have.string('Foxy Error #100');
+          err.params.should.be.equal('http://www.mangahere.cc/manga/');
         });
     });
 
@@ -193,7 +197,8 @@ describe('MangaHere', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('could not find DOM with property og:title');
+          err.message.should.have.string('Foxy Error #102');
+          err.params.should.be.equal('http://www.mangahere.cc/manga/12_name/');
         });
     });
 
@@ -295,7 +300,7 @@ describe('MangaHere', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: Wrong argument');
+          err.message.should.have.string('updateChapters() argument is invalid');
         });
     });
 
@@ -314,7 +319,8 @@ describe('MangaHere', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: Not Found');
+          err.message.should.have.string('Foxy Error #302');
+          err.params.should.have.string('Not Found');
         });
     });
 

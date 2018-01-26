@@ -6,6 +6,7 @@
 export async function isBookmarked(source, reference) {
   try {
     const storage = await browser.storage.sync.get('bookmark_list');
+    if (!storage.bookmark_list) return false;
 
     // Remove from storage.sync
     const index = storage.bookmark_list.findIndex((elem) => {
@@ -124,6 +125,7 @@ export function appendReloadDiv(parent, pageNumber, onclick) {
 export async function getCurrentViewMode() {
   try {
     const storage = await browser.storage.sync.get('view_mode');
+    if (!storage.view_mode) storage.view_mode = {};
 
     return Promise.resolve(storage.view_mode.manga || 'single');
   } catch (err) {

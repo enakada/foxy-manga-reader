@@ -13,12 +13,15 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 
 - [Mangafox](http://mangafox.la)
 - [MangaEden](http://www.mangaeden.com)
-- [MangaHere](http://www.mangahere.cc)
+- [MangaHere.cc](http://www.mangahere.cc)
 
 ## Coming Soon
 
 - Support for other sources:
   - Kiss Manga
-  - Batoto
   - MangaReader
   - MangaPark
+
+## Known Issues
+
+- Foxy is incompatible with any add-on which adds `transform: scale()` property to DOM. ([Issue #2](https://github.com/enakada/foxy-manga-reader/issues/2))

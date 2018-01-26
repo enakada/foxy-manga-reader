@@ -1,10 +1,16 @@
+import { getError as FoxyError } from '../util/foxyErrors';
 import Export from './util/export';
 import * as Import from './util/import';
 
 // Page alerts
 // ////////////////////////////////////////////////////////////////
 
-function appendAlert(type, text) {
+/**
+ * Appends an alert to the options page.
+ * @param {string} type Required. The type of the alert (success or danger).
+ * @param {object} options Required. Should contain the 'message' to the alert. The 'title' property is optional.
+ */
+function appendAlert(type, options = {}) {
   const dismisssBtn = document.createElement('button');
   dismisssBtn.type = 'button';
   dismisssBtn.className = 'close';
@@ -15,8 +21,12 @@ function appendAlert(type, text) {
   alert.className = `alert alert-${type} alert-dismissible fade show`;
   alert.setAttribute('role', 'alert');
 
+  const titleDom = document.createElement('strong');
+  if (options.title) titleDom.innerText = `${options.title} `;
+
   alert.appendChild(dismisssBtn);
-  alert.appendChild(document.createTextNode(text));
+  alert.appendChild(titleDom);
+  alert.appendChild(document.createTextNode(options.message));
 
   const alertDiv = document.getElementById('alerts');
 
@@ -53,7 +63,10 @@ async function importFileBrowserListener(evt) {
 
     restoreBtn.disabled = false;
   } catch (err) {
-    appendAlert('danger', browser.i18n.getMessage('wrongRestoreFileAlert'));
+    appendAlert('danger', {
+      title: browser.i18n.getMessage('alertErrorTitle'),
+      message: browser.i18n.getMessage('alertErrorMessage', [FoxyError().message, err.message]),
+    });
   }
 }
 
@@ -82,7 +95,13 @@ async function importButtonListener() {
         status.innerText = 'Error';
 
         console.error(`Could not restore backup file: ${err}`); // eslint-disable-line no-console
-        appendAlert('danger', err);
+
+        const code = (err.code) ? err.message : FoxyError().message;
+        const details = (err.code) ? JSON.stringify(err.params) : err.message;
+        appendAlert('danger', {
+          title: browser.i18n.getMessage('alertErrorTitle'),
+          message: browser.i18n.getMessage('alertErrorMessage', [code, details]),
+        });
       }
     }
   }
@@ -97,8 +116,10 @@ async function exportButtonListener() {
   try {
     await Export();
   } catch (err) {
-    console.error(`Could not generate backup file: ${err}`); // eslint-disable-line no-console
-    appendAlert('danger', browser.i18n.getMessage('backupFailureAlert'));
+    appendAlert('danger', {
+      title: browser.i18n.getMessage('alertErrorTitle'),
+      message: browser.i18n.getMessage('alertErrorMessage', [FoxyError().message, err.message]),
+    });
   }
 }
 

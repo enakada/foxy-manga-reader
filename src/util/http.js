@@ -1,3 +1,5 @@
+import { ErrorCode, getError as FoxyError } from './foxyErrors';
+
 /**
  * Uses the Fetch API to request information from an URL. Retries the fetch operation
  * 2 times (defaults) on timeouts or error code > 500.
@@ -27,9 +29,9 @@ export default async function fetch(url, onSuccess, options) {
 
           resolve(onSuccess(parsedResponse));
         } else if (res.status >= 500) {
-          throw new Error(res.statusText);
+          throw FoxyError(ErrorCode.SOURCE_SERVER_ERROR, `${res.status} ${res.statusText}`);
         } else {
-          reject(res.statusText);
+          reject(FoxyError(ErrorCode.SOURCE_CLIENT_ERROR, `${res.status} ${res.statusText}`));
         }
       } catch (err) {
         if (n > 0) {

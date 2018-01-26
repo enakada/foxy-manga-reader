@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Foxy Manga Reader",
-    "version": "0.5.0",
+    "version": "0.5.1",
 
     "description": "__MSG_extensionDescription__",
 	  "homepage_url": "https://github.com/enakada/foxy-manga-reader",
@@ -10,7 +10,7 @@
     "applications": {
       "gecko": {
         "id": "foxy-manga-reader@enakada",
-        "strict_min_version": "52.0"
+        "strict_min_version": "53.0"
       }
     },
 

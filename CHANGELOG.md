@@ -7,19 +7,41 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.1] - 2018-01-24
+### Added
+
+- Foxy custom error codes. Every user operation should now return a custom error code, making life easier when debugging for errors.
+
+### Changed
+
+- Raise the minimun Firefox version supported to 53.0 due to `storage.sync` support.
+- Improve Foxy's update process. This change can prevent future problems when updating the add-on version.
+- MangaHere source identification due to two manga sources having the same name ([mangahere.cc](http://www.mangahere.cc/) and [manga-here.io](https://manga-here.io/)).
+
+### Fixed
+
+- Prevent manga bookmarks from being duplicated due to slow network connections.
+- Manga bookmarks not being synced correctly due to how Foxy initialized the `storage.sync`.
+- Fix chapter `last read` string appearing besides the trash bin icon in the browser action pop-up after receiving `update-current-chapter` internal message.
+- Fix chapter selector updating to invalid index in the browser action pop-up after receiving `update-current-chapter` internal message.
+
+### Removed
+
+- Batoto as a potential source due to Batoto shutting its service down on January, 2018.
+
 ## [0.5.0] - 2018-01-14
 ### Changed
 
-- Replaced the XMLHttpRequest API with the newer Fetch API in order to implement connection retry in case of Error 500.
-- Modified the options page layout.
-- Renamed 'backup' and 'restore' to 'export' and 'import'.
-- Replaced the import (restore) operation with a new selective operation.
+- Replace the XMLHttpRequest API with the newer Fetch API in order to implement connection retry in case of Error 500.
+- Modify the options page layout.
+- Rename 'backup' and 'restore' to 'export' and 'import'.
+- Replace the import (restore) operation with a new selective operation.
 
 ### Fixed
 
 - Fix problem in which user was not able to bookmark Manhwa from MangaEden.
 
-## [0.4.0] - 2018-01-09
+## [0.4.0-beta] - 2018-01-09
 ### Added
 
 - New manga list view mode: list mode. Now it should be easier to track lots of manga.
@@ -28,7 +50,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Replaced Icomoon icons with Open Iconic icons.
+- Replace Icomoon icons with Open Iconic icons.
 
 ### Fixed
 
@@ -75,5 +97,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.2.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
-[0.4.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.1...v0.4.0
-[0.5.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.4.0...v0.5.0
+[0.4.0-beta]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.1...v0.4.0-beta
+[0.5.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.4.0-beta...v0.5.0
+[0.5.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.0...v0.5.1

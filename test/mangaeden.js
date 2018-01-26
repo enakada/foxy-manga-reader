@@ -46,7 +46,7 @@ describe('MangaEden', () => {
     });
 
     it('should throw error if response is not a DOM object', () => {
-      (MangaEden.getMangaCover).should.throw(Error, /MangaEden response is not a HTML/);
+      (MangaEden.getMangaCover).should.throw(Error, /Foxy Error #300/);
     });
 
     it('should throw error if no property og:image could be retrieved from response head', () => {
@@ -61,7 +61,7 @@ describe('MangaEden', () => {
 
       const fn = () => { MangaEden.getMangaCover(response); };
 
-      (fn).should.throw(Error, 'MangaEden: could not find DOM with property og:image');
+      (fn).should.throw(Error, /Foxy Error #104/);
     });
 
     it('should return correct manga cover URL', () => {
@@ -129,7 +129,8 @@ describe('MangaEden', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Invalid url');
+          err.message.should.have.string('Foxy Error #100');
+          err.params.should.be.equal('http://www.mangaeden.com/en/en-manga/');
         });
     });
 
@@ -139,8 +140,9 @@ describe('MangaEden', () => {
           MockFetch.callCount().should.be.equal(1);
 
           should.exist(err);
-          err.should.be.an('string');
-          err.should.have.string('Not Found');
+          err.should.be.an('error');
+          err.message.should.have.string('Foxy Error #302');
+          err.params.should.have.string('Not Found');
         });
     });
 
@@ -158,7 +160,8 @@ describe('MangaEden', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Bad Gateway');
+          err.message.should.have.string('Foxy Error #301');
+          err.params.should.have.string('Bad Gateway');
         });
     });
 
@@ -171,7 +174,8 @@ describe('MangaEden', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('MangaEden response is not a HTML');
+          err.message.should.have.string('Foxy Error #300');
+          err.params.should.be.equal('http://www.mangaeden.com/en/en-manga/gantz/');
         });
     });
 
@@ -182,12 +186,12 @@ describe('MangaEden', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Invalid url');
+          err.message.should.have.string('Foxy Error #100');
+          err.params.should.be.equal('http://www.mangaeden.com/en/en-directory/');
         });
     });
 
     it('should reject promise if no og:title could be retrieved from response body', () => {
-      // server.respondWith([200, { 'Content-Type': 'text/html' }, '<!DOCTYPE html><html></html>']); // 200
       window.fetch.callsFake(MockFetch.ok('<!DOCTYPE html><html></html>'));
 
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/gantz/')
@@ -196,7 +200,8 @@ describe('MangaEden', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('could not find DOM with property og:title');
+          err.message.should.have.string('Foxy Error #102');
+          err.params.should.be.equal('http://www.mangaeden.com/en/en-manga/gantz/');
         });
     });
 
@@ -315,7 +320,7 @@ describe('MangaEden', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: Wrong argument');
+          err.message.should.have.string('updateChapters() argument is invalid');
         });
     });
 
@@ -334,7 +339,8 @@ describe('MangaEden', () => {
 
           should.exist(err);
           err.should.be.an('error');
-          err.message.should.have.string('Error while retrieving chapter list: "Not Found"');
+          err.message.should.have.string('Foxy Error #302');
+          err.params.should.have.string('Not Found');
         });
     });
 

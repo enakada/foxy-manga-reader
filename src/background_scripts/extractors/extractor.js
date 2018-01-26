@@ -1,3 +1,4 @@
+import { ErrorCode, getError as FoxyError } from '../../util/foxyErrors';
 import HttpFetch from '../../util/http';
 import * as Mangafox from './mangafox';
 import * as MangaEden from './mangaeden';
@@ -42,7 +43,7 @@ export function parseUrl(url) {
  */
 export async function getCurrentMangaCover(source, mangaUrl) {
   const extractor = providersMap.get(source);
-  if (!extractor) return Promise.reject(Error(`Not a valid manga source: ${source}`));
+  if (!extractor) return Promise.reject(FoxyError(ErrorCode.INVALID_SOURCE, source));
 
   return HttpFetch(mangaUrl, extractor.getMangaCover);
 }

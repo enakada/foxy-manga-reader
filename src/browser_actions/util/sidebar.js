@@ -1,5 +1,7 @@
 import moment from 'moment';
 import Chart from 'chart.js';
+import { getError as FoxyError } from '../../util/foxyErrors';
+import * as Notification from '../../util/notification';
 
 /**
  * Expands the sidebar.
@@ -83,6 +85,9 @@ export function expandButtonListener(e) {
 export async function viewModeListener(e) {
   try {
     const storage = await browser.storage.sync.get('view_mode');
+
+    // Initialize storage.view_mode
+    if (!storage.view_mode) storage.view_mode = {};
     storage.view_mode.manga = e.target.id;
 
     await browser.storage.sync.set(storage);
@@ -98,8 +103,8 @@ export async function viewModeListener(e) {
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('changeViewModeErrorNotificationTitle'),
-      message: browser.i18n.getMessage('changeViewModeErrorNotificationMessage'),
+      title: FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', err.message),
     });
   }
 }

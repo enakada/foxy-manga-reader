@@ -1,7 +1,8 @@
 import moment from 'moment';
+import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
+import * as Notification from '../util/notification';
 import * as Sidebar from './util/sidebar';
 import * as MangaList from './util/list';
-import * as Notification from '../util/notification';
 import store from '../util/datastore';
 
 const mangaListDom = document.getElementById('manga-list');
@@ -20,7 +21,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
   let readCount = 0;
 
   try {
-    if (!bookmarkList) throw new Error('No available bookmarkList');
+    if (!bookmarkList) throw FoxyError(ErrorCode.NO_STORAGE_BOOKMARK, 'Empty Storage');
 
     // Get the correct method to call
     let fn;
@@ -37,7 +38,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
     // Append manga list
     const promises = bookmarkList.map(async (bookmark) => {
       const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
-      if (!manga) return;
+      if (!manga) throw FoxyError(ErrorCode.STORE_ERROR, `${bookmark.source}/${bookmark.reference}`); // return;
 
       const card = fn(bookmark, manga);
       mangaListDom.appendChild(card);
@@ -57,8 +58,12 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 async function listViewModeListener(e) {
   try {
     const storage = await browser.storage.sync.get(['view_mode', 'bookmark_list']);
-    storage.view_mode.list = e.target.id;
 
+    // Initializes the view_mode and bookmark_list
+    if (!storage.view_mode) storage.view_mode = {};
+    if (!storage.bookmark_list) storage.bookmark_list = [];
+
+    storage.view_mode.list = e.target.id;
     await browser.storage.sync.set({ view_mode: storage.view_mode });
 
     // Clear previous list
@@ -74,12 +79,12 @@ async function listViewModeListener(e) {
 
     e.target.parentNode.classList.add('active');
   } catch (err) {
-    console.error(`Could not change the view mode: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('changeViewModeErrorNotificationTitle'),
-      message: browser.i18n.getMessage('changeViewModeErrorNotificationMessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 }
@@ -90,12 +95,12 @@ async function listViewModeListener(e) {
 function updateCurrentChapter(bookmark) {
   const mangaDom = document.getElementById(`${bookmark.source}-${bookmark.reference}`);
 
-  const meta = mangaDom.getElementsByTagName('span')[0];
+  const meta = mangaDom.getElementsByClassName('last-read-span')[0];
   meta.textContent = `Last read: ${moment(bookmark.last_read.date).format('LL')}`;
 
   const chapterSel = mangaDom.getElementsByTagName('select')[0];
 
-  chapterSel.selectedIndex = bookmark.last_read.chapter.id;
+  chapterSel.selectedIndex = bookmark.last_read.chapter.index;
 
   const uptodate = bookmark.last_read.chapter.index === chapterSel.options.length - 1;
   if (uptodate) {
@@ -158,7 +163,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 window.onload = async () => {
   try {
     // Sanity check the DOM
-    if (!mangaListDom) throw new Error('manga-list element does not exist in DOM');
+    if (!mangaListDom) throw FoxyError(ErrorCode.DOM_MISSING, 'manga-list');
 
     const storage = await browser.storage.sync.get();
 
@@ -166,6 +171,9 @@ window.onload = async () => {
     Sidebar.init({
       last_update: storage.last_chapter_update,
     });
+
+    // Initialize storage.view_mode
+    if (!storage.view_mode) storage.view_mode = {};
 
     // Initialize version
     const versionDiv = document.getElementById('addon-version');
@@ -184,7 +192,7 @@ window.onload = async () => {
     if (storage.sidebar_collapsed) Sidebar.collapse(iconBtn.firstElementChild);
 
     // Update badge_count
-    if (storage && storage.badge_count > 0) {
+    if (storage.badge_count > 0) {
       browser.browserAction.setBadgeBackgroundColor({ color: '' });
       browser.browserAction.setBadgeText({ text: '' });
 
@@ -193,20 +201,20 @@ window.onload = async () => {
     }
 
     // Append manga list
-    if (storage && storage.bookmark_list) {
-      await setListViewMode(storage.view_mode.list, storage.bookmark_list);
+    if (storage.bookmark_list) {
+      await setListViewMode(storage.view_mode.list || 'list-rich', storage.bookmark_list);
     }
 
     // Add listener to list view radio button
     const listViewMode = document.getElementById('list-view-mode-container');
     listViewMode.onchange = listViewModeListener;
   } catch (err) {
-    console.error(`Error while starting the browser action script: ${err}`); // eslint-disable-line no-console
+    console.error(err); // eslint-disable-line no-console
 
     // Notify user that an error occurred
     Notification.error({
-      title: browser.i18n.getMessage('generalErrorNotificationTitle'),
-      message: browser.i18n.getMessage('generalErrorNotificationMessage'),
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
     });
   }
 };
