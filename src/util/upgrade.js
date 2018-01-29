@@ -84,7 +84,6 @@ async function updateStorage(bookmark, changes) {
 async function migrateDB(previousVersion, bookmarkList, updateIndexedDb = true) {
   try {
     const migrations = SourceMigrations.filter((elem) => {
-      console.log(`Migrating database from '< v${previousVersion}' to 'v${elem.version}': ${compareVersions(previousVersion, elem.version)}`);
       return compareVersions(previousVersion, elem.version);
     });
 
