@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+
+- Fix chapter selector updating to wrong index in the browser action pop-up after receiving `update-current-chapter` internal message.
+- Fix browser action pop-up not updating the chapter information after receiving `update-current-chapter` or `update-chapter-list` internal messages. This only affects the List View Mode.
 
 ## [0.5.1] - 2018-01-24
 ### Added

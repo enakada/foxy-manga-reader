@@ -260,7 +260,7 @@ export function createListCard(bookmark, manga) {
   titleCol.appendChild(headerLink);
 
   const chapterCol = document.createElement('div');
-  chapterCol.className = 'col-3 text-center';
+  chapterCol.className = 'col-3 text-center list-chapter-tracker';
   chapterCol.innerText = `${bookmark.last_read.chapter.index + 1}/${manga.chapter_list.length}`;
   headerRow.appendChild(chapterCol);
   if (upToDate) chapterCol.classList.add('text-success');
