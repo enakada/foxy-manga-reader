@@ -22,7 +22,7 @@
     },
 
     "permissions": [
-        "*://mangafox.la/*",
+        "*://*.fanfox.net/*",
         "*://*.mangaeden.com/*",
         "*://*.mangahere.cc/*",
         "storage",
@@ -60,7 +60,7 @@
 
     "content_scripts": [
         {
-            "matches": ["*://*.mangafox.la/*"],
+            "matches": ["*://*.fanfox.net/*"],
             "js": ["content_scripts/mangafox.js"],
             "css": ["css/content_ui.css", "css/mangafox.css"]
         },

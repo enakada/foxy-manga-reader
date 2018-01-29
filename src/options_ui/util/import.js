@@ -1,3 +1,5 @@
+import { processImportFile } from '../../util/upgrade';
+
 let importFile;
 
 /**
@@ -64,6 +66,7 @@ export async function parseFile(file, tbody) {
     reader.onload = async (load) => {
       try {
         importFile = JSON.parse(load.target.result);
+        importFile = await processImportFile(importFile);
 
         const storage = await browser.storage.sync.get('bookmark_list');
 

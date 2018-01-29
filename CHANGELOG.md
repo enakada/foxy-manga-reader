@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+
+- Mangafox domain from `http://mangafox.la` to `http://fanfox.net`.
+- Mangafox source name to `fanfox`. This only affects the database.
+- Export file version is now the same as the add-on version. This makes it easier to perform database migrations.
+
 ### Fixed
 
 - Fix chapter selector updating to wrong index in the browser action pop-up after receiving `update-current-chapter` internal message.
