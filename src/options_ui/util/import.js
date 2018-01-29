@@ -45,7 +45,7 @@ function createTable(tbody, bookmarkList) {
     row.appendChild(sourceCell);
 
     const nameCell = document.createElement('td');
-    nameCell.innerText = (importFile.version === '1.0') ? element.reference : element.name;
+    nameCell.innerText = (!element.name) ? element.reference : element.name;
     row.appendChild(nameCell);
 
     tbody.appendChild(row);

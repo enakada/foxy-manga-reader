@@ -56,16 +56,21 @@ export function applyChanges(object, changes) {
  * Updates the IndexedDB entry, applying the provided changes.
  * @param {object} bookmark Required. The bookmark to update.
  * @param {object~array} changes Required. The changes to apply to the storage data.
+ * @returns {object~promise} A promise which resolves to true if the changes were applied.
  */
 async function updateStorage(bookmark, changes) {
   try {
     const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
+    if (!manga) Promise.resolve(false);
 
     const newMangaObj = applyChanges(manga, changes);
 
+    await store.removeItem(`${bookmark.source}/${bookmark.reference}`);
     await store.setItem(`${newMangaObj.source}/${newMangaObj.reference}`, newMangaObj);
+
+    return Promise.resolve(true);
   } catch (err) {
-    throw err;
+    return Promise.reject(err);
   }
 }
 
