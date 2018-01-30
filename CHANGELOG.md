@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.2] - 2018-01-29
+### Changed
+
+- Mangafox domain from `http://mangafox.la` to `http://fanfox.net`.
+- Mangafox source name to `fanfox`. This only affects the database.
+- Export file version is now the same as the add-on version. This makes it easier to perform database migrations.
+
+### Fixed
+
+- Fix chapter selector updating to wrong index in the browser action pop-up after receiving `update-current-chapter` internal message.
+- Fix browser action pop-up not updating the chapter information after receiving `update-current-chapter` or `update-chapter-list` internal messages. This only affects the List View Mode.
+
 ## [0.5.1] - 2018-01-24
 ### Added
 
@@ -100,3 +112,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.4.0-beta]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.1...v0.4.0-beta
 [0.5.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.4.0-beta...v0.5.0
 [0.5.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.0...v0.5.1
+[0.5.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.1...v0.5.2

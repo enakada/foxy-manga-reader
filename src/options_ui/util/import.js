@@ -1,3 +1,5 @@
+import { processImportFile } from '../../util/upgrade';
+
 let importFile;
 
 /**
@@ -43,7 +45,7 @@ function createTable(tbody, bookmarkList) {
     row.appendChild(sourceCell);
 
     const nameCell = document.createElement('td');
-    nameCell.innerText = (importFile.version === '1.0') ? element.reference : element.name;
+    nameCell.innerText = (!element.name) ? element.reference : element.name;
     row.appendChild(nameCell);
 
     tbody.appendChild(row);
@@ -64,6 +66,7 @@ export async function parseFile(file, tbody) {
     reader.onload = async (load) => {
       try {
         importFile = JSON.parse(load.target.result);
+        importFile = await processImportFile(importFile);
 
         const storage = await browser.storage.sync.get('bookmark_list');
 

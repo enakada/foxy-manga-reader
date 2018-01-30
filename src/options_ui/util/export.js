@@ -12,7 +12,7 @@ export default async function exportBookmarks() {
     if (!storage.bookmark_list) storage.bookmark_list = [];
 
     const backup = {
-      version: '1.0',
+      version: browser.runtime.getManifest().version,
     };
     backup.bookmark_list = storage.bookmark_list;
 

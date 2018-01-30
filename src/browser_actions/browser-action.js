@@ -98,9 +98,15 @@ function updateCurrentChapter(bookmark) {
   const meta = mangaDom.getElementsByClassName('last-read-span')[0];
   meta.textContent = `Last read: ${moment(bookmark.last_read.date).format('LL')}`;
 
-  const chapterSel = mangaDom.getElementsByTagName('select')[0];
+  // Update List header
+  const chapterTracker = mangaDom.getElementsByClassName('list-chapter-tracker')[0];
+  if (chapterTracker) {
+    chapterTracker.innerText = chapterTracker.innerText.replace(/\d+\/(\d+)/, `${bookmark.last_read.chapter.index + 1}/$1`);
+  }
 
-  chapterSel.selectedIndex = bookmark.last_read.chapter.index;
+  // Update <select>
+  const chapterSel = mangaDom.getElementsByTagName('select')[0];
+  chapterSel.selectedIndex = (chapterSel.options.length - 1) - bookmark.last_read.chapter.index; // List is reversed
 
   const uptodate = bookmark.last_read.chapter.index === chapterSel.options.length - 1;
   if (uptodate) {
@@ -113,6 +119,12 @@ function updateCurrentChapter(bookmark) {
 function updateChapterList(bookmark, chapterList) {
   const mangaDom = document.getElementById(`${bookmark.source}-${bookmark.reference}`);
   const wasUptodate = mangaDom.classList.contains('flex-last');
+
+  // Update List header
+  const chapterTracker = mangaDom.getElementsByClassName('list-chapter-tracker')[0];
+  if (chapterTracker) {
+    chapterTracker.innerText = chapterTracker.innerText.replace(/(\d+)\/\d+/, `$1/${chapterList.length}`);
+  }
 
   const chapterSel = mangaDom.getElementsByTagName('select')[0];
 

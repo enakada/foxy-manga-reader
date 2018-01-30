@@ -14,27 +14,27 @@ describe('Mangafox', () => {
 
   // Test for #urlRegex
   describe('#urlRegex', () => {
-    it('regex should fail for http://mangafox.la/manga/', () => {
-      const result = Mangafox.urlRegex.exec('http://mangafox.la/manga/');
+    it('regex should fail for http://fanfox.net/manga/', () => {
+      const result = Mangafox.urlRegex.exec('http://fanfox.net/manga/');
 
       should.not.exist(result);
     });
 
-    it('regex should pass for http://mangafox.la/manga/12_name/', () => {
-      const result = Mangafox.urlRegex.exec('http://mangafox.la/manga/12_name/');
+    it('regex should pass for http://fanfox.net/manga/12_name/', () => {
+      const result = Mangafox.urlRegex.exec('http://fanfox.net/manga/12_name/');
 
       should.exist(result);
       result.should.have.lengthOf(3);
-      result[1].should.equal('mangafox');
+      result[1].should.equal('fanfox');
       result[2].should.equal('12_name');
     });
 
-    it('regex should pass for https://mangafox.la/manga/12_name/c001/01.html', () => {
-      const result = Mangafox.urlRegex.exec('https://mangafox.la/manga/12_name/c001/01.html');
+    it('regex should pass for https://fanfox.net/manga/12_name/c001/01.html', () => {
+      const result = Mangafox.urlRegex.exec('https://fanfox.net/manga/12_name/c001/01.html');
 
       should.exist(result);
       result.should.have.lengthOf(3);
-      result[1].should.equal('mangafox');
+      result[1].should.equal('fanfox');
       result[2].should.equal('12_name');
     });
   });
@@ -87,42 +87,42 @@ describe('Mangafox', () => {
 
   // Test for #getChapterReference()
   describe('#getChapterReference()', () => {
-    it('should return defaultValue on http://mangafox.la/manga/any_name/', () => {
-      const chapter = Mangafox.getChapterReference('http://mangafox.la/manga/any_name/', 'default');
+    it('should return defaultValue on http://fanfox.net/manga/any_name/', () => {
+      const chapter = Mangafox.getChapterReference('http://fanfox.net/manga/any_name/', 'default');
 
       chapter.should.equal('default');
     });
 
-    it('should return { id: v002/c001 } on http://mangafox.la/manga/any_name/v002/c001/1.html', () => {
-      const chapter = Mangafox.getChapterReference('http://mangafox.la/manga/any_name/v002/c001/1.html', 'default');
+    it('should return { id: v002/c001 } on http://fanfox.net/manga/any_name/v002/c001/1.html', () => {
+      const chapter = Mangafox.getChapterReference('http://fanfox.net/manga/any_name/v002/c001/1.html', 'default');
 
       chapter.should.be.an('object');
       chapter.should.have.property('id').equal('v002/c001');
     });
 
-    it('should return { id: vTBD/c001 } on http://mangafox.la/manga/any_name/vTBD/c001/1.html', () => {
-      const chapter = Mangafox.getChapterReference('http://mangafox.la/manga/any_name/vTBD/c001/1.html', 'default');
+    it('should return { id: vTBD/c001 } on http://fanfox.net/manga/any_name/vTBD/c001/1.html', () => {
+      const chapter = Mangafox.getChapterReference('http://fanfox.net/manga/any_name/vTBD/c001/1.html', 'default');
 
       chapter.should.be.an('object');
       chapter.should.have.property('id').equal('vTBD/c001');
     });
 
-    it('should return { id: c001 } on http://mangafox.la/manga/any_name/c001/1.html', () => {
-      const chapter = Mangafox.getChapterReference('http://mangafox.la/manga/any_name/c001/1.html', 'default');
+    it('should return { id: c001 } on http://fanfox.net/manga/any_name/c001/1.html', () => {
+      const chapter = Mangafox.getChapterReference('http://fanfox.net/manga/any_name/c001/1.html', 'default');
 
       chapter.should.be.an('object');
       chapter.should.have.property('id').equal('c001');
     });
 
-    it('should return { id: c001 } on http://mangafox.la/manga/any_name/c001/30.html', () => {
-      const chapter = Mangafox.getChapterReference('http://mangafox.la/manga/any_name/c001/1.html', 'default');
+    it('should return { id: c001 } on http://fanfox.net/manga/any_name/c001/30.html', () => {
+      const chapter = Mangafox.getChapterReference('http://fanfox.net/manga/any_name/c001/1.html', 'default');
 
       chapter.should.be.an('object');
       chapter.should.have.property('id').equal('c001');
     });
 
-    it('should return { id: v15/c088.5 } on http://mangafox.la/manga/any_name/v15/c088.5/30.html', () => {
-      const chapter = Mangafox.getChapterReference('http://mangafox.la/manga/any_name/v15/c088.5/1.html', 'default');
+    it('should return { id: v15/c088.5 } on http://fanfox.net/manga/any_name/v15/c088.5/30.html', () => {
+      const chapter = Mangafox.getChapterReference('http://fanfox.net/manga/any_name/v15/c088.5/1.html', 'default');
 
       chapter.should.be.an('object');
       chapter.should.have.property('id').equal('v15/c088.5');
@@ -140,19 +140,19 @@ describe('Mangafox', () => {
     });
 
     it('should reject promise on invalid URL', () => {
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/')
         .catch((err) => {
           MockFetch.callCount().should.be.equal(0);
 
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Foxy Error #100');
-          err.params.should.be.equal('http://mangafox.la/manga/');
+          err.params.should.be.equal('http://fanfox.net/manga/');
         });
     });
 
     it('should reject promise on Error 404', () => {
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/12_name/')
         .catch((err) => {
           MockFetch.callCount().should.be.equal(1);
 
@@ -171,7 +171,7 @@ describe('Mangafox', () => {
         statusText: 'Bad Gateway',
       }));
 
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/12_name/')
         .catch((err) => {
           MockFetch.callCount().should.be.equal(3);
 
@@ -185,28 +185,28 @@ describe('Mangafox', () => {
     it('should reject promise if response is empty with no headers', () => {
       window.fetch.callsFake(MockFetch.ok('', { headers: {} }));
 
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/12_name/')
         .catch((err) => {
           MockFetch.callCount().should.be.equal(1);
 
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Foxy Error #300');
-          err.params.should.have.string('http://mangafox.la/manga/12_name/');
+          err.params.should.have.string('http://fanfox.net/manga/12_name/');
         });
     });
 
     it('should reject promise if no og:title could be retrieved from response body', () => {
       window.fetch.callsFake(MockFetch.ok('<!DOCTYPE html><html></html>'));
 
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/12_name/')
         .catch((err) => {
           MockFetch.callCount().should.be.equal(1);
 
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Foxy Error #102');
-          err.params.should.have.string('http://mangafox.la/manga/12_name/');
+          err.params.should.have.string('http://fanfox.net/manga/12_name/');
         });
     });
 
@@ -220,14 +220,14 @@ describe('Mangafox', () => {
           <body></body>
         <html>`));
 
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_name/')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/12_name/')
         .catch((err) => {
           MockFetch.callCount().should.be.equal(1);
 
           should.exist(err);
           err.should.be.an('error');
           err.message.should.have.string('Foxy Error #104');
-          err.params.should.have.string('http://mangafox.la/manga/12_name/');
+          err.params.should.have.string('http://fanfox.net/manga/12_name/');
         });
     });
 
@@ -251,7 +251,7 @@ describe('Mangafox', () => {
         .onFirstCall().callsFake(MockFetch.ok(res1))
         .onSecondCall().callsFake(MockFetch.ok(res2, { headers: { 'Content-Type': 'application/x-javascript' } }));
 
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_manga/v001/c001/1.html')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/12_manga/v001/c001/1.html')
         .then((manga) => {
           MockFetch.callCount().should.be.equal(2);
 
@@ -259,9 +259,9 @@ describe('Mangafox', () => {
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('5035');
           manga.should.have.property('name').equal('Manga Name');
-          manga.should.have.property('source').equal('mangafox');
+          manga.should.have.property('source').equal('fanfox');
           manga.should.have.property('reference').equal('12_manga');
-          manga.should.have.property('url').equal('http://mangafox.la/manga/12_manga/');
+          manga.should.have.property('url').equal('http://fanfox.net/manga/12_manga/');
           manga.should.have.property('cover').equal('https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg');
           manga.should.have.property('last_update');
           manga.should.have.property('chapter_list').with.lengthOf(2);
@@ -290,7 +290,7 @@ describe('Mangafox', () => {
         .onFirstCall().callsFake(MockFetch.ok(res1))
         .onSecondCall().callsFake(MockFetch.ok(res2, { headers: { 'Content-Type': 'application/x-javascript' } }));
 
-      return Mangafox.getMangaInfo('http://mangafox.la/manga/12_manga/')
+      return Mangafox.getMangaInfo('http://fanfox.net/manga/12_manga/')
         .then((manga) => {
           MockFetch.callCount().should.be.equal(2);
 
@@ -298,9 +298,9 @@ describe('Mangafox', () => {
           manga.should.be.an('object');
           manga.should.have.property('sid').equal('5035');
           manga.should.have.property('name').equal('Manga Name');
-          manga.should.have.property('source').equal('mangafox');
+          manga.should.have.property('source').equal('fanfox');
           manga.should.have.property('reference').equal('12_manga');
-          manga.should.have.property('url').equal('http://mangafox.la/manga/12_manga/');
+          manga.should.have.property('url').equal('http://fanfox.net/manga/12_manga/');
           manga.should.have.property('cover').equal('https://lmfcdn.secure.footprint.net/store/manga/5035/cover2.jpg');
           manga.should.have.property('last_update');
           manga.should.have.property('chapter_list').with.lengthOf(2);
@@ -336,7 +336,7 @@ describe('Mangafox', () => {
     it('should reject promise on Error 404', () => {
       const promise = Mangafox.updateChapters({
         sid: '1',
-        url: 'http://mangafox.la/manga/12_manga/',
+        url: 'http://fanfox.net/manga/12_manga/',
         chapter_list: [],
       });
 
@@ -358,7 +358,7 @@ describe('Mangafox', () => {
 
       const promise = Mangafox.updateChapters({
         sid: '1',
-        url: 'http://mangafox.la/manga/12_manga/',
+        url: 'http://fanfox.net/manga/12_manga/',
         chapter_list: [],
       });
 
@@ -383,7 +383,7 @@ describe('Mangafox', () => {
 
       const promise = Mangafox.updateChapters({
         sid: '1',
-        url: 'http://mangafox.la/manga/12_manga/',
+        url: 'http://fanfox.net/manga/12_manga/',
         chapter_list: [],
       });
 
@@ -398,12 +398,12 @@ describe('Mangafox', () => {
           data.chapterList.should.deep.include({
             id: 'v01/c001',
             name: 'Title 1',
-            url: 'http://mangafox.la/manga/12_manga/v01/c001/1.html',
+            url: 'http://fanfox.net/manga/12_manga/v01/c001/1.html',
           });
           data.chapterList.should.deep.include({
             id: 'v01/c002.5',
             name: 'Title 2',
-            url: 'http://mangafox.la/manga/12_manga/v01/c002.5/1.html',
+            url: 'http://fanfox.net/manga/12_manga/v01/c002.5/1.html',
           });
         })
         .catch((err) => {

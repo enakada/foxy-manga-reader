@@ -4,7 +4,7 @@ import HttpFetch from '../../util/http';
 /**
  * Matches the URL of a manga page.
  */
-export const urlRegex = /(?:http\w*:\/\/)*(mangafox)\.\w+\/manga\/([\w_]+)\//;
+export const urlRegex = /(?:http\w*:\/\/)*(fanfox)\.\w+\/manga\/([\w_]+)\//;
 
 /**
  * Returns the chapter reference extracted from the URL or the defaultValue.
@@ -42,7 +42,7 @@ export function getMangaCover(response, url) {
  * @returns {array} The array of chapter objects.
  */
 function getChapterList(mangaSid, mangaUrl, chapterList = []) {
-  const url = `http://mangafox.la/media/js/list.${mangaSid}.js`;
+  const url = `http://fanfox.net/media/js/list.${mangaSid}.js`;
 
   return HttpFetch(url, (response) => {
     const regex = /\["(.+)","([\w/.]+)"\]/g;
@@ -107,7 +107,7 @@ export function getMangaInfo(url) {
       const manga = {
         sid,
         name,
-        source: 'mangafox',
+        source: 'fanfox',
         reference: mangaReference,
         url: mangaUrl,
         cover: imageUrl,

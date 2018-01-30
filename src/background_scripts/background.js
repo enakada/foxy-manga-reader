@@ -2,6 +2,7 @@ import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
 import * as Extractor from './extractors/extractor';
 import * as Notification from '../util/notification';
 import store from '../util/datastore';
+import { updateAddon } from '../util/upgrade';
 
 // Core Methods
 // ////////////////////////////////////////////////////////////////
@@ -50,7 +51,10 @@ async function bookmarkManga(url, bookmark, options = {}) {
         url: manga.url,
         last_read: {
           date: new Date(),
-          chapter: currentChapter,
+          chapter: {
+            id: currentChapter.id,
+            index: currentChapter.index,
+          },
         },
       };
     }
@@ -183,21 +187,8 @@ async function updateCurrentChapter(url) {
 async function init(details) {
   if (details.reason !== 'update') return;
 
-  const [major, minor] = details.previousVersion.split('.');
-
   try {
-    const storage = await browser.storage.sync.get();
-
-    // Handle transition to v0.4.0 - inclusion of manga list view mode
-    if (parseInt(major, 10) === 0 && parseInt(minor, 10) <= 3) {
-      if (typeof storage.view_mode === 'string') {
-        await browser.storage.sync.set({
-          view_mode: {
-            manga: storage.view_mode,
-          },
-        });
-      }
-    }
+    await updateAddon(details.previousVersion);
   } catch (err) {
     console.error(`An error occurred while initializing extension: ${err}`); // eslint-disable-line no-console
   }

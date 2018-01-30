@@ -5,7 +5,7 @@ import * as MangaEden from './mangaeden';
 import * as MangaHere from './mangahere';
 
 const providersMap = new Map([
-  ['mangafox', Mangafox],
+  ['fanfox', Mangafox],
   ['mangaeden', MangaEden],
   ['mangahere', MangaHere],
 ]);

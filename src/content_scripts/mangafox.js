@@ -1,6 +1,6 @@
 import * as Util from './util';
 
-const pageRegex = /(((?:http\w*:\/\/)*mangafox\.\w+\/manga\/(\w+)\/)(\S+)\/)(\d+)(\.html)/;
+const pageRegex = /(((?:http\w*:\/\/)*fanfox\.\w+\/manga\/(\w+)\/)(\S+)\/)(\d+)(\.html)/;
 
 
 // Page Utils
@@ -199,7 +199,7 @@ function displayMenu(matchUrl, viewMode) {
   }
 
   const options = {
-    source: 'mangafox',
+    source: 'fanfox',
     reference: matchUrl[3],
     url: {
       current: matchUrl[0],
