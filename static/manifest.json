@@ -26,6 +26,7 @@
         "*://*.mangaeden.com/*",
         "*://*.mangahere.cc/*",
         "storage",
+        "cookies",
         "alarms",
         "notifications",
         "activeTab",
