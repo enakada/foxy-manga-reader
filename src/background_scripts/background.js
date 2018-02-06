@@ -204,7 +204,7 @@ browser.runtime.onInstalled.addListener(init);
  */
 async function syncHandler(changes, areaName) {
   // Handle only changes to bookmark_list in the sync storage.
-  if (areaName !== 'sync' || !changes.bookmark_list) return;
+  if (areaName !== 'sync' || !changes.bookmark_list || !changes.bookmark_list.newValue) return;
 
   try {
     const keys = await store.keys();

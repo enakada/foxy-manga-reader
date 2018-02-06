@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- Cloudscrapper, a piece of code that solves challenges from Cloudflare in order to access pages protected by their service.
+
+### Fixed
+
+- When Foxy was updated or installed with no previous bookmarks, an undefined variable was being accessed.
+- Sometimes, when receiving a sync notification, it came with no newValue to modify, leading to an undefined variable being accessed.
 
 ## [0.5.2] - 2018-01-29
 ### Changed

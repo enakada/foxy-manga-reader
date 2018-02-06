@@ -130,10 +130,13 @@ export async function updateAddon(previousVersion) {
     }
 
     // Applies all DB migrations needed
-    const newBookmarkList = await migrateDB(previousVersion, storage.bookmark_list);
-    storage.bookmark_list = newBookmarkList;
+    if (storage.bookmark_list) {
+      const newBookmarkList = await migrateDB(previousVersion, storage.bookmark_list);
+      storage.bookmark_list = newBookmarkList;
 
-    await browser.storage.sync.set({ bookmark_list: storage.bookmark_list });
+      await browser.storage.sync.set({ bookmark_list: storage.bookmark_list });
+    }
+
     return Promise.resolve();
   } catch (err) {
     return Promise.reject(err);
