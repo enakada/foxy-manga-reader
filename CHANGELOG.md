@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Cloudscrapper, a piece of code that solves challenges from Cloudflare in order to access pages protected by their service.
 
+### Changed
+
+- Notification's error icon. Old icon replaced by the Open Iconic equivalent.
+
 ### Fixed
 
 - When Foxy was updated or installed with no previous bookmarks, an undefined variable was being accessed.
