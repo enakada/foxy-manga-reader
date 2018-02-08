@@ -40,7 +40,7 @@ async function unbookmarkButtonListener(e) {
     if (result) {
       mangaListDom.removeChild(card);
 
-      if (card.classList.contains('flex-last')) Sidebar.updateChart(0, -1);
+      if (card.classList.contains('order-last')) Sidebar.updateChart(0, -1);
       else Sidebar.updateChart(-1, 0);
 
       // Notify user
@@ -210,7 +210,7 @@ export function createListRichCard(bookmark, manga) {
   const mangaDiv = createMangaBlock(bookmark, manga, upToDate);
   mangaDiv.id = `${bookmark.source}-${bookmark.reference}`;
 
-  if (upToDate) mangaDiv.classList.add('flex-last');
+  if (upToDate) mangaDiv.classList.add('order-last');
 
   const removeBtn = createRemoveButton({
     class: ['col-1', 'p-0'],
@@ -235,7 +235,7 @@ export function createListCard(bookmark, manga) {
   const card = document.createElement('div');
   card.className = 'card mx-1';
   card.id = `${bookmark.source}-${bookmark.reference}`;
-  if (upToDate) card.classList.add('flex-last');
+  if (upToDate) card.classList.add('order-last');
 
   const cardHeader = document.createElement('div');
   cardHeader.className = 'card-header p-1';
