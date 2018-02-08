@@ -121,13 +121,17 @@ header {
     border-radius: 5px;
     background-color: rgba(254,254,254,0.7);
 
-    .input-group-sm {
-      height: $input-height-sm;
-    }
-
     img {
       display: inline-block;
     }
+  }
+
+  .bg-red {
+    background-color: #f4cccc;
+  }
+
+  .bg-green {
+    background-color: #d9ead3;
   }
 
   .manga-data {

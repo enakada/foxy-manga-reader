@@ -27,14 +27,14 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <!-- Export -->
-      <div class="card-block tab-pane active" id="backup">
+      <div class="card-body tab-pane fade show active" id="backup">
         <h4 class="card-title">Backup your bookmarks</h4>
         <p class="card-text">Export all your current bookmarks.</p>
         <button id="export-btn" type="button" class="btn btn-primary">Backup</button>
       </div>
 
       <!-- Import -->
-      <div class="card-block tab-pane" id="restore">
+      <div class="card-body tab-pane fade" id="restore">
         <div id="loading-overlay" class="overlay">
           <div class="sk-circle">
             <div class="sk-circle1 sk-child"></div>
@@ -66,10 +66,10 @@
               <thead>
                 <tr>
                   <th>
-                    <label class="custom-control custom-checkbox">
+                    <div class="custom-control custom-checkbox">
                       <input type="checkbox" class="custom-control-input" id="main-import-checkbox" checked>
-                      <span class="custom-control-indicator"></span>
-                    </label>
+                      <label class="custom-control-label" for="main-import-checkbox"></label>
+                    </div>
                   </th>
                   <th>Status</th>
                   <th>Source</th>

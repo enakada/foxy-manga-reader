@@ -101,14 +101,14 @@ function createRemoveButton(options = {}) {
 function createChapterList(chapterList, lastReadId, isUpToDate) {
   // Input group
   const inputGroup = document.createElement('div');
-  inputGroup.className = 'input-group input-group-sm my-2';
+  inputGroup.className = 'input-group my-2';
 
   // Add chapters
   const chapterSelect = document.createElement('select');
-  chapterSelect.className = 'custom-select form-control form-control-sm p-0 pr-4';
+  chapterSelect.className = 'custom-select custom-select-sm p-0 pr-4';
   inputGroup.appendChild(chapterSelect);
-  if (isUpToDate) chapterSelect.classList.add('bg-success');
-  else chapterSelect.classList.add('bg-danger', 'text-white');
+  if (isUpToDate) chapterSelect.classList.add('bg-green');
+  else chapterSelect.classList.add('bg-red');
 
   chapterList.slice().reverse().forEach((chapter) => {
     const option = document.createElement('option');
@@ -122,13 +122,13 @@ function createChapterList(chapterList, lastReadId, isUpToDate) {
   });
 
   // Input group button
-  const inputGroupBtn = document.createElement('span');
-  inputGroupBtn.className = 'input-group-btn';
+  const inputGroupBtn = document.createElement('div');
+  inputGroupBtn.className = 'input-group-append';
   inputGroup.appendChild(inputGroupBtn);
 
   // Add Read button
   const goBtn = document.createElement('button');
-  goBtn.className = 'btn btn-outline-info';
+  goBtn.className = 'btn btn-sm btn-outline-info';
   goBtn.innerHTML = 'Read';
   goBtn.type = 'button';
   goBtn.onclick = readButtonListener;
