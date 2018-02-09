@@ -78,10 +78,10 @@ async function updateStorage(bookmark, changes) {
  * Applies all necessary DB migrations.
  * @param {string} previousVersion Required. The previous version string to migrate from.
  * @param {object~array} bookmarkList Required. An array with the bookmark list to update.
- * @param {boolean} updateIndexedDb A boolean indicating whether or not to update the indexedDB. Defaults to true.
+ * @param {boolean} updateDb A boolean indicating whether or not to update the indexedDB and Sync. Defaults to true.
  * @returns {object~array} The updated bookmark list.
  */
-async function migrateDB(previousVersion, bookmarkList, updateIndexedDb = true) {
+async function migrateDB(previousVersion, bookmarkList, updateDb = true) {
   try {
     const migrations = SourceMigrations.filter((elem) => {
       return compareVersions(previousVersion, elem.version);
@@ -98,18 +98,54 @@ async function migrateDB(previousVersion, bookmarkList, updateIndexedDb = true) 
     const newList = [];
     for (let i = 0; i < bookmarkList.length; i += 1) {
       const bookmark = bookmarkList[i];
-      newList.push(applyChanges(bookmark, changes));
+      const key = `${bookmark.source}/${bookmark.reference}`;
+
+      const storage = {};
+      storage[key] = applyChanges(bookmark, changes);
+
+      newList.push(storage[key]);
 
       // Update indexedDB storage
-      if (updateIndexedDb) {
+      if (updateDb) {
+        promises.push(browser.storage.sync.set(storage));
         promises.push(updateStorage(bookmark, changes));
       }
     }
 
     await Promise.all(promises);
-    return newList;
+
+    return Promise.resolve(newList);
   } catch (err) {
-    throw err;
+    return Promise.reject(err);
+  }
+}
+
+/**
+ * Redesigns the bookmark list. Converts a single list with all bookmarks into multiple entries
+ * indexed by the key: source/reference.
+ * @param {object~array} bookmarkList The old bookmark list to redesign.
+ * @return {object~Promise} A promise which resolves if the redesign was successfull.
+ */
+async function redesignBookmarkStorage(bookmarkList) {
+  try {
+    const promises = [];
+
+    bookmarkList.forEach((bookmark) => {
+      const key = `${bookmark.source}/${bookmark.reference}`;
+
+      const newBookmark = Object.assign({}, bookmark, { type: 'bookmark' });
+
+      const storage = {};
+      storage[key] = newBookmark;
+      promises.push(browser.storage.sync.set(storage));
+    });
+
+    await Promise.all(promises);
+    await browser.storage.sync.remove('bookmark_list');
+
+    return Promise.resolve();
+  } catch (err) {
+    return Promise.reject(err);
   }
 }
 
@@ -120,7 +156,7 @@ async function migrateDB(previousVersion, bookmarkList, updateIndexedDb = true) 
  */
 export async function updateAddon(previousVersion) {
   try {
-    const storage = await browser.storage.sync.get();
+    let storage = await browser.storage.sync.get();
 
     // Handle transition to v0.3.1 - inclusion of manga list view mode
     if (compareVersions(previousVersion, '0.3.1') && typeof storage.view_mode === 'string') {
@@ -129,13 +165,18 @@ export async function updateAddon(previousVersion) {
       });
     }
 
-    // Applies all DB migrations needed
-    if (storage.bookmark_list) {
-      const newBookmarkList = await migrateDB(previousVersion, storage.bookmark_list);
-      storage.bookmark_list = newBookmarkList;
-
-      await browser.storage.sync.set({ bookmark_list: storage.bookmark_list });
+    // Handle transition to v0.6.0 - storage redesign (issue#9)
+    if (compareVersions(previousVersion, '0.6.0') && storage.bookmark_list) {
+      await redesignBookmarkStorage(storage.bookmark_list);
+      storage = await browser.storage.sync.get();
     }
+
+    const bookmarkList = Object.keys(storage)
+      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+      .map(key => storage[key]);
+
+    // Applies all DB migrations needed
+    await migrateDB(previousVersion, bookmarkList);
 
     return Promise.resolve();
   } catch (err) {
@@ -150,10 +191,16 @@ export async function updateAddon(previousVersion) {
  */
 export async function processImportFile(importObj) {
   try {
-    // Before version 0.6.0 the export file version was set to 1.0
+    // Before version 0.5.2 the export file version was set to 1.0
     const version = (importObj.version === '1.0') ? '0.5.1' : importObj.version;
 
-    const newBookmarkList = await migrateDB(version, importObj.bookmark_list, false);
+    // Handle transition to v0.6.0 - storage redesign (issue#9)
+    const bookmarkList = importObj.bookmark_list;
+    for (let i = 0; i < bookmarkList.length; i += 1) {
+      if (!bookmarkList[i].type) bookmarkList[i].type = 'bookmark';
+    }
+
+    const newBookmarkList = await migrateDB(version, bookmarkList, false);
 
     const returnValue = Object.assign({}, importObj);
     returnValue.bookmark_list = newBookmarkList;

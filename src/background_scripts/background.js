@@ -44,7 +44,6 @@ async function bookmarkManga(url, bookmark, options = {}) {
 
       bookmarkEntry = {
         type: 'bookmark', // Required. Included on version 0.6.0
-        name: manga.name, // Included on version 0.6.0
         source: manga.source,
         reference: manga.reference,
         url: manga.url,
@@ -170,13 +169,18 @@ browser.runtime.onInstalled.addListener(init);
  */
 async function syncHandler(changes, areaName) {
   // Handle only changes to bookmark_list in the sync storage.
-  if (areaName !== 'sync' || !changes.bookmark_list || !changes.bookmark_list.newValue) return;
+  if (areaName !== 'sync') return;
+
+  const bookmarkList = Object.keys(changes)
+    .filter(key => (changes[key].newValue && changes[key].newValue.type === 'bookmark'))
+    .map(key => changes[key].newValue);
+  if (!bookmarkList) return;
 
   try {
     const keys = await store.keys();
 
     // Add manga information for each new entry in the bookmarklist
-    changes.bookmark_list.newValue.forEach(async (bookmark) => {
+    bookmarkList.forEach(async (bookmark) => {
       const storeKey = `${bookmark.source}/${bookmark.reference}`;
 
       if (keys.indexOf(storeKey) === -1) {
