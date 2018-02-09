@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - When Foxy was updated or installed with no previous bookmarks, an undefined variable was being accessed.
 - Sometimes, when receiving a sync notification, it came with no newValue to modify, leading to an undefined variable being accessed.
+- Foxy was unable to sync its data if a large number of manga were bookmarked.
 
 ## [0.5.2] - 2018-01-29
 ### Changed

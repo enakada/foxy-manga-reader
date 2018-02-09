@@ -8,13 +8,16 @@ export default async function exportBookmarks() {
   a.style = 'display: none';
 
   try {
-    const storage = await browser.storage.sync.get('bookmark_list');
-    if (!storage.bookmark_list) storage.bookmark_list = [];
+    const storage = await browser.storage.sync.get();
+
+    const bookmarkList = Object.keys(storage)
+      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+      .map(key => storage[key]);
 
     const backup = {
       version: browser.runtime.getManifest().version,
+      bookmark_list: bookmarkList,
     };
-    backup.bookmark_list = storage.bookmark_list;
 
     // Create timestamp
     const date = new Date();
