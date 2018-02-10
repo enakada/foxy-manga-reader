@@ -3,17 +3,20 @@ import HttpFetch from '../../util/http';
 import * as Mangafox from './mangafox';
 import * as MangaEden from './mangaeden';
 import * as MangaHere from './mangahere';
+import * as KissManga from './kissmanga';
 
 const providersMap = new Map([
   ['fanfox', Mangafox],
   ['mangaeden', MangaEden],
   ['mangahere', MangaHere],
+  ['kissmanga', KissManga],
 ]);
 
 const regexList = [
   Mangafox.urlRegex,
   MangaEden.urlRegex,
   MangaHere.urlRegex,
+  KissManga.urlRegex,
 ];
 
 /**

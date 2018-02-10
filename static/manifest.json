@@ -25,6 +25,7 @@
         "*://*.fanfox.net/*",
         "*://*.mangaeden.com/*",
         "*://*.mangahere.cc/*",
+        "*://*.kissmanga.com/*",
         "storage",
         "cookies",
         "alarms",
@@ -73,6 +74,11 @@
         {
           "matches": ["*://*.mangahere.cc/*"],
           "js": ["content_scripts/mangahere.js"],
+          "css": ["css/content_ui.css"]
+        },
+        {
+          "matches": ["*://*.kissmanga.com/*"],
+          "js": ["content_scripts/kissmanga.js"],
           "css": ["css/content_ui.css"]
         }
     ]

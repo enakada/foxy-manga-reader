@@ -14,11 +14,11 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 - [Mangafox](http://mangafox.la)
 - [MangaEden](http://www.mangaeden.com)
 - [MangaHere.cc](http://www.mangahere.cc)
+- [Kissmanga](http://kissmanga.com)
 
 ## Coming Soon
 
 - Support for other sources:
-  - Kiss Manga
   - MangaReader
   - MangaPark
 
