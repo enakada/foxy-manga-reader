@@ -16,6 +16,7 @@ const scriptList = [
   './src/content_scripts/mangafox.js',
   './src/content_scripts/mangaeden.js',
   './src/content_scripts/mangahere.js',
+  './src/content_scripts/kissmanga.js',
 ];
 
 
