@@ -25,6 +25,7 @@
         "*://*.fanfox.net/*",
         "*://*.mangaeden.com/*",
         "*://*.mangahere.cc/*",
+        "*://*.kissmanga.com/*",
         "storage",
         "cookies",
         "alarms",
