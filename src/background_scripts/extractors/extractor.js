@@ -32,8 +32,7 @@ export function parseUrl(url) {
   const websiteInfo = regex[0].exec(url);
 
   return {
-    website: websiteInfo[1],
-    reference: websiteInfo[2],
+    key: `${websiteInfo[1]}/${websiteInfo[2]}`,
     extractor: providersMap.get(websiteInfo[1]),
   };
 }

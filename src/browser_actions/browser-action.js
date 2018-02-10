@@ -17,6 +17,22 @@ document.addEventListener('click', Sidebar.expandButtonListener);
 // List view controller
 // ////////////////////////////////////////////////////////////////
 
+function getBookmarkList(storage) {
+  const bookmarkList = Object.keys(storage)
+    .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+    .map(key => storage[key]);
+
+  bookmarkList.sort((a, b) => {
+    const refA = a.reference.toUpperCase();
+    const refB = b.reference.toUpperCase();
+    if (refA < refB) return -1;
+    if (refA > refB) return 1;
+    return 0;
+  });
+
+  return bookmarkList;
+}
+
 async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true) {
   let readCount = 0;
 
@@ -57,11 +73,10 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 
 async function listViewModeListener(e) {
   try {
-    const storage = await browser.storage.sync.get(['view_mode', 'bookmark_list']);
+    const storage = await browser.storage.sync.get();
 
     // Initializes the view_mode and bookmark_list
     if (!storage.view_mode) storage.view_mode = {};
-    if (!storage.bookmark_list) storage.bookmark_list = [];
 
     storage.view_mode.list = e.target.id;
     await browser.storage.sync.set({ view_mode: storage.view_mode });
@@ -69,8 +84,11 @@ async function listViewModeListener(e) {
     // Clear previous list
     mangaListDom.innerHTML = '';
 
+    // Get the bookmarkList
+    const bookmarkList = getBookmarkList(storage);
+
     // Append new list
-    await setListViewMode(storage.view_mode.list, storage.bookmark_list, false);
+    await setListViewMode(storage.view_mode.list, bookmarkList, false);
 
     const container = document.getElementById('list-view-mode-container');
     const previousActive = container.getElementsByClassName('active')[0];
@@ -212,9 +230,12 @@ window.onload = async () => {
       await browser.storage.sync.set({ badge_count: storage.badge_count });
     }
 
+    // Get the bookmarkList
+    const bookmarkList = getBookmarkList(storage);
+
     // Append manga list
-    if (storage.bookmark_list) {
-      await setListViewMode(storage.view_mode.list || 'list-rich', storage.bookmark_list);
+    if (bookmarkList) {
+      await setListViewMode(storage.view_mode.list || 'list-rich', bookmarkList);
     }
 
     // Add listener to list view radio button

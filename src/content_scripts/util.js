@@ -5,15 +5,10 @@
  */
 export async function isBookmarked(source, reference) {
   try {
-    const storage = await browser.storage.sync.get('bookmark_list');
-    if (!storage.bookmark_list) return false;
+    const key = `${source}/${reference}`;
 
-    // Remove from storage.sync
-    const index = storage.bookmark_list.findIndex((elem) => {
-      return elem.source === source && elem.reference === reference;
-    });
-
-    return (index !== -1);
+    const storage = await browser.storage.sync.get(key);
+    return (storage[key] !== undefined);
   } catch (err) {
     console.error(`Could not check if manga is bookmarked: ${err}`); // eslint-disable-line no-console
     return false;

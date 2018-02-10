@@ -73,9 +73,13 @@ export async function parseFile(file, tbody) {
         importFile = JSON.parse(load.target.result);
         importFile = await processImportFile(importFile);
 
-        const storage = await browser.storage.sync.get('bookmark_list');
+        const storage = await browser.storage.sync.get();
 
-        await createTable(tbody, storage.bookmark_list || []);
+        const bookmarkList = Object.keys(storage)
+          .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+          .map(key => storage[key]);
+
+        await createTable(tbody, bookmarkList);
 
         resolve(true);
       } catch (err) {
