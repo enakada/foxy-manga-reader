@@ -74,18 +74,25 @@ async function bookmarkManga(url, bookmark, options = {}) {
  * - Get extractor from URL
  * - Remove manga data from storage.sync
  * - Remove manga data from indexeddb
- * @param {string} url The url of the manga.
+ * @param {string} url Required. The url of the manga.
+ * @param {string} key Optional. The key of the manga to unbookmark.
  * @returns {Promise} A promise which resolves to true if manga was unbookmarked.
  */
-async function unbookmarkManga(url) {
+async function unbookmarkManga(url, key) {
   try {
-    const info = Extractor.parseUrl(url);
-    if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
+    let mangaKey;
+    if (key) {
+      mangaKey = key;
+    } else {
+      const info = Extractor.parseUrl(url);
+      if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
-    await browser.storage.sync.remove(info.key);
+      mangaKey = info.key;
+    }
 
-    // Remove from indexdb
-    await store.removeItem(info.key);
+    // Remove from indexdb and sync
+    await browser.storage.sync.remove(mangaKey);
+    await store.removeItem(mangaKey);
 
     return Promise.resolve(true);
   } catch (err) {
@@ -458,7 +465,7 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
     case 'bookmark':
       return (sender.tab) ? bookmarkActionListener(sender.tab) : bookmarkManga(message.manga_url);
     case 'unbookmark':
-      return (sender.tab) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url);
+      return (sender.tab) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url, message.manga_key);
     case 'update-chapter':
       return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(TypeError('message has no property tab.url'));
     case 'import-single':

@@ -35,6 +35,7 @@ async function unbookmarkButtonListener(e) {
     const result = await browser.runtime.sendMessage({
       type: 'unbookmark',
       manga_url: e.target.dataset.mangaUrl,
+      manga_key: e.target.dataset.mangaKey,
     });
 
     if (result) {
@@ -73,6 +74,7 @@ function createRemoveButton(options = {}) {
     title: 'Remove Manga',
     target: '',
     url: '',
+    key: '',
   };
 
   const opts = Object.assign(defaults, options);
@@ -88,6 +90,7 @@ function createRemoveButton(options = {}) {
 
   removeBtn.dataset.target = opts.target;
   removeBtn.dataset.mangaUrl = opts.url;
+  removeBtn.dataset.mangaKey = opts.key;
 
   return removeBtn;
 }
@@ -216,6 +219,7 @@ export function createListRichCard(bookmark, manga) {
     class: ['col-1', 'p-0'],
     target: mangaDiv.id,
     url: manga.url,
+    key: `${bookmark.source}/${bookmark.reference}`,
   });
   removeBtn.style = 'font-size: 1.3em;';
   mangaDiv.appendChild(removeBtn);
@@ -270,6 +274,7 @@ export function createListCard(bookmark, manga) {
     class: ['col-1', 'p-0'],
     target: card.id,
     url: manga.url,
+    key: `${bookmark.source}/${bookmark.reference}`,
   });
   headerRow.appendChild(removeBtn);
 
