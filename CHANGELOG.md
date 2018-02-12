@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Notification's error icon. Old icon replaced by the Open Iconic equivalent.
 - Update Bootstrap to version 4.0.0.
 - Prevent Foxy from checking manga URL when unbookmarking entries from the pop-up.
+- Moved Export/Import features from add-on options to Foxy's dashboard.
 
 ### Fixed
 
