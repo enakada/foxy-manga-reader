@@ -109,6 +109,7 @@ function createChapterList(chapterList, lastReadId, isUpToDate) {
   // Add chapters
   const chapterSelect = document.createElement('select');
   chapterSelect.className = 'custom-select custom-select-sm p-0 pr-4';
+  chapterSelect.style = '-moz-appearance: none';
   inputGroup.appendChild(chapterSelect);
   if (isUpToDate) chapterSelect.classList.add('bg-green');
   else chapterSelect.classList.add('bg-red');

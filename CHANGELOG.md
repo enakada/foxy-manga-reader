@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Cloudscrapper, a piece of code that solves challenges from Cloudflare in order to access pages protected by their service.
 - Support for kissmanga.com.
+- Dashboard page. Users can now manage their bookmarks easily using bulk actions.
 
 ### Changed
 

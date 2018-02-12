@@ -26,6 +26,11 @@ export function expand(iconSpan) {
 
   viewModeContainer.parentElement.firstElementChild.style = 'display: inherit';
 
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  if (!dashboardBtn.lastChild.textContent) {
+    dashboardBtn.insertAdjacentText('beforeend', ` ${dashboardBtn.firstElementChild.title}`);
+  }
+
   const settingsBtn = document.getElementById('options-btn');
   if (!settingsBtn.lastChild.textContent) {
     settingsBtn.insertAdjacentText('beforeend', ` ${settingsBtn.firstElementChild.title}`);
@@ -56,6 +61,9 @@ export function collapse(iconSpan) {
   viewModeContainer.classList.add('d-flex', 'flex-column');
 
   viewModeContainer.parentElement.firstElementChild.style = 'display: none';
+
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  dashboardBtn.lastChild.textContent = '';
 
   const settingsBtn = document.getElementById('options-btn');
   settingsBtn.lastChild.textContent = '';

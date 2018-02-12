@@ -59,7 +59,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
       const card = fn(bookmark, manga);
       mangaListDom.appendChild(card);
 
-      if (card.classList.contains('flex-last')) readCount += 1;
+      if (card.classList.contains('order-last')) readCount += 1;
     });
 
     await Promise.all(promises);
@@ -116,27 +116,28 @@ function updateCurrentChapter(bookmark) {
   const meta = mangaDom.getElementsByClassName('last-read-span')[0];
   meta.textContent = `Last read: ${moment(bookmark.last_read.date).format('LL')}`;
 
-  // Update List header
-  const chapterTracker = mangaDom.getElementsByClassName('list-chapter-tracker')[0];
-  if (chapterTracker) {
-    chapterTracker.innerText = chapterTracker.innerText.replace(/\d+\/(\d+)/, `${bookmark.last_read.chapter.index + 1}/$1`);
-  }
-
   // Update <select>
   const chapterSel = mangaDom.getElementsByTagName('select')[0];
   chapterSel.selectedIndex = (chapterSel.options.length - 1) - bookmark.last_read.chapter.index; // List is reversed
 
   const uptodate = bookmark.last_read.chapter.index === chapterSel.options.length - 1;
   if (uptodate) {
-    chapterSel.classList.replace('bg-danger', 'bg-success');
-    mangaDom.classList.add('flex-last');
+    chapterSel.classList.replace('bg-red', 'bg-green');
+    mangaDom.classList.add('order-last');
     Sidebar.updateChart(-1, 1);
+  }
+
+  // Update List header
+  const chapterTracker = mangaDom.getElementsByClassName('list-chapter-tracker')[0];
+  if (chapterTracker) {
+    chapterTracker.innerText = chapterTracker.innerText.replace(/\d+\/(\d+)/, `${bookmark.last_read.chapter.index + 1}/$1`);
+    if (uptodate) chapterTracker.classList.replace('text-danger', 'text-success');
   }
 }
 
 function updateChapterList(bookmark, chapterList) {
   const mangaDom = document.getElementById(`${bookmark.source}-${bookmark.reference}`);
-  const wasUptodate = mangaDom.classList.contains('flex-last');
+  const wasUptodate = mangaDom.classList.contains('order-last');
 
   // Update List header
   const chapterTracker = mangaDom.getElementsByClassName('list-chapter-tracker')[0];
@@ -147,7 +148,7 @@ function updateChapterList(bookmark, chapterList) {
   const chapterSel = mangaDom.getElementsByTagName('select')[0];
 
   if (wasUptodate) {
-    mangaDom.classList.remove('flex-last');
+    mangaDom.classList.remove('order-last');
     chapterSel.classList.replace('bg-success', 'bg-danger');
     Sidebar.updateChart(1, -1);
   }

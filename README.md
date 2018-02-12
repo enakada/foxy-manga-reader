@@ -8,6 +8,7 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 - Backup and Restore your bookmarks;
 - Choose how you want to read your manga (infinite scrolling, dual page or single page) and improve your experience;
 - Access your bookmarks across different devices.
+- Easily manage your bookmarks using the dashboard page.
 
 ## Supported Websites
 

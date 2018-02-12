@@ -8,7 +8,6 @@
 
  body {
   width: $body-width;
-  max-height: $body-max-height;
   background: url("../images/dust_scratches.png");
   font-family: $font-family-base, serif;
   color: $body-color;
@@ -55,6 +54,14 @@ header {
   width: 32px;
   background: url('../icons/fmr-color-64.png') no-repeat;
   background-size: contain;
+}
+
+/*
+ * Content Layout
+*/
+
+#content {
+  height: $content-height;
 }
 
 /*
