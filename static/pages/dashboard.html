@@ -85,12 +85,21 @@
       <!-- Alerts space -->
       <div id="alerts"></div>
 
-      <!-- Additional table controls -->
-      <div class="btn-toolbar mb-2" role="toolbar" aria-label="Manga table controls">
-        <div class="input-group input-group-sm mr-2">
-          <input id="selected-count" type="number" class="form-control" value="0" aria-label="Number of selected entries" style="width: 50px; -moz-appearance:textfield;" disabled>
+      <!-- Additional options-->
+      <div class="btn-toolbar mb-2 ml-3" role="toolbar" aria-label="Additional options">
+        <div class="btn-group btn-group-sm mr-2" role="group" aria-label="Export and Import">
+          <button type="button" id="export-btn" class="btn btn-outline-info">Export</button>
+          <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#import-modal">Import</button>
+        </div>
+      </div>
+
+      <!-- Additional table controls (Moved during datatables initialization) -->
+      <div id="table-controls" class="btn-toolbar" role="toolbar" aria-label="Manga table controls">
+        <div class="input-group input-group-sm mr-1">
+          <div class="input-group-prepend">
+            <div class="input-group-text" id="selected-count">0 selected entries</div>
+          </div>
           <div class="input-group-append">
-            <div class="input-group-text" id="btnGroupAddon">selected entries</div>
             <button id="bulk-dropdown" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>Bulk Actions</button>
             <div class="dropdown-menu">
               <a id="bulk-remove-btn" class="dropdown-item" href="#">Remove selected manga</a>
@@ -98,9 +107,18 @@
           </div>
         </div>
 
-        <div class="btn-group btn-group-sm mr-2" role="group" aria-label="Export and Import">
-          <button type="button" id="export-btn" class="btn btn-outline-info">Export</button>
-          <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#import-modal">Import</button>
+        <div class="input-group input-group-sm">
+          <div class="input-group-prepend">
+            <label class="input-group-text" for="table-length-select">Show</label>
+          </div>
+          <select class="custom-select custom-select-sm" id="table-length-select" style="-moz-appearance: none;">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+          <div class="input-group-append">
+            <label class="input-group-text" for="table-length-select">entries</label>
+          </div>
         </div>
       </div>
 

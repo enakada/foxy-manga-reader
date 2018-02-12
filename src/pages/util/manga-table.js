@@ -4,6 +4,7 @@ import Alert from '../../util/alerts';
 
 let mangaCheckboxList = [];
 
+let selectedCheckbox = 0;
 
 // Table actions
 // ////////////////////////////////////////////////////////////////
@@ -14,14 +15,18 @@ let mangaCheckboxList = [];
  * @param {integer} increment Optional. The number of steps to move. Defaults to 1.
  */
 function updateSelectedCount(add, increment = 1) {
-  const input = document.getElementById('selected-count');
-  if (add) input.stepUp(increment);
-  else input.stepDown(increment);
+  selectedCheckbox = (add) ? selectedCheckbox + increment : selectedCheckbox - increment;
+
+  const div = document.getElementById('selected-count');
+  div.innerText = `${selectedCheckbox} selected entries`;
 
   const bulkAction = document.getElementById('bulk-dropdown');
-  bulkAction.disabled = (input.value === '0');
+  bulkAction.disabled = (selectedCheckbox === 0);
 }
 
+/**
+ * Bulk removes all selected manga from the bookmark list.
+ */
 async function bulkRemove() {
   try {
     const promises = [];
@@ -146,13 +151,13 @@ export function checkboxToggleListener(event) {
     mangaCheckboxList[i].checked = event.target.checked;
   }
 
-  const input = document.getElementById('selected-count');
-  input.value = (event.target.checked) ? mangaCheckboxList.length : 0;
+  selectedCheckbox = (event.target.checked) ? mangaCheckboxList.length : 0;
 
-  if (event.target.checked) {
-    const bulkAction = document.getElementById('bulk-dropdown');
-    bulkAction.disabled = (input.value === '0');
-  }
+  const div = document.getElementById('selected-count');
+  div.innerText = `${selectedCheckbox} selected entries`;
+
+  const bulkAction = document.getElementById('bulk-dropdown');
+  bulkAction.disabled = (selectedCheckbox === 0);
 }
 
 export async function bulkRemoveBtnListener() {
