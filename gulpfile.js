@@ -13,6 +13,7 @@ const scriptList = [
   './src/background_scripts/background.js',
   './src/browser_actions/browser-action.js',
   './src/options_ui/options.js',
+  './src/pages/dashboard.js',
   './src/content_scripts/mangafox.js',
   './src/content_scripts/mangaeden.js',
   './src/content_scripts/mangahere.js',

@@ -451,7 +451,7 @@ async function importManga(bookmark) {
       await browser.storage.sync.set(storage);
     }
 
-    return Promise.resolve(true);
+    return Promise.resolve(bookmark);
   } catch (err) {
     return Promise.reject(err);
   }
@@ -465,7 +465,7 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
     case 'bookmark':
       return (sender.tab) ? bookmarkActionListener(sender.tab) : bookmarkManga(message.manga_url);
     case 'unbookmark':
-      return (sender.tab) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url, message.manga_key);
+      return (sender.tab && !sender.tab.url.includes('moz-extension')) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url, message.manga_key);
     case 'update-chapter':
       return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(TypeError('message has no property tab.url'));
     case 'import-single':

@@ -1,0 +1,16 @@
+// Import Bootstrap
+@import 'variables';
+@import '../../node_modules/open-iconic/font/css/open-iconic-bootstrap.scss';
+@import '../../node_modules/bootstrap/scss/bootstrap';
+
+body {
+  background: url("../images/dust_scratches.png");
+  font-family: $font-family-base, serif;
+  color: $body-color;
+}
+
+h1, h2, h3,
+h4, h5, h6 {
+  font-family: $font-family-headings, sans-serif;
+  text-transform: uppercase;
+}
