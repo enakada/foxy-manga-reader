@@ -137,6 +137,10 @@ export function init(userConfig = {}) {
 
   const configs = Object.assign(defaults, userConfig);
 
+  // Init dashboard button
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  dashboardBtn.onclick = () => { browser.tabs.create({ url: '../pages/dashboard.html' }); };
+
   // Init options button
   const optBtn = document.getElementById('options-btn');
   optBtn.onclick = () => { browser.runtime.openOptionsPage(); };
