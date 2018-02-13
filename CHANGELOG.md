@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2018-02-12
+### Added
+
+- Cloudscrapper, a piece of code that solves challenges from Cloudflare in order to access pages protected by their service.
+- Support for kissmanga.com.
+- Dashboard page. Users can now manage their bookmarks easily using bulk actions.
+
+### Changed
+
+- Notification's error icon. Old icon replaced by the Open Iconic equivalent.
+- Update Bootstrap to version 4.0.0.
+- Prevent Foxy from checking manga URL when unbookmarking entries from the pop-up.
+- Moved Export/Import features from add-on options to Foxy's dashboard.
+
+### Fixed
+
+- When Foxy was updated or installed with no previous bookmarks, an undefined variable was being accessed.
+- Sometimes, when receiving a sync notification, it came with no newValue to modify, leading to an undefined variable being accessed.
+- Foxy was unable to sync its data if a large number of manga were bookmarked.
+
 ## [0.5.2] - 2018-01-29
 ### Changed
 
@@ -113,3 +133,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.5.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.4.0-beta...v0.5.0
 [0.5.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.0...v0.5.1
 [0.5.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.1...v0.5.2
+[0.6.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.2...v0.6.0

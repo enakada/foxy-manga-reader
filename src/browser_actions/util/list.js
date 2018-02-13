@@ -35,12 +35,13 @@ async function unbookmarkButtonListener(e) {
     const result = await browser.runtime.sendMessage({
       type: 'unbookmark',
       manga_url: e.target.dataset.mangaUrl,
+      manga_key: e.target.dataset.mangaKey,
     });
 
     if (result) {
       mangaListDom.removeChild(card);
 
-      if (card.classList.contains('flex-last')) Sidebar.updateChart(0, -1);
+      if (card.classList.contains('order-last')) Sidebar.updateChart(0, -1);
       else Sidebar.updateChart(-1, 0);
 
       // Notify user
@@ -73,6 +74,7 @@ function createRemoveButton(options = {}) {
     title: 'Remove Manga',
     target: '',
     url: '',
+    key: '',
   };
 
   const opts = Object.assign(defaults, options);
@@ -88,6 +90,7 @@ function createRemoveButton(options = {}) {
 
   removeBtn.dataset.target = opts.target;
   removeBtn.dataset.mangaUrl = opts.url;
+  removeBtn.dataset.mangaKey = opts.key;
 
   return removeBtn;
 }
@@ -101,14 +104,15 @@ function createRemoveButton(options = {}) {
 function createChapterList(chapterList, lastReadId, isUpToDate) {
   // Input group
   const inputGroup = document.createElement('div');
-  inputGroup.className = 'input-group input-group-sm my-2';
+  inputGroup.className = 'input-group my-2';
 
   // Add chapters
   const chapterSelect = document.createElement('select');
-  chapterSelect.className = 'custom-select form-control form-control-sm p-0 pr-4';
+  chapterSelect.className = 'custom-select custom-select-sm p-0 pr-4';
+  chapterSelect.style = '-moz-appearance: none';
   inputGroup.appendChild(chapterSelect);
-  if (isUpToDate) chapterSelect.classList.add('bg-success');
-  else chapterSelect.classList.add('bg-danger', 'text-white');
+  if (isUpToDate) chapterSelect.classList.add('bg-green');
+  else chapterSelect.classList.add('bg-red');
 
   chapterList.slice().reverse().forEach((chapter) => {
     const option = document.createElement('option');
@@ -122,13 +126,13 @@ function createChapterList(chapterList, lastReadId, isUpToDate) {
   });
 
   // Input group button
-  const inputGroupBtn = document.createElement('span');
-  inputGroupBtn.className = 'input-group-btn';
+  const inputGroupBtn = document.createElement('div');
+  inputGroupBtn.className = 'input-group-append';
   inputGroup.appendChild(inputGroupBtn);
 
   // Add Read button
   const goBtn = document.createElement('button');
-  goBtn.className = 'btn btn-outline-info';
+  goBtn.className = 'btn btn-sm btn-outline-info';
   goBtn.innerHTML = 'Read';
   goBtn.type = 'button';
   goBtn.onclick = readButtonListener;
@@ -210,12 +214,13 @@ export function createListRichCard(bookmark, manga) {
   const mangaDiv = createMangaBlock(bookmark, manga, upToDate);
   mangaDiv.id = `${bookmark.source}-${bookmark.reference}`;
 
-  if (upToDate) mangaDiv.classList.add('flex-last');
+  if (upToDate) mangaDiv.classList.add('order-last');
 
   const removeBtn = createRemoveButton({
     class: ['col-1', 'p-0'],
     target: mangaDiv.id,
     url: manga.url,
+    key: `${bookmark.source}/${bookmark.reference}`,
   });
   removeBtn.style = 'font-size: 1.3em;';
   mangaDiv.appendChild(removeBtn);
@@ -235,7 +240,7 @@ export function createListCard(bookmark, manga) {
   const card = document.createElement('div');
   card.className = 'card mx-1';
   card.id = `${bookmark.source}-${bookmark.reference}`;
-  if (upToDate) card.classList.add('flex-last');
+  if (upToDate) card.classList.add('order-last');
 
   const cardHeader = document.createElement('div');
   cardHeader.className = 'card-header p-1';
@@ -246,7 +251,7 @@ export function createListCard(bookmark, manga) {
   cardHeader.appendChild(headerRow);
 
   const titleCol = document.createElement('h6');
-  titleCol.className = 'col-8 mb-0';
+  titleCol.className = 'col-7 mb-0';
   headerRow.appendChild(titleCol);
 
   const headerLink = document.createElement('a');
@@ -260,7 +265,7 @@ export function createListCard(bookmark, manga) {
   titleCol.appendChild(headerLink);
 
   const chapterCol = document.createElement('div');
-  chapterCol.className = 'col-3 text-center list-chapter-tracker';
+  chapterCol.className = 'col-4 text-center list-chapter-tracker';
   chapterCol.innerText = `${bookmark.last_read.chapter.index + 1}/${manga.chapter_list.length}`;
   headerRow.appendChild(chapterCol);
   if (upToDate) chapterCol.classList.add('text-success');
@@ -270,6 +275,7 @@ export function createListCard(bookmark, manga) {
     class: ['col-1', 'p-0'],
     target: card.id,
     url: manga.url,
+    key: `${bookmark.source}/${bookmark.reference}`,
   });
   headerRow.appendChild(removeBtn);
 

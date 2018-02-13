@@ -5,15 +5,10 @@
  */
 export async function isBookmarked(source, reference) {
   try {
-    const storage = await browser.storage.sync.get('bookmark_list');
-    if (!storage.bookmark_list) return false;
+    const key = `${source}/${reference}`;
 
-    // Remove from storage.sync
-    const index = storage.bookmark_list.findIndex((elem) => {
-      return elem.source === source && elem.reference === reference;
-    });
-
-    return (index !== -1);
+    const storage = await browser.storage.sync.get(key);
+    return (storage[key] !== undefined);
   } catch (err) {
     console.error(`Could not check if manga is bookmarked: ${err}`); // eslint-disable-line no-console
     return false;
@@ -212,9 +207,13 @@ export async function appendMenu(options) {
       prevPageBtn.innerHTML = '<span class="oi" data-glyph="chevron-left" aria-hidden="true"></span>';
       prevPageBtn.className = (opts.url.previousPage) ? 'fmr-btn' : 'fmr-btn disabled';
       if (opts.url.previousPage) {
-        prevPageBtn.onclick = () => {
-          window.location.href = opts.url.previousPage;
-        };
+        if (typeof opts.url.previousPage === 'function') {
+          prevPageBtn.onclick = opts.url.previousPage;
+        } else {
+          prevPageBtn.onclick = () => {
+            window.location.href = opts.url.previousPage;
+          };
+        }
       }
     }
 
@@ -236,9 +235,13 @@ export async function appendMenu(options) {
       nextPageBtn.innerHTML = '<span class="oi" data-glyph="chevron-right"></span>';
       nextPageBtn.className = (opts.url.nextPage) ? 'fmr-btn' : 'fmr-btn disabled';
       if (opts.url.nextPage) {
-        nextPageBtn.onclick = () => {
-          window.location.href = opts.url.nextPage;
-        };
+        if (typeof opts.url.nextPage === 'function') {
+          nextPageBtn.onclick = opts.url.nextPage;
+        } else {
+          nextPageBtn.onclick = () => {
+            window.location.href = opts.url.nextPage;
+          };
+        }
       }
     }
 

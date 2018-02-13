@@ -16,6 +16,7 @@ export const ErrorCode = {
 
   // DOM Related errors
   DOM_MISSING: [200, 'DOM Missing From Page'],
+  IMPORT_NO_DATA: [201, 'No data to import'],
 
   // Network related errors
   RESPONSE_NOT_HTML: [300, 'HTTP Response was not HTML'],

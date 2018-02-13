@@ -13,9 +13,11 @@ const scriptList = [
   './src/background_scripts/background.js',
   './src/browser_actions/browser-action.js',
   './src/options_ui/options.js',
+  './src/pages/dashboard.js',
   './src/content_scripts/mangafox.js',
   './src/content_scripts/mangaeden.js',
   './src/content_scripts/mangahere.js',
+  './src/content_scripts/kissmanga.js',
 ];
 
 
@@ -42,7 +44,7 @@ gulp.task('copyStaticContent', () => {
   gulp.src('./node_modules/open-iconic/font/fonts/**')
     .pipe(gulp.dest(`${dist}/fonts`));
 
-  gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
+  gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js*')
     .pipe(gulp.dest(`${dist}/js`));
 });
 

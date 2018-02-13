@@ -23,7 +23,7 @@ export function inform(options) {
 export function error(options) {
   const defaults = {
     type: 'basic',
-    iconUrl: browser.extension.getURL('icons/error-icon.png'),
+    iconUrl: browser.extension.getURL('icons/error-icon-64.png'),
   };
 
   // Title and Message properties are required

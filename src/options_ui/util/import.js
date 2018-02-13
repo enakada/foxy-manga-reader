@@ -21,18 +21,23 @@ function createTable(tbody, bookmarkList) {
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'custom-control-input';
+    checkbox.id = `${element.source}-${element.reference}`;
     checkbox.name = 'manga-import';
     checkbox.dataset.source = element.source;
     checkbox.dataset.reference = element.reference;
-    if (!exists) checkbox.setAttribute('checked', 'true');
+    if (!exists) checkbox.setAttribute('checked', true);
 
     const checkboxLabel = document.createElement('label');
-    checkboxLabel.className = 'custom-control custom-checkbox';
-    checkboxLabel.appendChild(checkbox);
-    checkboxLabel.innerHTML += '<span class="custom-control-indicator"></span>';
+    checkboxLabel.className = 'custom-control-label';
+    checkboxLabel.setAttribute('for', `${element.source}-${element.reference}`);
+
+    const checkboxDiv = document.createElement('div');
+    checkboxDiv.className = 'custom-control custom-checkbox';
+    checkboxDiv.appendChild(checkbox);
+    checkboxDiv.appendChild(checkboxLabel);
 
     const checkCell = document.createElement('td');
-    checkCell.appendChild(checkboxLabel);
+    checkCell.appendChild(checkboxDiv);
     row.appendChild(checkCell);
 
     const statusCell = document.createElement('td');
@@ -68,9 +73,13 @@ export async function parseFile(file, tbody) {
         importFile = JSON.parse(load.target.result);
         importFile = await processImportFile(importFile);
 
-        const storage = await browser.storage.sync.get('bookmark_list');
+        const storage = await browser.storage.sync.get();
 
-        await createTable(tbody, storage.bookmark_list || []);
+        const bookmarkList = Object.keys(storage)
+          .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+          .map(key => storage[key]);
+
+        await createTable(tbody, bookmarkList);
 
         resolve(true);
       } catch (err) {

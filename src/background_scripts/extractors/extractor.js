@@ -3,17 +3,20 @@ import HttpFetch from '../../util/http';
 import * as Mangafox from './mangafox';
 import * as MangaEden from './mangaeden';
 import * as MangaHere from './mangahere';
+import * as KissManga from './kissmanga';
 
 const providersMap = new Map([
   ['fanfox', Mangafox],
   ['mangaeden', MangaEden],
   ['mangahere', MangaHere],
+  ['kissmanga', KissManga],
 ]);
 
 const regexList = [
   Mangafox.urlRegex,
   MangaEden.urlRegex,
   MangaHere.urlRegex,
+  KissManga.urlRegex,
 ];
 
 /**
@@ -29,8 +32,7 @@ export function parseUrl(url) {
   const websiteInfo = regex[0].exec(url);
 
   return {
-    website: websiteInfo[1],
-    reference: websiteInfo[2],
+    key: `${websiteInfo[1]}/${websiteInfo[2]}`,
     extractor: providersMap.get(websiteInfo[1]),
   };
 }

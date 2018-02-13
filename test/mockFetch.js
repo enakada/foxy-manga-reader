@@ -64,4 +64,3 @@ export function restore() {
 export function callCount() {
   return count;
 }
-
