@@ -251,7 +251,7 @@ export function createListCard(bookmark, manga) {
   cardHeader.appendChild(headerRow);
 
   const titleCol = document.createElement('h6');
-  titleCol.className = 'col-8 mb-0';
+  titleCol.className = 'col-7 mb-0';
   headerRow.appendChild(titleCol);
 
   const headerLink = document.createElement('a');
@@ -265,7 +265,7 @@ export function createListCard(bookmark, manga) {
   titleCol.appendChild(headerLink);
 
   const chapterCol = document.createElement('div');
-  chapterCol.className = 'col-3 text-center list-chapter-tracker';
+  chapterCol.className = 'col-4 text-center list-chapter-tracker';
   chapterCol.innerText = `${bookmark.last_read.chapter.index + 1}/${manga.chapter_list.length}`;
   headerRow.appendChild(chapterCol);
   if (upToDate) chapterCol.classList.add('text-success');
