@@ -14,3 +14,19 @@ h4, h5, h6 {
   font-family: $font-family-headings, sans-serif;
   text-transform: uppercase;
 }
+
+.jumbotron {
+  background:
+    linear-gradient(rgba(51, 153, 204, 0.9), rgba(51, 153, 204, 0.9)),
+    url("../images/manga-bg.png") no-repeat center;
+  background-size: cover;
+  color: white;
+
+  .logo {
+    display: inline-block;
+    background: url('../icons/fmr-color-64.png') no-repeat;
+    background-size: contain;
+    height: 64px;
+    width: 64px;
+  }
+}
