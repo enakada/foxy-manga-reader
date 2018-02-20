@@ -16,7 +16,18 @@ async function initTable(table) {
       .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
       .map(key => storage[key]);
 
-    bookmarkList.forEach(bookmark => table.appendChild(MangaTable.createRow(bookmark)));
+    const promises = [];
+    bookmarkList.forEach(async (bookmark) => {
+      const mangaPromise = browser.runtime.sendMessage({
+        type: 'get-manga-data',
+        manga_key: `${bookmark.source}/${bookmark.reference}`,
+      });
+      promises.push(mangaPromise);
+
+      table.appendChild(MangaTable.createRow(bookmark, await mangaPromise));
+    });
+
+    await Promise.all(promises);
   } catch (err) {
     throw err;
   }

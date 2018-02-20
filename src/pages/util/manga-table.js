@@ -87,9 +87,10 @@ async function bulkRemove() {
 /**
  * Creates a new table row with the bookmark information.
  * @param {object} bookmark Required. The bookmark object.
+ * @param {object} manga Required. The manga object.
  * @returns {object~DOMElement} The <tr> element to append to the table.
  */
-export function createRow(bookmark) {
+export function createRow(bookmark, manga) {
   // Table Row
   const row = document.createElement('tr');
   row.dataset.mangaUrl = bookmark.url;
@@ -134,6 +135,13 @@ export function createRow(bookmark) {
   const lastReadCell = document.createElement('td');
   lastReadCell.innerText = moment(bookmark.last_read.date).format('LL');
   row.appendChild(lastReadCell);
+
+  // Progress
+  const progressCell = document.createElement('td');
+  const upToDate = (bookmark.last_read.chapter.index + 1 === manga.chapter_list.length);
+  progressCell.innerText = `${bookmark.last_read.chapter.index + 1}/${manga.chapter_list.length}`;
+  progressCell.classList.add((upToDate) ? 'text-success' : 'text-danger');
+  row.appendChild(progressCell);
 
   return row;
 }

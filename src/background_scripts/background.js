@@ -468,6 +468,8 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       return (sender.tab && !sender.tab.url.includes('moz-extension')) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url, message.manga_key);
     case 'update-chapter':
       return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(TypeError('message has no property tab.url'));
+    case 'get-manga-data':
+      return store.getItem(message.manga_key);
     case 'import-single':
       return importManga(message.bookmark);
     default:
