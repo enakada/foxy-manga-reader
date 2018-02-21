@@ -13,7 +13,7 @@ export const urlRegex = /(?:https*:\/\/[\w.]*)*(mangahere)\.\w{2,3}\/manga\/([\w
  * @returns A string representing the chapter reference extracted from the URL or the defaultValue.
  */
 export function getChapterReference(url, defaultValue) {
-  const m = /[\w:/.]+\/manga\/\w+\/([\dc.]+)\/(?:\d+\.html)*/.exec(url);
+  const m = /[\w:/.]+\/manga\/\w+\/([\dvc/.]+)\/(?:\d+\.html)*/.exec(url);
   return (m) ? { id: m[1] } : defaultValue;
 }
 
@@ -45,7 +45,7 @@ function getChapterList(mangaSid, mangaUrl, chapterList = []) {
   const url = `http://www.mangahere.cc/get_chapters${mangaSid}.js`;
 
   return HttpFetch(url, (response) => {
-    const regex = /\["(.+)","[\w./"+]+\/([c\d.]+)\/"\]/g;
+    const regex = /\["(.+)","[\w./"+]+"\/([vc/\d.]+)\/"\]/g;
 
     const body = response.body.innerHTML;
     if (!body) return chapterList;

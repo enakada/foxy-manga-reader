@@ -101,6 +101,13 @@ describe('MangaHere', () => {
       chapter.should.equal('default');
     });
 
+    it('should return { id: v002/c001 } on http://www.mangahere.cc/manga/12_name/v002/c001/', () => {
+      const chapter = MangaHere.getChapterReference('http://www.mangahere.cc/manga/12_name/v002/c001/', 'default');
+
+      chapter.should.be.an('object');
+      chapter.should.have.property('id').equal('v002/c001');
+    });
+
     it('should return { id: c031 } on http://www.mangahere.cc/manga/12_name/c031/', () => {
       const chapter = MangaHere.getChapterReference('http://www.mangahere.cc/manga/12_name/c031/', 'default');
 

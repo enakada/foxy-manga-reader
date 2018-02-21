@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Manga progress to Dashboard page.
 
+### Fixed
+
+- MangaHere's chapter parser ignoring the volume string (e.g., `v01/c50` returning only `c50`).
+
 ## [0.6.0] - 2018-02-12
 ### Added
 

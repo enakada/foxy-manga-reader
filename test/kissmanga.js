@@ -5,7 +5,7 @@ import * as KissManga from '../src/background_scripts/extractors/kissmanga';
 
 const should = chai.should();
 
-describe.only('KissManga', () => {
+describe('KissManga', () => {
   before(() => {
     // Setting DOMParser global to JSDOM
     global.DOMParser = window.DOMParser;
