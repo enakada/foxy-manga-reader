@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Manga progress to Dashboard page.
 - Source information to browser action pop-up.
+- Limit manga list size to 300 entries (Issue #13);
 
 ### Fixed
 

@@ -22,6 +22,15 @@ import { updateAddon } from '../util/upgrade';
  */
 async function bookmarkManga(url, bookmark, options = {}) {
   try {
+    // Prevent manga list from exceeding 300 entries
+    {
+      const storage = await browser.storage.sync.get();
+      const bookmarkList = Object.keys(storage)
+        .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+        .map(key => storage[key]);
+      if (bookmarkList.length >= 300) throw FoxyError(ErrorCode.MANGA_LIMIT_EXCEEDED, 'Limit: 300 entries');
+    }
+
     const info = Extractor.parseUrl(url);
     if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 

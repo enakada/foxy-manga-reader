@@ -234,6 +234,13 @@ export async function importButtonListener() {
     const dataToImport = mangaCheckboxList.filter(checkbox => checkbox.checked);
     if (dataToImport.length === 0) throw FoxyError(ErrorCode.IMPORT_NO_DATA);
 
+    // Check if size limit will not be exceeded
+    const storage = await browser.storage.sync.get();
+    const bookmarkList = Object.keys(storage)
+      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+      .map(key => storage[key]);
+    if (bookmarkList.length + dataToImport.length > 300) throw FoxyError(ErrorCode.MANGA_LIMIT_EXCEEDED, 'Limit: 300 entries');
+
     // Reset progress and show bar
     const progress = document.getElementById('import-progress-container');
     for (let i = 0; i < progress.childElementCount; i += 1) {
