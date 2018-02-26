@@ -169,9 +169,9 @@ function createMangaBlock(bookmark, manga, isUpToDate, userOptions = {}) {
     mangaRow.appendChild(imageDiv);
 
     const mangaCover = document.createElement('img');
+    imageDiv.appendChild(mangaCover);
     mangaCover.className = 'img-fluid align-middle';
     mangaCover.src = manga.cover;
-    imageDiv.appendChild(mangaCover);
   }
 
   const mangaData = document.createElement('div');
@@ -185,6 +185,11 @@ function createMangaBlock(bookmark, manga, isUpToDate, userOptions = {}) {
     title.textContent = manga.name;
     title.className = 'title';
     mangaData.appendChild(title);
+
+    const infoIcon = document.createElement('span');
+    infoIcon.className = 'oi oi-info ml-1 px-1 text-info';
+    infoIcon.title = `Source: ${bookmark.source}`;
+    title.appendChild(infoIcon);
   }
 
   // Add Manga metadata
@@ -263,6 +268,11 @@ export function createListCard(bookmark, manga) {
   headerLink.setAttribute('aria-controls', `collapse-${bookmark.source}-${bookmark.reference}`);
   headerLink.innerText = manga.name;
   titleCol.appendChild(headerLink);
+
+  const infoIcon = document.createElement('span');
+  infoIcon.className = 'oi oi-info ml-1 px-1 text-info';
+  infoIcon.title = `Source: ${bookmark.source}`;
+  titleCol.appendChild(infoIcon);
 
   const chapterCol = document.createElement('div');
   chapterCol.className = 'col-4 text-center list-chapter-tracker';

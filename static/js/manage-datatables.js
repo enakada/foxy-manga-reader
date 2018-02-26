@@ -19,7 +19,7 @@ table.addEventListener('table-loaded', () => {
       null,
       null,
       null,
-      null,
+      { searchable: false, orderable: false },
     ],
     dom,
     pagingType: 'first_last_numbers',
