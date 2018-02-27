@@ -143,6 +143,15 @@ export function createRow(bookmark, manga) {
   progressCell.classList.add((upToDate) ? 'text-success' : 'text-danger');
   row.appendChild(progressCell);
 
+  // Status
+  const statusCell = document.createElement('td');
+  if (manga && manga.status !== undefined) {
+    const colorClass = (manga.status) ? 'text-success' : 'text-danger';
+    statusCell.classList.add(colorClass);
+    statusCell.innerText = (manga.status) ? 'Completed' : 'Ongoing';
+  }
+  row.appendChild(statusCell);
+
   return row;
 }
 

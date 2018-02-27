@@ -45,10 +45,6 @@ describe('MangaEden', () => {
       parser = new DOMParser();
     });
 
-    it('should throw error if response is not a DOM object', () => {
-      (MangaEden.getMangaCover).should.throw(Error, /Foxy Error #300/);
-    });
-
     it('should throw error if no property og:image could be retrieved from response head', () => {
       const response = parser.parseFromString(`
         <!DOCTYPE html>
@@ -57,7 +53,7 @@ describe('MangaEden', () => {
           </head>
           <body>
           </body>
-        <html>`, 'text/html');
+        </html>`, 'text/html');
 
       const fn = () => { MangaEden.getMangaCover(response); };
 
@@ -73,12 +69,77 @@ describe('MangaEden', () => {
             <meta property="og:title" content="Read World's End Harem Manga Online Free in English - Manga Eden" />
           </head>
           <body></body>
-        <html>`, 'text/html');
+        </html>`, 'text/html');
 
       const cover = MangaEden.getMangaCover(response);
 
       should.exist(cover);
       cover.should.be.equal('http://cdn.mangaeden.com/mangasimg/d5/d5d504279e9f99ac5270b098696a203535f55008064142c4fb321405.png');
+    });
+  });
+
+  // Test for #getMangaStatus()
+  describe('#getMangaStatus()', () => {
+    let parser;
+    before(() => {
+      parser = new DOMParser();
+    });
+
+    it('should throw error if no "Status X" could be retrieved from response body', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+          </body>
+        </html>`, 'text/html');
+
+      const fn = () => { MangaEden.getMangaStatus(response); };
+
+      (fn).should.throw(Error, /Foxy Error #113/);
+    });
+
+    it('should return true if status is Completed', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+            <div id="rightContent">
+              <div class="rightBox">
+                Status\nCompleted
+              </div>
+            </div>
+          </body>
+        </html>`, 'text/html');
+
+      const status = MangaEden.getMangaStatus(response);
+
+      should.exist(status);
+      status.should.be.equal(true);
+    });
+
+    it('should return false if status is Ongoing', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+            <div id="rightContent">
+              <div class="rightBox">
+                Status\nOngoing
+              </div>
+            </div>
+          </body>
+        </html>`, 'text/html');
+
+      const status = MangaEden.getMangaStatus(response);
+
+      should.exist(status);
+      status.should.be.equal(false);
     });
   });
 
@@ -214,6 +275,11 @@ describe('MangaEden', () => {
             <meta property="og:title" content="Read World's End Harem Manga Online Free in English - Manga Eden" />
           </head>
           <body>
+          <div id="rightContent">
+            <div class="rightBox">
+              Status\nOngoing
+            </div>
+          </div>
           <div id="leftContent">
           <table>
             <tbody>
@@ -231,7 +297,7 @@ describe('MangaEden', () => {
           </table>
           </div>
           </body>
-        <html>`));
+        </html>`));
 
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/fairy-tail/')
         .then((manga) => {
@@ -245,6 +311,7 @@ describe('MangaEden', () => {
           manga.should.have.property('reference').equal('fairy-tail');
           manga.should.have.property('url').equal('http://www.mangaeden.com/en/en-manga/fairy-tail/');
           manga.should.have.property('cover').equal('http://cdn.mangaeden.com/mangasimg/d5/d5d504279e9f99ac5270b098696a203535f55008064142c4fb321405.png');
+          manga.should.have.property('status').equal(false);
           manga.should.have.property('last_update');
           manga.should.have.property('chapter_list').with.lengthOf(2);
         }).catch((err) => {
@@ -262,6 +329,11 @@ describe('MangaEden', () => {
             <meta property="og:title" content="Read World's End Harem 31.1 Online For Free in English - page 1 - Manga Eden" />
           </head>
           <body>
+          <div id="rightContent">
+            <div class="rightBox">
+              Status\nCompleted
+            </div>
+          </div>
           <div id="leftContent">
           <table>
             <tbody>
@@ -279,7 +351,7 @@ describe('MangaEden', () => {
           </table>
           </div>
           </body>
-        <html>`));
+        </html>`));
 
       return MangaEden.getMangaInfo('http://www.mangaeden.com/en/en-manga/air-gear/287/1/')
         .then((manga) => {
@@ -293,6 +365,7 @@ describe('MangaEden', () => {
           manga.should.have.property('reference').equal('air-gear');
           manga.should.have.property('url').equal('http://www.mangaeden.com/en/en-manga/air-gear/');
           manga.should.have.property('cover').equal('http://cdn.mangaeden.com/mangasimg/58/5834bffd4d615bdc77c7eae56c61ead9577c49d1fef18d429e42b5ff.jpg');
+          manga.should.have.property('status').equal(true);
           manga.should.have.property('last_update');
           manga.should.have.property('chapter_list').with.lengthOf(2);
         }).catch((err) => {
@@ -417,6 +490,108 @@ describe('MangaEden', () => {
           });
         })
         .catch((err) => {
+          should.not.exist(err);
+        });
+    });
+  });
+
+  // Test for #updateMetadata()
+  describe('#updateMetadata()', () => {
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
+    });
+    afterEach(() => {
+      MockFetch.restore();
+    });
+
+    it('should reject promise if manga object is invalid', () => {
+      return MangaEden.updateMetadata({ })
+        .then((data) => {
+          should.not.exist(data);
+        }).catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('updateMetadata() argument is invalid');
+        });
+    });
+
+    it('should reject promise on Error 404', () => {
+      const promise = MangaEden.updateMetadata({
+        url: 'http://www.mangaeden.com/en/en-manga/gantz/',
+      });
+
+      return promise
+        .then((data) => {
+          should.not.exist(data);
+        }).catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Foxy Error #302');
+          err.params.should.have.string('Not Found');
+        });
+    });
+
+    it('should reject promise on cover error', () => {
+      window.fetch.callsFake(MockFetch.ok(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+          </body>
+        </html>`));
+
+      const promise = MangaEden.updateMetadata({
+        url: 'http://www.mangaeden.com/en/en-manga/gantz/',
+      });
+
+      return promise
+        .then((data) => {
+          should.not.exist(data);
+        }).catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Foxy Error #104');
+          err.params.should.have.string('http://www.mangaeden.com/en/en-manga/gantz/');
+        });
+    });
+
+    it('should resolve to the correct update object', () => {
+      window.fetch.callsFake(MockFetch.ok(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="og:image" content="http://cdn.mangaeden.com/mangasimg/d5/d5d504279e9f99ac5270b098696a203535f55008064142c4fb321405.png" />
+          </head>
+          <body>
+            <div id="rightContent">
+              <div class="rightBox">
+                Status\nCompleted
+              </div>
+            </div>
+          </body>
+        </html>`));
+
+      const promise = MangaEden.updateMetadata({
+        url: 'http://www.mangaeden.com/en/en-manga/gantz/',
+      });
+
+      return promise
+        .then((data) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(data);
+          data.should.be.an('object');
+          data.should.have.property('cover').equal('http://cdn.mangaeden.com/mangasimg/d5/d5d504279e9f99ac5270b098696a203535f55008064142c4fb321405.png');
+          data.should.have.property('status').equal(true);
+        }).catch((err) => {
           should.not.exist(err);
         });
     });

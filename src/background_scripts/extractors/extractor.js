@@ -1,5 +1,3 @@
-import { ErrorCode, getError as FoxyError } from '../../util/foxyErrors';
-import HttpFetch from '../../util/http';
 import * as Mangafox from './mangafox';
 import * as MangaEden from './mangaeden';
 import * as MangaHere from './mangahere';
@@ -12,7 +10,7 @@ const providersMap = new Map([
   ['kissmanga', KissManga],
 ]);
 
-const regexList = [
+export const regexList = [
   Mangafox.urlRegex,
   MangaEden.urlRegex,
   MangaHere.urlRegex,
@@ -35,17 +33,4 @@ export function parseUrl(url) {
     key: `${websiteInfo[1]}/${websiteInfo[2]}`,
     extractor: providersMap.get(websiteInfo[1]),
   };
-}
-
-/**
- * Returns a promise which resolves to the new cover URL.
- * @param {string} source The name of the source to extract information from.
- * @param {string} mangaUrl The URL for the manga which to extract information from.
- * @returns Promise which resolves to the new cover URL.
- */
-export async function getCurrentMangaCover(source, mangaUrl) {
-  const extractor = providersMap.get(source);
-  if (!extractor) return Promise.reject(FoxyError(ErrorCode.INVALID_SOURCE, source));
-
-  return HttpFetch(mangaUrl, extractor.getMangaCover);
 }

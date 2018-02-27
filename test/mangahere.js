@@ -54,10 +54,6 @@ describe('MangaHere', () => {
       parser = new DOMParser();
     });
 
-    it('should throw error if response is not a DOM object', () => {
-      (MangaHere.getMangaCover).should.throw(Error, /Foxy Error #300/);
-    });
-
     it('should throw error if no class="cover" could be retrieved from response body', () => {
       const response = parser.parseFromString(`
         <!DOCTYPE html>
@@ -66,7 +62,7 @@ describe('MangaHere', () => {
           </head>
           <body>
           </body>
-        <html>`, 'text/html');
+        </html>`, 'text/html');
 
       const fn = () => { MangaHere.getMangaCover(response); };
 
@@ -84,12 +80,77 @@ describe('MangaHere', () => {
           <body>
             <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
           </body>
-        <html>`, 'text/html');
+        </html>`, 'text/html');
 
       const cover = MangaHere.getMangaCover(response);
 
       should.exist(cover);
       cover.should.be.equal('https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg');
+    });
+  });
+
+  // Test for #getMangaStatus()
+  describe('#getMangaStatus()', () => {
+    let parser;
+    before(() => {
+      parser = new DOMParser();
+    });
+
+    it('should throw error if no "Status:X" could be retrieved from response body', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+          </body>
+        </html>`, 'text/html');
+
+      const fn = () => { MangaHere.getMangaStatus(response); };
+
+      (fn).should.throw(Error, /Foxy Error #113/);
+    });
+
+    it('should return true if status is Completed', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+            <ul class="detail_topText">
+              <li></li><li></li><li></li>
+              <li></li><li></li><li></li>
+              <li>Status:Completed</li>
+            </ul>
+          </body>
+        </html>`, 'text/html');
+
+      const status = MangaHere.getMangaStatus(response);
+
+      should.exist(status);
+      status.should.be.equal(true);
+    });
+
+    it('should return false if status is Ongoing', () => {
+      const response = parser.parseFromString(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+            <ul class="detail_topText">
+              <li></li><li></li><li></li>
+              <li></li><li></li><li></li>
+              <li>Status:Ongoing</li>
+            </ul>
+          </body>
+        </html>`, 'text/html');
+
+      const status = MangaHere.getMangaStatus(response);
+
+      should.exist(status);
+      status.should.be.equal(false);
     });
   });
 
@@ -218,9 +279,14 @@ describe('MangaHere', () => {
             <meta property="og:title" content="Manga Name" />
           </head>
           <body>
-          <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
+            <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
+            <ul class="detail_topText">
+              <li></li><li></li><li></li>
+              <li></li><li></li><li></li>
+              <li>Status:Completed</li>
+            </ul>
           </body>
-        <html>`;
+        </html>`;
       const res2 = `
         ["Title 1","//www.mangahere.cc/manga/"+series_name+"/c001/"],
         ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`;
@@ -241,6 +307,7 @@ describe('MangaHere', () => {
           manga.should.have.property('reference').equal('12_manga');
           manga.should.have.property('url').equal('http://www.mangahere.cc/manga/12_manga/');
           manga.should.have.property('cover').equal('https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg');
+          manga.should.have.property('status').equal(true);
           manga.should.have.property('last_update');
           manga.should.have.property('chapter_list').with.lengthOf(2);
         }).catch((err) => {
@@ -258,8 +325,13 @@ describe('MangaHere', () => {
           </head>
           <body>
             <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
+            <ul class="detail_topText">
+              <li></li><li></li><li></li>
+              <li></li><li></li><li></li>
+              <li>Status:Ongoing</li>
+            </ul>
           </body>
-        <html>`;
+        </html>`;
       const res2 = `
         ["Title 1","//www.mangahere.cc/manga/"+series_name+"/c001/"],
         ["Title 2","//www.mangahere.cc/manga/"+series_name+"/c002.5/"]`;
@@ -280,6 +352,7 @@ describe('MangaHere', () => {
           manga.should.have.property('reference').equal('12_manga');
           manga.should.have.property('url').equal('http://www.mangahere.cc/manga/12_manga/');
           manga.should.have.property('cover').equal('https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg');
+          manga.should.have.property('status').equal(false);
           manga.should.have.property('last_update');
           manga.should.have.property('chapter_list').with.lengthOf(2);
         }).catch((err) => {
@@ -380,6 +453,108 @@ describe('MangaHere', () => {
           });
         })
         .catch((err) => {
+          should.not.exist(err);
+        });
+    });
+  });
+
+  // Test for #updateMetadata()
+  describe('#updateMetadata()', () => {
+    // Sinon sandbox for Fetch API
+    beforeEach(() => {
+      MockFetch.init();
+    });
+    afterEach(() => {
+      MockFetch.restore();
+    });
+
+    it('should reject promise if manga object is invalid', () => {
+      return MangaHere.updateMetadata({ })
+        .then((data) => {
+          should.not.exist(data);
+        }).catch((err) => {
+          MockFetch.callCount().should.be.equal(0);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('updateMetadata() argument is invalid');
+        });
+    });
+
+    it('should reject promise on Error 404', () => {
+      const promise = MangaHere.updateMetadata({
+        url: 'http://www.mangahere.cc/manga/12_manga/',
+      });
+
+      return promise
+        .then((data) => {
+          should.not.exist(data);
+        }).catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Foxy Error #302');
+          err.params.should.have.string('Not Found');
+        });
+    });
+
+    it('should reject promise on cover error', () => {
+      window.fetch.callsFake(MockFetch.ok(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+          </body>
+        </html>`));
+
+      const promise = MangaHere.updateMetadata({
+        url: 'http://www.mangahere.cc/manga/12_manga/',
+      });
+
+      return promise
+        .then((data) => {
+          should.not.exist(data);
+        }).catch((err) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(err);
+          err.should.be.an('error');
+          err.message.should.have.string('Foxy Error #104');
+          err.params.should.have.string('http://www.mangahere.cc/manga/12_manga/');
+        });
+    });
+
+    it('should resolve to the correct update object', () => {
+      window.fetch.callsFake(MockFetch.ok(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+          </head>
+          <body>
+            <div class="manga_detail_top clearfix"><img src="https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg"/></div>
+            <ul class="detail_topText">
+              <li></li><li></li><li></li>
+              <li></li><li></li><li></li>
+              <li>Status:Completed</li>
+            </ul>
+          </body>
+        </html>`));
+
+      const promise = MangaHere.updateMetadata({
+        url: 'http://www.mangahere.cc/manga/12_manga/',
+      });
+
+      return promise
+        .then((data) => {
+          MockFetch.callCount().should.be.equal(1);
+
+          should.exist(data);
+          data.should.be.an('object');
+          data.should.have.property('cover').equal('https://mhcdn.secure.footprint.net/store/manga/16143/cover.jpg');
+          data.should.have.property('status').equal(true);
+        }).catch((err) => {
           should.not.exist(err);
         });
     });

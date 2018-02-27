@@ -254,12 +254,11 @@ async function updateMangaChapterList(alarm) {
         bookmark.last_read.chapter.index = lastReadIndex;
       }
 
-      // Update cover if it changed
-      const coverUrl = await Extractor.getCurrentMangaCover(manga.source, manga.url);
-      if (coverUrl && coverUrl !== manga.cover) manga.cover = coverUrl;
+      // Update manga metadata
+      const metadata = await info.extractor.updateMetadata(manga);
 
       // Update db
-      const mangaCopy = Object.assign(manga, { chapter_list: chapterList });
+      const mangaCopy = Object.assign(manga, { chapter_list: chapterList }, metadata);
       await store.setItem(info.key, mangaCopy);
 
       if (count <= 0) return; // no new chapters
