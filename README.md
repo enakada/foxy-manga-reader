@@ -26,3 +26,4 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 ## Known Issues
 
 - Foxy is incompatible with any add-on which adds `transform: scale()` property to DOM. ([Issue #2](https://github.com/enakada/foxy-manga-reader/issues/2))
+- Firefox's sync storage has a size limit of 200kb for storing add-on data. To prevent Foxy from breaking, the maximum number of manga users can bookmark was limited to 300 manga. In the future another solution will be implemented for those interested in keeping more than 300 manga synced across different devices ([Issue #13](https://github.com/enakada/foxy-manga-reader/issues/13))

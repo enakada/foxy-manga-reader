@@ -126,6 +126,14 @@ export function createRow(bookmark, manga) {
   nameCell.appendChild(a);
   row.appendChild(nameCell);
 
+  // Database Error Icon
+  if (!manga) {
+    const databaseWarningIcon = document.createElement('span');
+    databaseWarningIcon.className = 'oi oi-warning ml-1 px-1 text-warning';
+    databaseWarningIcon.title = browser.i18n.getMessage('dashboardDataError');
+    nameCell.appendChild(databaseWarningIcon);
+  }
+
   // Source
   const sourceCell = document.createElement('td');
   sourceCell.innerText = bookmark.source;
@@ -138,9 +146,10 @@ export function createRow(bookmark, manga) {
 
   // Progress
   const progressCell = document.createElement('td');
-  const upToDate = (bookmark.last_read.chapter.index + 1 === manga.chapter_list.length);
-  progressCell.innerText = `${bookmark.last_read.chapter.index + 1}/${manga.chapter_list.length}`;
-  progressCell.classList.add((upToDate) ? 'text-success' : 'text-danger');
+  const chLength = (manga) ? manga.chapter_list.length : '-';
+  const upToDate = (bookmark.last_read.chapter.index + 1 === chLength);
+  progressCell.classList.add((upToDate && manga) ? 'text-success' : 'text-danger');
+  progressCell.innerText = `${bookmark.last_read.chapter.index + 1}/${chLength}`;
   row.appendChild(progressCell);
 
   // Status

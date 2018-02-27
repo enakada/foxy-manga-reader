@@ -63,11 +63,11 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
     });
 
     await Promise.all(promises);
-
-    // Update chart
-    if (shouldUpdateChart) Sidebar.updateChart(mangaListDom.childElementCount - readCount, readCount);
   } catch (err) {
     throw err;
+  } finally {
+    // Update chart
+    if (shouldUpdateChart) Sidebar.updateChart(mangaListDom.childElementCount - readCount, readCount);
   }
 }
 
