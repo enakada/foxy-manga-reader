@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Source information to browser action pop-up.
 - Limit manga list size to 300 entries ([Issue #13](https://github.com/enakada/foxy-manga-reader/issues/13)).
 - Manga status (`Completed` or `Ongoing`) to Dashboard page.
-- Show database consistency errors in Dashboard page.
+- Show database consistency warning in Dashboard page.
+- AMA and Discord shields to `README.md`.
 
 ### Fixed
 

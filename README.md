@@ -1,5 +1,10 @@
 # <img src="static/icons/fmr-color-32.png"> Foxy Manga Reader
 
+[![Mozilla Add-on](https://img.shields.io/amo/stars/foxy-manga-reader.svg?colorB=ff8c00)](https://addons.mozilla.org/en-US/firefox/addon/foxy-manga-reader/)
+[![Mozilla Add-on](https://img.shields.io/amo/users/foxy-manga-reader.svg?colorB=ff8c00)](https://addons.mozilla.org/en-US/firefox/addon/foxy-manga-reader/)
+[![Discord](https://img.shields.io/discord/418181193104621570.svg?logo=discord&colorB=ff8c00)](https://discord.gg/btqZuFC)
+
+
 A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga releases from multiple sources and improves your reading experience. This project was inspired by [A Certain Manga Reader](https://github.com/saishy/certainmangareader).
 
 ## Features
