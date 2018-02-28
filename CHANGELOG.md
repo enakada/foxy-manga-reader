@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.6.1] - 2018-02-27
 ### Added
 
 - Manga progress to Dashboard page.
@@ -137,7 +139,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Settings page with Backup/Restore options.
 - License file.
 
-[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.1...HEAD
 [0.2.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
@@ -146,3 +148,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.5.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.0...v0.5.1
 [0.5.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.1...v0.5.2
 [0.6.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.2...v0.6.0
+[0.6.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.0...v0.6.1
