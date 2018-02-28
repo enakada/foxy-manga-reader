@@ -13,6 +13,8 @@ export const ErrorCode = {
   NO_STORAGE_BOOKMARK: [109, 'Cannot Find the Bookmark List'],
   BOOKMARK_SYNC_ERROR: [110, 'Cannot Sync Bookmark Data'],
   NO_BOOKMARK_TO_EXPORT: [111, 'No Bookmarks to Export'],
+  MANGA_LIMIT_EXCEEDED: [112, 'Manga Limit Exceeded'],
+  NO_MANGA_STATUS: [113, 'Cannot Find Manga Status'],
 
   // DOM Related errors
   DOM_MISSING: [200, 'DOM Missing From Page'],

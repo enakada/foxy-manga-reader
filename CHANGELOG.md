@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.1] - 2018-02-27
+### Added
+
+- Manga progress to Dashboard page.
+- Source information to browser action pop-up.
+- Limit manga list size to 300 entries ([Issue #13](https://github.com/enakada/foxy-manga-reader/issues/13)).
+- Manga status (`Completed` or `Ongoing`) to Dashboard page.
+- Show database consistency warning in Dashboard page.
+- AMA and Discord shields to `README.md`.
+
+### Fixed
+
+- MangaHere's chapter parser ignoring the volume string (e.g., `v01/c50` returning only `c50`).
+
 ## [0.6.0] - 2018-02-12
 ### Added
 
@@ -125,7 +139,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Settings page with Backup/Restore options.
 - License file.
 
-[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.1...HEAD
 [0.2.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
@@ -134,3 +148,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.5.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.0...v0.5.1
 [0.5.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.1...v0.5.2
 [0.6.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.2...v0.6.0
+[0.6.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.0...v0.6.1

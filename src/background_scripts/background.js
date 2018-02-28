@@ -22,6 +22,15 @@ import { updateAddon } from '../util/upgrade';
  */
 async function bookmarkManga(url, bookmark, options = {}) {
   try {
+    // Prevent manga list from exceeding 300 entries
+    {
+      const storage = await browser.storage.sync.get();
+      const bookmarkList = Object.keys(storage)
+        .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+        .map(key => storage[key]);
+      if (bookmarkList.length >= 300) throw FoxyError(ErrorCode.MANGA_LIMIT_EXCEEDED, 'Limit: 300 entries');
+    }
+
     const info = Extractor.parseUrl(url);
     if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
@@ -245,12 +254,11 @@ async function updateMangaChapterList(alarm) {
         bookmark.last_read.chapter.index = lastReadIndex;
       }
 
-      // Update cover if it changed
-      const coverUrl = await Extractor.getCurrentMangaCover(manga.source, manga.url);
-      if (coverUrl && coverUrl !== manga.cover) manga.cover = coverUrl;
+      // Update manga metadata
+      const metadata = await info.extractor.updateMetadata(manga);
 
       // Update db
-      const mangaCopy = Object.assign(manga, { chapter_list: chapterList });
+      const mangaCopy = Object.assign(manga, { chapter_list: chapterList }, metadata);
       await store.setItem(info.key, mangaCopy);
 
       if (count <= 0) return; // no new chapters
@@ -468,6 +476,8 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       return (sender.tab && !sender.tab.url.includes('moz-extension')) ? unbookmarkActionListener(sender.tab) : unbookmarkManga(message.manga_url, message.manga_key);
     case 'update-chapter':
       return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(TypeError('message has no property tab.url'));
+    case 'get-manga-data':
+      return store.getItem(message.manga_key);
     case 'import-single':
       return importManga(message.bookmark);
     default:

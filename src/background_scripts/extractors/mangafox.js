@@ -24,15 +24,27 @@ export function getChapterReference(url, defaultValue) {
  * @returns String representing the manga cover URL.
  */
 export function getMangaCover(response, url) {
-  if (!response || typeof response !== 'object') {
-    throw FoxyError(ErrorCode.RESPONSE_NOT_HTML, url);
-  }
-
   // Get manga image URL from response
   const imageDom = response.evaluate('//div[@class="cover"]/img', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
   if (!imageDom.singleNodeValue) throw FoxyError(ErrorCode.NO_MANGA_COVER, url);
 
   return imageDom.singleNodeValue.getAttribute('src');
+}
+
+/**
+ * Returns the Manga status (Ongoing|Completed) from the manga main page.
+ * @param {object} response The Fetch API response object.
+ * @param {string} url Optional. The URL to print with errors.
+ * @returns {boolean} True if the series is stated as 'Completed' and False otherwise.
+ */
+export function getMangaStatus(response, url) {
+  const imageDom = response.evaluate('//div[@id="series_info"]/div[@class="data"][1]/span', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+  if (!imageDom.singleNodeValue) throw FoxyError(ErrorCode.NO_MANGA_STATUS, url);
+
+  const statusStr = /(\w+)/.exec(imageDom.singleNodeValue.textContent);
+  if (!statusStr) throw FoxyError(ErrorCode.NO_MANGA_STATUS, url);
+
+  return (statusStr[0] === 'Completed');
 }
 
 /**
@@ -92,7 +104,9 @@ export function getMangaInfo(url) {
 
     const name = /([\w\s]+) (?:[\d.]+ Page \d+|Manga)/.exec(titleDom.singleNodeValue.getAttribute('content'))[1];
 
+    // Get image URL and status from response
     const imageUrl = getMangaCover(response, mangaUrl);
+    const status = getMangaStatus(response, mangaUrl);
 
     m = /\S+\/manga\/(\d+)\S+/.exec(imageUrl);
     if (!m) throw FoxyError(ErrorCode.NO_MANGA_SID, mangaUrl);
@@ -111,6 +125,7 @@ export function getMangaInfo(url) {
         reference: mangaReference,
         url: mangaUrl,
         cover: imageUrl,
+        status,
         last_update: new Date(),
         chapter_list: chapterList,
       };
@@ -144,4 +159,28 @@ export async function updateChapters(manga) {
   } catch (err) {
     throw err;
   }
+}
+
+/**
+ * Returns the manga information
+ * @param {object} manga The manga to update.
+ * @returns {Promise} A promise which resolves to the manga object retrieved.
+ */
+export async function updateMetadata(manga) {
+  if (!manga || !manga.url) {
+    throw new TypeError(`updateMetadata() argument is invalid: ${JSON.stringify(manga)}`);
+  }
+
+  return HttpFetch(manga.url, async (response) => {
+    if (!response || typeof response !== 'object') {
+      throw FoxyError(ErrorCode.RESPONSE_NOT_HTML, manga.url);
+    }
+
+    const update = {
+      cover: getMangaCover(response, manga.url),
+      status: getMangaStatus(response, manga.url),
+    };
+
+    return update;
+  });
 }

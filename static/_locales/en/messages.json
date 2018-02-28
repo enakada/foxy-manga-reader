@@ -88,6 +88,11 @@
     }
   },
 
+  "dashboardDataError": {
+    "message": "Missing manga data. If you just imported this manga, don't worry as the database will be updated shortly. If the problem persists, contact the extension author!",
+    "description": "Dashboard table error. Notifies that there is an inconsistence with the indexedDB."
+  },
+
   "restoreSuccessAlert": {
     "message": "The backup file was successfuly restored.",
     "description": "Alert message when restoration was successful."

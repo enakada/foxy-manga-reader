@@ -87,9 +87,10 @@ async function bulkRemove() {
 /**
  * Creates a new table row with the bookmark information.
  * @param {object} bookmark Required. The bookmark object.
+ * @param {object} manga Required. The manga object.
  * @returns {object~DOMElement} The <tr> element to append to the table.
  */
-export function createRow(bookmark) {
+export function createRow(bookmark, manga) {
   // Table Row
   const row = document.createElement('tr');
   row.dataset.mangaUrl = bookmark.url;
@@ -125,6 +126,14 @@ export function createRow(bookmark) {
   nameCell.appendChild(a);
   row.appendChild(nameCell);
 
+  // Database Error Icon
+  if (!manga) {
+    const databaseWarningIcon = document.createElement('span');
+    databaseWarningIcon.className = 'oi oi-warning ml-1 px-1 text-warning';
+    databaseWarningIcon.title = browser.i18n.getMessage('dashboardDataError');
+    nameCell.appendChild(databaseWarningIcon);
+  }
+
   // Source
   const sourceCell = document.createElement('td');
   sourceCell.innerText = bookmark.source;
@@ -134,6 +143,23 @@ export function createRow(bookmark) {
   const lastReadCell = document.createElement('td');
   lastReadCell.innerText = moment(bookmark.last_read.date).format('LL');
   row.appendChild(lastReadCell);
+
+  // Progress
+  const progressCell = document.createElement('td');
+  const chLength = (manga) ? manga.chapter_list.length : '-';
+  const upToDate = (bookmark.last_read.chapter.index + 1 === chLength);
+  progressCell.classList.add((upToDate && manga) ? 'text-success' : 'text-danger');
+  progressCell.innerText = `${bookmark.last_read.chapter.index + 1}/${chLength}`;
+  row.appendChild(progressCell);
+
+  // Status
+  const statusCell = document.createElement('td');
+  if (manga && manga.status !== undefined) {
+    const colorClass = (manga.status) ? 'text-success' : 'text-danger';
+    statusCell.classList.add(colorClass);
+    statusCell.innerText = (manga.status) ? 'Completed' : 'Ongoing';
+  }
+  row.appendChild(statusCell);
 
   return row;
 }

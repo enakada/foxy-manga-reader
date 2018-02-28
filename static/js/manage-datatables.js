@@ -19,6 +19,8 @@ table.addEventListener('table-loaded', () => {
       null,
       null,
       null,
+      { searchable: false, orderable: false },
+      null,
     ],
     dom,
     pagingType: 'first_last_numbers',
