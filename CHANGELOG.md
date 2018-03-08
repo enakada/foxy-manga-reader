@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+
+- Content script was not loading sidebar menu on kissmanga pages due to a change to the DOM structure when 'All pages' mode was selected.
 
 ## [0.6.1] - 2018-02-27
 ### Added
