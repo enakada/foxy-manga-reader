@@ -1,5 +1,6 @@
 import { getError as FoxyError } from '../../util/foxyErrors';
 import Alert from '../../util/alerts';
+import * as FoxyStorage from '../../util/FoxyStorage';
 
 /**
  * Exports a backup file with all bookmarks.
@@ -11,11 +12,7 @@ async function exportBookmarks() {
   a.style = 'display: none';
 
   try {
-    const storage = await browser.storage.sync.get();
-
-    const bookmarkList = Object.keys(storage)
-      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-      .map(key => storage[key]);
+    const bookmarkList = await FoxyStorage.getMetadata();
 
     const backup = {
       version: browser.runtime.getManifest().version,

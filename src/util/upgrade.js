@@ -1,4 +1,5 @@
 import SourceMigrations from './source-migration';
+import * as FoxyStorage from '../util/FoxyStorage';
 import store from '../util/datastore';
 
 /**
@@ -100,14 +101,13 @@ async function migrateDB(previousVersion, bookmarkList, updateDb = true) {
       const bookmark = bookmarkList[i];
       const key = `${bookmark.source}/${bookmark.reference}`;
 
-      const storage = {};
-      storage[key] = applyChanges(bookmark, changes);
+      const updatedEntry = applyChanges(bookmark, changes);
 
-      newList.push(storage[key]);
+      newList.push(updatedEntry);
 
       // Update indexedDB storage
       if (updateDb) {
-        promises.push(browser.storage.sync.set(storage));
+        promises.push(FoxyStorage.setMetadata(key, updatedEntry));
         promises.push(updateStorage(bookmark, changes));
       }
     }
@@ -135,9 +135,7 @@ async function redesignBookmarkStorage(bookmarkList) {
 
       const newBookmark = Object.assign({}, bookmark, { type: 'bookmark' });
 
-      const storage = {};
-      storage[key] = newBookmark;
-      promises.push(browser.storage.sync.set(storage));
+      promises.push(FoxyStorage.setMetadata(key, newBookmark));
     });
 
     await Promise.all(promises);
@@ -156,7 +154,7 @@ async function redesignBookmarkStorage(bookmarkList) {
  */
 export async function updateAddon(previousVersion) {
   try {
-    let storage = await browser.storage.sync.get();
+    const storage = await browser.storage.sync.get();
 
     // Handle transition to v0.3.1 - inclusion of manga list view mode
     if (compareVersions(previousVersion, '0.3.1') && typeof storage.view_mode === 'string') {
@@ -166,14 +164,11 @@ export async function updateAddon(previousVersion) {
     }
 
     // Handle transition to v0.6.0 - storage redesign (issue#9)
+    let bookmarkList = [];
     if (compareVersions(previousVersion, '0.6.0') && storage.bookmark_list) {
       await redesignBookmarkStorage(storage.bookmark_list);
-      storage = await browser.storage.sync.get();
+      bookmarkList = await FoxyStorage.getMetadata();
     }
-
-    const bookmarkList = Object.keys(storage)
-      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-      .map(key => storage[key]);
 
     // Applies all DB migrations needed
     await migrateDB(previousVersion, bookmarkList);

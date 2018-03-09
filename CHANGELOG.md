@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- Option for choosing which storage to store the bookmarks. (For now either `Local` or `Sync`).
+
+### Changed
+
+- Decrease maximum manga list size from 300 entries to 280 in order to have more leeway in adding more add-on configuration in the future.
+This only affects users using the sync storage.
+
 ### Fixed
 
 - Content script was not loading sidebar menu on kissmanga pages due to a change to the DOM structure when 'All pages' mode was selected.

@@ -1,3 +1,5 @@
+import * as FoxyStorage from '../util/FoxyStorage';
+
 /**
  * Checks whether or not the manga is bookmarked
  * @param {string} source The source of the manga to check.
@@ -7,8 +9,8 @@ export async function isBookmarked(source, reference) {
   try {
     const key = `${source}/${reference}`;
 
-    const storage = await browser.storage.sync.get(key);
-    return (storage[key] !== undefined);
+    const bookmark = await FoxyStorage.getMetadata(key);
+    return (bookmark !== undefined);
   } catch (err) {
     console.error(`Could not check if manga is bookmarked: ${err}`); // eslint-disable-line no-console
     return false;

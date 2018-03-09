@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
+import * as FoxyStorage from '../util/FoxyStorage';
 import * as Notification from '../util/notification';
 import * as Sidebar from './util/sidebar';
 import * as MangaList from './util/list';
@@ -16,22 +17,6 @@ document.addEventListener('click', Sidebar.expandButtonListener);
 
 // List view controller
 // ////////////////////////////////////////////////////////////////
-
-function getBookmarkList(storage) {
-  const bookmarkList = Object.keys(storage)
-    .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-    .map(key => storage[key]);
-
-  bookmarkList.sort((a, b) => {
-    const refA = a.reference.toUpperCase();
-    const refB = b.reference.toUpperCase();
-    if (refA < refB) return -1;
-    if (refA > refB) return 1;
-    return 0;
-  });
-
-  return bookmarkList;
-}
 
 async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true) {
   let readCount = 0;
@@ -73,7 +58,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 
 async function listViewModeListener(e) {
   try {
-    const storage = await browser.storage.sync.get();
+    const storage = await browser.storage.sync.get('view_mode');
 
     // Initializes the view_mode and bookmark_list
     if (!storage.view_mode) storage.view_mode = {};
@@ -85,7 +70,14 @@ async function listViewModeListener(e) {
     mangaListDom.innerHTML = '';
 
     // Get the bookmarkList
-    const bookmarkList = getBookmarkList(storage);
+    const bookmarkList = await FoxyStorage.getMetadata();
+    bookmarkList.sort((a, b) => {
+      const refA = a.reference.toUpperCase();
+      const refB = b.reference.toUpperCase();
+      if (refA < refB) return -1;
+      if (refA > refB) return 1;
+      return 0;
+    });
 
     // Append new list
     await setListViewMode(storage.view_mode.list, bookmarkList, false);
@@ -232,7 +224,14 @@ window.onload = async () => {
     }
 
     // Get the bookmarkList
-    const bookmarkList = getBookmarkList(storage);
+    const bookmarkList = await FoxyStorage.getMetadata();
+    bookmarkList.sort((a, b) => {
+      const refA = a.reference.toUpperCase();
+      const refB = b.reference.toUpperCase();
+      if (refA < refB) return -1;
+      if (refA > refB) return 1;
+      return 0;
+    });
 
     // Append manga list
     if (bookmarkList) {

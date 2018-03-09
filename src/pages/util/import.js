@@ -1,5 +1,6 @@
 import { ErrorCode, getError as FoxyError } from '../../util/foxyErrors';
 import Alert from '../../util/alerts';
+import * as FoxyStorage from '../../util/FoxyStorage';
 import { processImportFile } from '../../util/upgrade';
 import { createRow } from './manga-table';
 
@@ -95,11 +96,7 @@ export async function parseFile(file, tbody) {
         importFile = await processImportFile(importFile);
         if (!importFile || !importFile.bookmark_list) throw new TypeError('Import file has no property bookmark_list');
 
-        const storage = await browser.storage.sync.get();
-
-        const bookmarkList = Object.keys(storage)
-          .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-          .map(key => storage[key]);
+        const bookmarkList = await FoxyStorage.getMetadata();
 
         await createTable(tbody, bookmarkList);
 
@@ -235,11 +232,7 @@ export async function importButtonListener() {
     if (dataToImport.length === 0) throw FoxyError(ErrorCode.IMPORT_NO_DATA);
 
     // Check if size limit will not be exceeded
-    const storage = await browser.storage.sync.get();
-    const bookmarkList = Object.keys(storage)
-      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-      .map(key => storage[key]);
-    if (bookmarkList.length + dataToImport.length > 300) throw FoxyError(ErrorCode.MANGA_LIMIT_EXCEEDED, 'Limit: 300 entries');
+    await FoxyStorage.checkLimit({ sum: dataToImport.length });
 
     // Reset progress and show bar
     const progress = document.getElementById('import-progress-container');

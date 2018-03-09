@@ -1,5 +1,6 @@
 import { getError as FoxyError } from '../util/foxyErrors';
 import Alert from '../util/alerts';
+import * as FoxyStorage from '../util/FoxyStorage';
 import * as MangaTable from './util/manga-table';
 import * as Import from './util/import';
 import Export from './util/export';
@@ -10,11 +11,7 @@ import Export from './util/export';
  */
 async function initTable(table) {
   try {
-    const storage = await browser.storage.sync.get();
-
-    const bookmarkList = Object.keys(storage)
-      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-      .map(key => storage[key]);
+    const bookmarkList = await FoxyStorage.getMetadata();
 
     const promises = [];
     bookmarkList.forEach(async (bookmark) => {
