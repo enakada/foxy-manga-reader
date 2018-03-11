@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Decrease maximum manga list size from 300 entries to 280 in order to have more leeway in adding more add-on configuration in the future.
 This only affects users using the sync storage.
+- Moved `LocalForage` storage to `FoxyStorage`.
 
 ### Fixed
 

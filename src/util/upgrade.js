@@ -1,6 +1,5 @@
 import SourceMigrations from './source-migration';
 import * as FoxyStorage from '../util/FoxyStorage';
-import store from '../util/datastore';
 
 /**
  * Checks whether or not v1 is lower than v2.
@@ -61,13 +60,13 @@ export function applyChanges(object, changes) {
  */
 async function updateStorage(bookmark, changes) {
   try {
-    const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
+    const manga = await FoxyStorage.DataStorage.getItem(`${bookmark.source}/${bookmark.reference}`);
     if (!manga) Promise.resolve(false);
 
     const newMangaObj = applyChanges(manga, changes);
 
-    await store.removeItem(`${bookmark.source}/${bookmark.reference}`);
-    await store.setItem(`${newMangaObj.source}/${newMangaObj.reference}`, newMangaObj);
+    await FoxyStorage.DataStorage.removeItem(`${bookmark.source}/${bookmark.reference}`);
+    await FoxyStorage.DataStorage.setItem(`${newMangaObj.source}/${newMangaObj.reference}`, newMangaObj);
 
     return Promise.resolve(true);
   } catch (err) {

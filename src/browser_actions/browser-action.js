@@ -1,10 +1,8 @@
 import moment from 'moment';
 import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
-import * as FoxyStorage from '../util/FoxyStorage';
 import * as Notification from '../util/notification';
 import * as Sidebar from './util/sidebar';
 import * as MangaList from './util/list';
-import store from '../util/datastore';
 
 const mangaListDom = document.getElementById('manga-list');
 
@@ -38,7 +36,11 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 
     // Append manga list
     const promises = bookmarkList.map(async (bookmark) => {
-      const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
+      // Get Manga data
+      const manga = await browser.runtime.sendMessage({
+        type: 'get-manga-data',
+        manga_key: `${bookmark.source}/${bookmark.reference}`,
+      });
       if (!manga) throw FoxyError(ErrorCode.STORE_ERROR, `${bookmark.source}/${bookmark.reference}`); // return;
 
       const card = fn(bookmark, manga);
@@ -70,7 +72,9 @@ async function listViewModeListener(e) {
     mangaListDom.innerHTML = '';
 
     // Get the bookmarkList
-    const bookmarkList = await FoxyStorage.getMetadata();
+    const bookmarkList = await browser.runtime.sendMessage({
+      type: 'get-bookmark-data',
+    });
     bookmarkList.sort((a, b) => {
       const refA = a.reference.toUpperCase();
       const refB = b.reference.toUpperCase();
@@ -224,7 +228,9 @@ window.onload = async () => {
     }
 
     // Get the bookmarkList
-    const bookmarkList = await FoxyStorage.getMetadata();
+    const bookmarkList = await browser.runtime.sendMessage({
+      type: 'get-bookmark-data',
+    });
     bookmarkList.sort((a, b) => {
       const refA = a.reference.toUpperCase();
       const refB = b.reference.toUpperCase();

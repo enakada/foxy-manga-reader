@@ -18,9 +18,22 @@
  * - Dropbox (coming soon)
  */
 
+import localforage from 'localforage';
 import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
 
 export const syncLimit = 280;
+
+
+// Manga data storage
+// ////////////////////////////////////////////////////////////////
+
+export const DataStorage = localforage.createInstance({
+  name: 'foxy-manga-reader',
+});
+
+
+// Manga metadata storage operations
+// ////////////////////////////////////////////////////////////////
 
 /**
  * Checks whether or not the sync manga limit was exceeded.
@@ -80,13 +93,17 @@ export async function getMetadata(keys) {
     }
 
     // Return an object if keys is a string or else, an array
-    const result = (!returnArray)
-      ? storage[keys]
-      : Object.keys(storage)
-        .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-        .map(key => storage[key]);
+    if (!returnArray) {
+      return (!Object.hasOwnProperty.call(storage, keys))
+        ? Promise.resolve()
+        : Promise.resolve(storage[keys]);
+    }
 
-    return result;
+    const list = Object.keys(storage)
+      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
+      .map(key => storage[key]);
+
+    return Promise.resolve(list);
   } catch (err) {
     throw err;
   }
@@ -107,9 +124,10 @@ export async function setMetadata(key, value) {
 
   try {
     const syncStorage = await browser.storage.sync.get();
+    const { storageType } = syncStorage;
 
     let result;
-    switch (syncStorage.storageType) {
+    switch (storageType) {
       case 'local':
         result = await browser.storage.local.set(storage);
         break;
@@ -157,12 +175,6 @@ export async function removeMetadata(keys) {
     throw err;
   }
 }
-
-// Data storage operations
-// ////////////////////////////////////////////////////////////////
-
-// Operations
-// ////////////////////////////////////////////////////////////////
 
 /**
  * Migrates the current manga metadata list to the specified storage type.

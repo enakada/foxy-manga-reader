@@ -2,7 +2,6 @@ import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
 import * as Extractor from './extractors/extractor';
 import * as Notification from '../util/notification';
 import * as FoxyStorage from '../util/FoxyStorage';
-import store from '../util/datastore';
 import { updateAddon } from '../util/upgrade';
 
 // Core Methods
@@ -33,7 +32,7 @@ async function bookmarkManga(url, bookmark, options = {}) {
     if (!manga) throw FoxyError(ErrorCode.WRONG_MANGA_URL, url);
 
     // Save manga information
-    await store.setItem(info.key, manga);
+    await FoxyStorage.DataStorage.setItem(info.key, manga);
 
     // Get the bookmarkEntry
     let bookmarkEntry;
@@ -93,7 +92,7 @@ async function unbookmarkManga(url, key) {
 
     // Remove from indexdb and sync
     await FoxyStorage.removeMetadata(mangaKey);
-    await store.removeItem(mangaKey);
+    await FoxyStorage.DataStorage.removeItem(mangaKey);
 
     return Promise.resolve(true);
   } catch (err) {
@@ -118,7 +117,7 @@ async function updateCurrentChapter(url) {
     const entry = await FoxyStorage.getMetadata(info.key);
     if (!entry) return Promise.resolve(false);
 
-    const manga = await store.getItem(info.key);
+    const manga = await FoxyStorage.DataStorage.getItem(info.key);
     if (!manga) throw FoxyError(ErrorCode.STORE_ERROR, info.key);
 
     const chapter = info.extractor.getChapterReference(url);
@@ -184,7 +183,7 @@ async function syncHandler(changes, areaName) {
   if (!bookmarkList) return;
 
   try {
-    const keys = await store.keys();
+    const keys = await FoxyStorage.DataStorage.keys();
 
     // Add manga information for each new entry in the bookmarklist
     bookmarkList.forEach(async (bookmark) => {
@@ -221,11 +220,11 @@ async function updateMangaChapterList(alarm) {
     const storage = await browser.storage.sync.get('badge_count');
     if (!storage.badge_count) storage.badge_count = 0;
 
-    const keys = await store.keys();
+    const keys = await FoxyStorage.DataStorage.keys();
     if (!keys) return; // no manga to track
 
     keys.forEach(async (key) => {
-      const manga = await store.getItem(key);
+      const manga = await FoxyStorage.DataStorage.getItem(key);
 
       const bookmark = await FoxyStorage.getMetadata(key);
       if (!bookmark) throw FoxyError(ErrorCode.NO_BOOKMARK_ERROR, manga.name);
@@ -253,7 +252,7 @@ async function updateMangaChapterList(alarm) {
 
       // Update db
       const mangaCopy = Object.assign(manga, { chapter_list: chapterList }, metadata);
-      await store.setItem(info.key, mangaCopy);
+      await FoxyStorage.DataStorage.setItem(info.key, mangaCopy);
 
       if (count <= 0) return; // no new chapters
 
@@ -442,7 +441,7 @@ async function importManga(bookmark) {
   const key = `${bookmark.source}/${bookmark.reference}`;
 
   try {
-    const manga = await store.getItem(key);
+    const manga = await FoxyStorage.DataStorage.getItem(key);
     if (!manga) {
       await bookmarkManga(bookmark.url, bookmark);
     } else {
@@ -467,9 +466,13 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
     case 'update-chapter':
       return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(TypeError('message has no property tab.url'));
     case 'get-manga-data':
-      return store.getItem(message.manga_key);
+      return FoxyStorage.DataStorage.getItem(message.manga_key);
+    case 'get-bookmark-data':
+      return FoxyStorage.getMetadata(message.key);
     case 'import-single':
       return importManga(message.bookmark);
+    case 'switch-storage':
+      return FoxyStorage.switchStorage(message.to);
     default:
       return Promise.reject(new TypeError(`Unsupported message type: ${message.type}`));
   }
