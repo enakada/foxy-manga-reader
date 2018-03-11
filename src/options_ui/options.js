@@ -1,12 +1,12 @@
 import { getError as FoxyError } from '../util/foxyErrors';
-import { migrateMetadata } from '../util/FoxyStorage';
+import { switchStorage } from '../util/FoxyStorage';
 import Alert from '../util/alerts';
 
 const saveOptions = async () => {
   try {
     const checkedValue = document.querySelector('[name=storageType]:checked').id;
 
-    await migrateMetadata(checkedValue);
+    await switchStorage(checkedValue);
 
     await browser.storage.sync.set({ storageType: checkedValue });
 

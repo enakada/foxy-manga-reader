@@ -20,7 +20,7 @@
 
 import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
 
-const syncLimit = 280;
+export const syncLimit = 280;
 
 /**
  * Checks whether or not the sync manga limit was exceeded.
@@ -171,7 +171,7 @@ export async function removeMetadata(keys) {
  * @returns A Promise which resolves to true if the storage was migrated or false
  *  if the destination is the same as the current storage.
  */
-export async function migrateMetadata(to) {
+export async function switchStorage(to) {
   try {
     let { storageType } = await browser.storage.sync.get('storageType');
     storageType = storageType || 'sync';

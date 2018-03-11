@@ -164,10 +164,16 @@ export async function updateAddon(previousVersion) {
     }
 
     // Handle transition to v0.6.0 - storage redesign (issue#9)
-    let bookmarkList = [];
     if (compareVersions(previousVersion, '0.6.0') && storage.bookmark_list) {
       await redesignBookmarkStorage(storage.bookmark_list);
-      bookmarkList = await FoxyStorage.getMetadata();
+    }
+
+    const bookmarkList = await FoxyStorage.getMetadata();
+
+    // Handle transition to v0.6.2 - local/sync storage options (issue#13)
+    if (compareVersions(previousVersion, '0.6.2') && bookmarkList.length > FoxyStorage.syncLimit) {
+      await FoxyStorage.switchStorage('local');
+      await browser.storage.sync.set({ storageType: 'local' });
     }
 
     // Applies all DB migrations needed
