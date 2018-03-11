@@ -10,7 +10,36 @@
 </head>
 
 <body>
+  <!-- Alerts space -->
   <div id="alerts"></div>
+
+  <div>
+    <h1>Storage Type</h1>
+    <div class="alert alert-info" role="alert">
+      <h4 class="alert-heading">Let's understand the storage options!</h4>
+      <p>
+        <strong>Local:</strong> Stores your data locally. You won't be able to sync your data across devices,
+        but you can have unlimited storage (meaning unlimited manga bookmarks).
+      <p>
+        <strong>Sync:</strong> Your data will be stored and managed by Firefox Sync account. This allows you to
+        have your manga ready in any device running Firefox, but there is a 200kb limit to the storage
+        (meaning that you will be limited to 280 mangas only).
+      </p>
+    </div>
+
+    <form class="mb-3">
+      <div class="custom-control custom-radio">
+        <input type="radio" id="local" name="storageType" class="custom-control-input">
+        <label class="custom-control-label" for="local">Local</label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input type="radio" id="sync" name="storageType" class="custom-control-input">
+        <label class="custom-control-label" for="sync">Sync</label>
+      </div>
+    </form>
+
+    <button type="button" id="save-btn" class="btn btn-primary btn-lg">Save</button>
+  </div>
 
   <script type="text/javascript" src="../js/jquery-3.2.1.slim.min.js"></script>
   <script type="text/javascript" src="../js/popper.min.js"></script>

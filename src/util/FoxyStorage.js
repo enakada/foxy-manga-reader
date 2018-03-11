@@ -115,7 +115,10 @@ export async function setMetadata(key, value) {
         break;
       case 'sync':
       default:
-        await checkLimit({ preloadedStorage: syncStorage });
+        // Check manga limit in case we are not updating data
+        if (!syncStorage[key]) {
+          await checkLimit({ preloadedStorage: syncStorage });
+        }
 
         result = await browser.storage.sync.set(storage);
         break;
@@ -161,4 +164,39 @@ export async function removeMetadata(keys) {
 // Operations
 // ////////////////////////////////////////////////////////////////
 
-// TODO: Migrate storage
+/**
+ * Migrates the current manga metadata list to the specified storage type.
+ * @param {string} to Required. A string definind which storage type to move the metadata list.
+ *  Can be one of the following ['local, 'sync'].
+ * @returns A Promise which resolves to true if the storage was migrated or false
+ *  if the destination is the same as the current storage.
+ */
+export async function migrateMetadata(to) {
+  try {
+    let { storageType } = await browser.storage.sync.get('storageType');
+    storageType = storageType || 'sync';
+    if (storageType === to) return Promise.resolve(false);
+
+    const oldStorage = await browser.storage[storageType].get();
+
+    const keys = Object.keys(oldStorage)
+      .filter(key => (oldStorage[key].type && oldStorage[key].type === 'bookmark'));
+
+    // Check if the list will exceed the limit in case the user is migrating to sync
+    if (to === 'sync' && keys.length > syncLimit) {
+      throw FoxyError(ErrorCode.MANGA_LIMIT_EXCEEDED, `Limit: ${syncLimit} entries`);
+    }
+
+    const newStorage = {};
+    keys.forEach((key) => {
+      newStorage[key] = oldStorage[key];
+    });
+
+    await browser.storage[to].set(newStorage);
+    await browser.storage[storageType].remove(Object.keys(newStorage));
+
+    return Promise.resolve(true);
+  } catch (err) {
+    throw err;
+  }
+}
