@@ -3,7 +3,6 @@ import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
 import * as Notification from '../util/notification';
 import * as Sidebar from './util/sidebar';
 import * as MangaList from './util/list';
-import store from '../util/datastore';
 
 const mangaListDom = document.getElementById('manga-list');
 
@@ -16,22 +15,6 @@ document.addEventListener('click', Sidebar.expandButtonListener);
 
 // List view controller
 // ////////////////////////////////////////////////////////////////
-
-function getBookmarkList(storage) {
-  const bookmarkList = Object.keys(storage)
-    .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-    .map(key => storage[key]);
-
-  bookmarkList.sort((a, b) => {
-    const refA = a.reference.toUpperCase();
-    const refB = b.reference.toUpperCase();
-    if (refA < refB) return -1;
-    if (refA > refB) return 1;
-    return 0;
-  });
-
-  return bookmarkList;
-}
 
 async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true) {
   let readCount = 0;
@@ -53,7 +36,11 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 
     // Append manga list
     const promises = bookmarkList.map(async (bookmark) => {
-      const manga = await store.getItem(`${bookmark.source}/${bookmark.reference}`);
+      // Get Manga data
+      const manga = await browser.runtime.sendMessage({
+        type: 'get-manga-data',
+        manga_key: `${bookmark.source}/${bookmark.reference}`,
+      });
       if (!manga) throw FoxyError(ErrorCode.STORE_ERROR, `${bookmark.source}/${bookmark.reference}`); // return;
 
       const card = fn(bookmark, manga);
@@ -73,7 +60,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 
 async function listViewModeListener(e) {
   try {
-    const storage = await browser.storage.sync.get();
+    const storage = await browser.storage.sync.get('view_mode');
 
     // Initializes the view_mode and bookmark_list
     if (!storage.view_mode) storage.view_mode = {};
@@ -85,7 +72,16 @@ async function listViewModeListener(e) {
     mangaListDom.innerHTML = '';
 
     // Get the bookmarkList
-    const bookmarkList = getBookmarkList(storage);
+    const bookmarkList = await browser.runtime.sendMessage({
+      type: 'get-bookmark-data',
+    });
+    bookmarkList.sort((a, b) => {
+      const refA = a.reference.toUpperCase();
+      const refB = b.reference.toUpperCase();
+      if (refA < refB) return -1;
+      if (refA > refB) return 1;
+      return 0;
+    });
 
     // Append new list
     await setListViewMode(storage.view_mode.list, bookmarkList, false);
@@ -232,7 +228,16 @@ window.onload = async () => {
     }
 
     // Get the bookmarkList
-    const bookmarkList = getBookmarkList(storage);
+    const bookmarkList = await browser.runtime.sendMessage({
+      type: 'get-bookmark-data',
+    });
+    bookmarkList.sort((a, b) => {
+      const refA = a.reference.toUpperCase();
+      const refB = b.reference.toUpperCase();
+      if (refA < refB) return -1;
+      if (refA > refB) return 1;
+      return 0;
+    });
 
     // Append manga list
     if (bookmarkList) {

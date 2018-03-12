@@ -11,11 +11,9 @@ async function exportBookmarks() {
   a.style = 'display: none';
 
   try {
-    const storage = await browser.storage.sync.get();
-
-    const bookmarkList = Object.keys(storage)
-      .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-      .map(key => storage[key]);
+    const bookmarkList = await browser.runtime.sendMessage({
+      type: 'get-bookmark-data',
+    });
 
     const backup = {
       version: browser.runtime.getManifest().version,

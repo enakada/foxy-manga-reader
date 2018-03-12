@@ -35,6 +35,11 @@
     }
   },
 
+  "saveOptionsSuccessMessage": {
+    "message": "Your options were successfully saved.",
+    "description": "Alert body for options success message."
+  },
+
   "unbookmarkIconTitle": {
     "message": "Remove Manga",
     "description": "Page action unbookmark manga icon title."

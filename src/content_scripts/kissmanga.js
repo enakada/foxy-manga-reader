@@ -80,7 +80,13 @@ async function dualPage(viewerDiv) {
 // ////////////////////////////////////////////////////////////////
 
 function displayMenu(data, viewMode) {
-  const chapterList = document.getElementById('selectChapter').options;
+  // Check select the reading type
+  const readType = document.getElementById('selectReadType');
+  if (!readType) return;
+
+  const chapterList = (readType.selectedIndex === 0)
+    ? document.getElementById('selectChapter').options
+    : document.getElementsByClassName('selectChapter')[0];
   if (!chapterList) return;
 
   // Parse chapter links
@@ -91,13 +97,7 @@ function displayMenu(data, viewMode) {
     ? `${data.mangaHome}${chapterList[curChapterIndex + 1].value}` : '';
   const previousChapter = (curChapterIndex > 0) ? `${data.mangaHome}${chapterList[curChapterIndex - 1].value}` : '';
 
-  const pageList = document.getElementById('selectPage').options;
-  if (!pageList) return;
-
   const pageIncrement = (viewMode !== 'dual') ? 1 : 2;
-
-  const curPageIndex = pageList.selectedIndex;
-  if (curPageIndex === -1) return;
 
   const nextPage = () => {
     if (pageIncrement === 2) window.wrappedJSObject.currImage += 1;

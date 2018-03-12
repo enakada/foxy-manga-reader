@@ -6,9 +6,12 @@
 export async function isBookmarked(source, reference) {
   try {
     const key = `${source}/${reference}`;
+    const bookmark = await browser.runtime.sendMessage({
+      type: 'get-bookmark-data',
+      key,
+    });
 
-    const storage = await browser.storage.sync.get(key);
-    return (storage[key] !== undefined);
+    return (bookmark !== undefined);
   } catch (err) {
     console.error(`Could not check if manga is bookmarked: ${err}`); // eslint-disable-line no-console
     return false;

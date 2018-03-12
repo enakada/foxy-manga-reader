@@ -1,7 +1,7 @@
 import { ErrorCode, getError as FoxyError } from '../util/foxyErrors';
 import * as Extractor from './extractors/extractor';
 import * as Notification from '../util/notification';
-import store from '../util/datastore';
+import * as FoxyStorage from '../util/FoxyStorage';
 import { updateAddon } from '../util/upgrade';
 
 // Core Methods
@@ -12,24 +12,18 @@ import { updateAddon } from '../util/upgrade';
  * - Get extractor from URL
  * - Get Manga Info
  * - Get current chapter info, if any, or save first chapter
- * - save manga reference (and cur_chapter) to storage.sync
+ * - save manga reference (and cur_chapter) to FoxyStorage
  * - Save manga info to indexedDB
  * @param {string} url The url of the manga.
  * @param {object} bookmark The bookmark object of a previous backup.
  * @param {object} options Optional. Contains property `skipSave`: defines whether or not the method should save
- *  bookmarks to the `storage.sync`.
+ *  bookmarks to the `FoxyStorage`.
  * @returns {Promise} A promise which resolves to the manga object.
  */
 async function bookmarkManga(url, bookmark, options = {}) {
   try {
-    // Prevent manga list from exceeding 300 entries
-    {
-      const storage = await browser.storage.sync.get();
-      const bookmarkList = Object.keys(storage)
-        .filter(key => (storage[key].type && storage[key].type === 'bookmark'))
-        .map(key => storage[key]);
-      if (bookmarkList.length >= 300) throw FoxyError(ErrorCode.MANGA_LIMIT_EXCEEDED, 'Limit: 300 entries');
-    }
+    // Prevent manga list from exceeding a limit when using sync storage
+    await FoxyStorage.checkLimit({});
 
     const info = Extractor.parseUrl(url);
     if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
@@ -38,7 +32,7 @@ async function bookmarkManga(url, bookmark, options = {}) {
     if (!manga) throw FoxyError(ErrorCode.WRONG_MANGA_URL, url);
 
     // Save manga information
-    await store.setItem(info.key, manga);
+    await FoxyStorage.DataStorage.setItem(info.key, manga);
 
     // Get the bookmarkEntry
     let bookmarkEntry;
@@ -66,11 +60,8 @@ async function bookmarkManga(url, bookmark, options = {}) {
       };
     }
 
-    const storage = {};
-    storage[info.key] = bookmarkEntry;
-
-    // Save bookmark to storage.sync
-    if (!options.skipSave) await browser.storage.sync.set(storage);
+    // Save bookmark to FoxyStorage
+    if (!options.skipSave) await FoxyStorage.setMetadata(info.key, bookmarkEntry);
 
     return Promise.resolve(manga);
   } catch (err) {
@@ -81,7 +72,7 @@ async function bookmarkManga(url, bookmark, options = {}) {
 /**
  * Unbookmarks a manga.
  * - Get extractor from URL
- * - Remove manga data from storage.sync
+ * - Remove manga data from FoxyStorage
  * - Remove manga data from indexeddb
  * @param {string} url Required. The url of the manga.
  * @param {string} key Optional. The key of the manga to unbookmark.
@@ -100,8 +91,8 @@ async function unbookmarkManga(url, key) {
     }
 
     // Remove from indexdb and sync
-    await browser.storage.sync.remove(mangaKey);
-    await store.removeItem(mangaKey);
+    await FoxyStorage.removeMetadata(mangaKey);
+    await FoxyStorage.DataStorage.removeItem(mangaKey);
 
     return Promise.resolve(true);
   } catch (err) {
@@ -112,7 +103,7 @@ async function unbookmarkManga(url, key) {
 /**
  * Updates the last read chapter to the URL defined chapter.
  * - Get extractor from URL
- * - Get last_read information from storage.sync
+ * - Get last_read information from FoxyStorage
  * - Check if current chapter is higher than the storage
  * - Update the storage
  * @param {string} url The url of the manga.
@@ -123,11 +114,10 @@ async function updateCurrentChapter(url) {
     const info = Extractor.parseUrl(url);
     if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, url);
 
-    const storage = await browser.storage.sync.get(info.key);
-    const entry = storage[info.key];
+    const entry = await FoxyStorage.getMetadata(info.key);
     if (!entry) return Promise.resolve(false);
 
-    const manga = await store.getItem(info.key);
+    const manga = await FoxyStorage.DataStorage.getItem(info.key);
     if (!manga) throw FoxyError(ErrorCode.STORE_ERROR, info.key);
 
     const chapter = info.extractor.getChapterReference(url);
@@ -141,7 +131,7 @@ async function updateCurrentChapter(url) {
       entry.last_read.chapter.id = chapter.id;
       entry.last_read.chapter.index = chapterIndex;
 
-      await browser.storage.sync.set(storage);
+      await FoxyStorage.setMetadata(info.key, entry);
 
       // Send message to update current chapter
       browser.runtime.sendMessage({
@@ -193,7 +183,7 @@ async function syncHandler(changes, areaName) {
   if (!bookmarkList) return;
 
   try {
-    const keys = await store.keys();
+    const keys = await FoxyStorage.DataStorage.keys();
 
     // Add manga information for each new entry in the bookmarklist
     bookmarkList.forEach(async (bookmark) => {
@@ -227,16 +217,16 @@ async function updateMangaChapterList(alarm) {
   if (alarm.name !== 'background_update') return;
 
   try {
-    const storage = await browser.storage.sync.get();
+    const storage = await browser.storage.sync.get('badge_count');
     if (!storage.badge_count) storage.badge_count = 0;
 
-    const keys = await store.keys();
+    const keys = await FoxyStorage.DataStorage.keys();
     if (!keys) return; // no manga to track
 
     keys.forEach(async (key) => {
-      const manga = await store.getItem(key);
+      const manga = await FoxyStorage.DataStorage.getItem(key);
 
-      const bookmark = storage[key];
+      const bookmark = await FoxyStorage.getMetadata(key);
       if (!bookmark) throw FoxyError(ErrorCode.NO_BOOKMARK_ERROR, manga.name);
 
       console.log(`Checking updates for '${manga.name}'`);
@@ -254,12 +244,15 @@ async function updateMangaChapterList(alarm) {
         bookmark.last_read.chapter.index = lastReadIndex;
       }
 
+      // Save metadata
+      await FoxyStorage.setMetadata(key, bookmark);
+
       // Update manga metadata
       const metadata = await info.extractor.updateMetadata(manga);
 
       // Update db
       const mangaCopy = Object.assign(manga, { chapter_list: chapterList }, metadata);
-      await store.setItem(info.key, mangaCopy);
+      await FoxyStorage.DataStorage.setItem(info.key, mangaCopy);
 
       if (count <= 0) return; // no new chapters
 
@@ -418,12 +411,10 @@ async function pageActionListener(tabId, changeInfo) {
   const info = Extractor.parseUrl(changeInfo.url);
   if (!info) return;
 
-  // console.debug(`Called page action listener on new tab ${changeInfo.url}`);
-
   try {
-    const storage = await browser.storage.sync.get(info.key);
+    const bookmark = await FoxyStorage.getMetadata(info.key);
 
-    if (!storage[info.key]) { // not bookmarked
+    if (!bookmark) { // not bookmarked
       displayBookmarkIcon(tabId);
     } else { // bookmarked
       displayUnbookmarkIcon(tabId);
@@ -450,13 +441,11 @@ async function importManga(bookmark) {
   const key = `${bookmark.source}/${bookmark.reference}`;
 
   try {
-    const manga = await store.getItem(key);
+    const manga = await FoxyStorage.DataStorage.getItem(key);
     if (!manga) {
       await bookmarkManga(bookmark.url, bookmark);
     } else {
-      const storage = {};
-      storage[key] = bookmark;
-      await browser.storage.sync.set(storage);
+      await FoxyStorage.setMetadata(key, bookmark);
     }
 
     return Promise.resolve(bookmark);
@@ -477,9 +466,13 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
     case 'update-chapter':
       return (sender.tab) ? updateCurrentChapter(sender.tab.url) : Promise.reject(TypeError('message has no property tab.url'));
     case 'get-manga-data':
-      return store.getItem(message.manga_key);
+      return FoxyStorage.DataStorage.getItem(message.manga_key);
+    case 'get-bookmark-data':
+      return FoxyStorage.getMetadata(message.key);
     case 'import-single':
       return importManga(message.bookmark);
+    case 'switch-storage':
+      return FoxyStorage.switchStorage(message.to);
     default:
       return Promise.reject(new TypeError(`Unsupported message type: ${message.type}`));
   }

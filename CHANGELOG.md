@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.2] - 2018-03-12
+### Added
+
+- Option for choosing which storage to store the bookmarks. (For now either `Local` or `Sync`).
+
+### Changed
+
+- Decrease maximum manga list size from 300 entries to 280 in order to have more leeway in adding more add-on configuration in the future.
+This only affects users using the sync storage.
+- Moved `LocalForage` storage to `FoxyStorage`.
+
+### Fixed
+
+- Content script was not loading sidebar menu on kissmanga pages due to a change to the DOM structure when 'All pages' mode was selected.
+
 ## [0.6.1] - 2018-02-27
 ### Added
 
@@ -139,7 +154,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Settings page with Backup/Restore options.
 - License file.
 
-[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.2...HEAD
 [0.2.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
@@ -149,3 +164,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.5.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.1...v0.5.2
 [0.6.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.2...v0.6.0
 [0.6.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.0...v0.6.1
+[0.6.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.1...v0.6.2
