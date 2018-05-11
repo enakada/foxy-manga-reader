@@ -26,6 +26,7 @@
         "*://*.mangaeden.com/*",
         "*://*.mangahere.cc/*",
         "*://*.kissmanga.com/*",
+        "*://*.mangareader.net/*",
         "storage",
         "cookies",
         "alarms",
@@ -79,6 +80,11 @@
         {
           "matches": ["*://*.kissmanga.com/*"],
           "js": ["content_scripts/kissmanga.js"],
+          "css": ["css/content_ui.css"]
+        },
+        {
+          "matches": ["*://*.mangareader.net/*"],
+          "js": ["content_scripts/mangareader.js"],
           "css": ["css/content_ui.css"]
         }
     ]
