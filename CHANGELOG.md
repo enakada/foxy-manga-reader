@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - New source: [MangaReader](https://www.mangareader.net).
 
+### Fixed
+
+- Kissmanga background updates. The updates were not working due to a change to the cloudflare code.
+
 ## [0.6.2] - 2018-03-12
 ### Added
 
