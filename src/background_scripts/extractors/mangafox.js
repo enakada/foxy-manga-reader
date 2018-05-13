@@ -53,24 +53,44 @@ export function getMangaStatus(response, url) {
  * @param {array} chapterList A default chapterList array to start from. Defaults to an empty array
  * @returns {array} The array of chapter objects.
  */
-function getChapterList(mangaSid, mangaUrl, chapterList = []) {
-  const url = `http://fanfox.net/media/js/list.${mangaSid}.js`;
+function getChapterList(mangaUrl, dom, chapterList = []) {
+  const parseFn = (doc) => {
+    const rowIterator = doc.evaluate('//div[@id="chapters"]/ul[@class="chlist"]//h3|//h4', doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
-  return HttpFetch(url, (response) => {
-    const regex = /\["(.+)","([\w/.]+)"\]/g;
+    try {
+      let rowNode = rowIterator.iterateNext();
+      if (!rowNode) return chapterList;
 
-    let m = regex.exec(response);
-    while (m !== null) {
-      chapterList.push({
-        id: m[2],
-        name: m[1],
-        url: new URL(`${m[2]}/1.html`, mangaUrl).toString(),
-      });
+      while (rowNode) {
+        const [linkNode] = rowNode.getElementsByTagName('a');
 
-      m = regex.exec(response);
+        const [, url] = linkNode.href.split('//');
+        const { id } = getChapterReference(url);
+        const name = rowNode.textContent.trim().replace(/(\r\n|\n|\r)/, ': ');
+
+        chapterList.push({
+          id,
+          name: name.replace(/\s{2,}/, ' '), // Remove any double space left
+          url: `http://${url}`,
+        });
+
+        rowNode = rowIterator.iterateNext();
+      }
+    } catch (err) {
+      throw Error(`Document tree modified during iteration: ${err}`);
     }
 
-    return chapterList;
+    return chapterList.reverse();
+  };
+
+  if (dom) return Promise.resolve(parseFn(dom));
+
+  return HttpFetch(mangaUrl, (response) => {
+    if (!response || typeof response !== 'object') {
+      throw FoxyError(ErrorCode.RESPONSE_NOT_HTML, mangaUrl);
+    }
+
+    return parseFn(response);
   });
 }
 
@@ -115,7 +135,7 @@ export function getMangaInfo(url) {
 
     // Get chapter list and return
     try {
-      const chapterList = await getChapterList(sid, mangaUrl);
+      const chapterList = await getChapterList(mangaUrl, response);
 
       // Create the manga object
       const manga = {
@@ -148,7 +168,7 @@ export async function updateChapters(manga) {
   }
 
   try {
-    const chapterList = await getChapterList(manga.sid, manga.url);
+    const chapterList = await getChapterList(manga.url);
 
     const data = {
       count: chapterList.length - manga.chapter_list.length,

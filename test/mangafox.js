@@ -295,7 +295,7 @@ describe('Mangafox', () => {
     });
 
     it('should return the correct manga object structure for chapter page', () => {
-      const res1 = `
+      window.fetch.callsFake(MockFetch.ok(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -310,19 +310,30 @@ describe('Mangafox', () => {
                 <span> Completed</span>
               </div>
             </div>
+            <div id="chapters">
+              <ul class="chlist" style="display:block">
+                <li>
+                    <div><h3>
+                      <a href="//fanfox.net/manga/break_blade/v15/c088.5/1.html">Break Blade 88.5</a>
+                      <span>Omake</span>
+                    </h3></div>
+                </li>
+              </ul>
+              <ul class="chlist" style="display:block">
+                <li>
+                  <h4>
+                    <a href="//fanfox.net/manga/break_blade/v15/c088/1.html">Break Blade 88</a>
+                    <span>Sentiment</span>
+                  </h4>
+                </li>
+              </ul>
+            </div>
           </body>
-        </html>`;
-      const res2 = `
-        ["Title 1","v01/c001"],
-        ["Title 2","v01/c002.5"]`;
-
-      window.fetch
-        .onFirstCall().callsFake(MockFetch.ok(res1))
-        .onSecondCall().callsFake(MockFetch.ok(res2, { headers: { 'Content-Type': 'application/x-javascript' } }));
+        </html>`));
 
       return Mangafox.getMangaInfo('http://fanfox.net/manga/12_manga/v001/c001/1.html')
         .then((manga) => {
-          MockFetch.callCount().should.be.equal(2);
+          MockFetch.callCount().should.be.equal(1);
 
           should.exist(manga);
           manga.should.be.an('object');
@@ -341,7 +352,7 @@ describe('Mangafox', () => {
     });
 
     it('should return the correct manga object structure for main page', () => {
-      const res1 = `
+      window.fetch.callsFake(MockFetch.ok(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -356,19 +367,30 @@ describe('Mangafox', () => {
                 <span>Ongoing,</span>
               </div>
             </div>
+            <div id="chapters">
+              <ul class="chlist" style="display:block">
+                <li>
+                    <div><h3>
+                      <a href="//fanfox.net/manga/break_blade/v15/c088.5/1.html">Break Blade 88.5</a>
+                      <span>Omake</span>
+                    </h3></div>
+                </li>
+              </ul>
+              <ul class="chlist" style="display:block">
+                <li>
+                  <h4>
+                    <a href="//fanfox.net/manga/break_blade/v15/c088/1.html">Break Blade 88</a>
+                    <span>Sentiment</span>
+                  </h4>
+                </li>
+              </ul>
+            </div>
           </body>
-        </html>`;
-      const res2 = `
-        ["Title 1","v01/c001"],
-        ["Title 2","v01/c002.5"]`;
-
-      window.fetch
-        .onFirstCall().callsFake(MockFetch.ok(res1))
-        .onSecondCall().callsFake(MockFetch.ok(res2, { headers: { 'Content-Type': 'application/x-javascript' } }));
+        </html>`));
 
       return Mangafox.getMangaInfo('http://fanfox.net/manga/12_manga/')
         .then((manga) => {
-          MockFetch.callCount().should.be.equal(2);
+          MockFetch.callCount().should.be.equal(1);
 
           should.exist(manga);
           manga.should.be.an('object');
@@ -431,7 +453,7 @@ describe('Mangafox', () => {
     });
 
     it('should return an empty array if no chapters pattern found in response object', () => {
-      window.fetch.callsFake(MockFetch.ok('', { headers: { 'Content-Type': 'application/x-javascript' } }));
+      window.fetch.callsFake(MockFetch.ok('no value'));
 
       const promise = Mangafox.updateChapters({
         sid: '1',
@@ -455,8 +477,30 @@ describe('Mangafox', () => {
 
     it('should return the correct object structure', () => {
       window.fetch.callsFake(MockFetch.ok(`
-        ["Title 1","v01/c001"],
-        ["Title 2","v01/c002.5"]`, { headers: { 'Content-Type': 'application/x-javascript' } }));
+        <!DOCTYPE html>
+        <html>
+          <head></head>
+          <body>
+            <div id="chapters">
+              <ul class="chlist" style="display:block">
+                <li>
+                    <div><h3>
+                      <a href="//fanfox.net/manga/break_blade/v15/c088.5/1.html">Break Blade 88.5</a>
+                      <span>Omake</span>
+                    </h3></div>
+                </li>
+              </ul>
+              <ul class="chlist" style="display:block">
+                <li>
+                  <h4>
+                    <a href="//fanfox.net/manga/break_blade/v15/c088/1.html">Break Blade 88</a>
+                    <span></span>
+                  </h4>
+                </li>
+              </ul>
+            </div>
+          </body>
+        </html>`));
 
       const promise = Mangafox.updateChapters({
         sid: '1',
@@ -473,14 +517,14 @@ describe('Mangafox', () => {
           data.should.have.property('count').equal(2);
           data.should.have.property('chapterList').with.lengthOf(2);
           data.chapterList.should.deep.include({
-            id: 'v01/c001',
-            name: 'Title 1',
-            url: 'http://fanfox.net/manga/12_manga/v01/c001/1.html',
+            id: 'v15/c088.5',
+            name: 'Break Blade 88.5: Omake',
+            url: 'http://fanfox.net/manga/break_blade/v15/c088.5/1.html',
           });
           data.chapterList.should.deep.include({
-            id: 'v01/c002.5',
-            name: 'Title 2',
-            url: 'http://fanfox.net/manga/12_manga/v01/c002.5/1.html',
+            id: 'v15/c088',
+            name: 'Break Blade 88',
+            url: 'http://fanfox.net/manga/break_blade/v15/c088/1.html',
           });
         })
         .catch((err) => {
