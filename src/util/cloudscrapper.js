@@ -56,16 +56,22 @@ function parseString(str) {
  * @returns {integer} The numerical answer for the challenge.
  */
 function solveChallenge(challenge) {
-  let value = /var [\w,]+ [\w]+={"[\w]+":([![\]()+]+)};/.exec(challenge);
+  let value = /var [\w,]+ [\w]+={"[\w]+":([![\]()/+]+)};/.exec(challenge);
   if (!value) return false;
 
-  value = parseString(value[1]);
+  const aux = value[1].split('/');
+  value = aux.length > 1
+    ? parseString(aux[0]) / parseString(aux[1])
+    : parseString(aux[0]);
 
-  const regex = /[\w.]+([*+-])=([![\]+()]+);/g;
+  const regex = /[\w.]+([*/+-])=([![\]/+()]+);/g;
 
   let match = regex.exec(challenge);
   while (match !== null) {
-    const integer = parseString(match[2]);
+    const parts = match[2].split('/');
+    const integer = parts.length > 1
+      ? parseString(parts[0]) / parseString(parts[1])
+      : parseString(parts[0]);
 
     switch (match[1]) {
       case '*':
@@ -111,9 +117,11 @@ export default function solveCloudflare(response, body) {
   challenge = body.match(/getElementById\('cf-content'\)[\s\S]+?setTimeout.+?\r?\n([\s\S]+?a\.value =.+?)\r?\n/i);
   if (!challenge) return false;
 
+  const presolution = solveChallenge(challenge[1]);
+
   const answer = {
     jschl_vc: jsChlVc,
-    jschl_answer: solveChallenge(challenge[1]) + host.length, // the solution needs to be added to the number of characters in the host name
+    jschl_answer: +presolution.toFixed(10) + host.length, // the solution needs to be added to the number of characters in the host name
     pass: challengePass,
   };
 

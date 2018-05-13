@@ -4,7 +4,7 @@ import HttpFetch from '../../util/http';
 /**
  * Matches the URL of a manga page.
  */
-export const urlRegex = /(?:http\w*:\/\/)*(fanfox)\.\w+\/manga\/([\w_]+)\//;
+export const urlRegex = /(?:https*:\/\/[\w.]*)*(mangareader)\.\w{2,3}\/([\w-_]+)/;
 
 /**
  * Returns the chapter reference extracted from the URL or the defaultValue.
@@ -13,19 +13,19 @@ export const urlRegex = /(?:http\w*:\/\/)*(fanfox)\.\w+\/manga\/([\w_]+)\//;
  * @returns A string representing the chapter reference extracted from the URL or the defaultValue.
  */
 export function getChapterReference(url, defaultValue) {
-  const m = /[\w:/.]+\/manga\/\w+\/(\S+)\/\d+\.html/.exec(url);
+  const m = /[\w:/.]+mangareader\.\w{2,3}\/[\w-]+\/([\d.]+)(?:\/\d+)*/.exec(url);
   return (m) ? { id: m[1] } : defaultValue;
 }
 
 /**
  * Returns the Manga cover URL from the manga main page.
- * @param {object} response Required. The Fetch API response object.
+ * @param {object} response The Fetch API response object.
  * @param {string} url Optional. The URL to print with errors.
  * @returns String representing the manga cover URL.
  */
 export function getMangaCover(response, url) {
   // Get manga image URL from response
-  const imageDom = response.evaluate('//div[@class="cover"]/img', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+  const imageDom = response.evaluate('//div[@id="mangaimg"]/img', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
   if (!imageDom.singleNodeValue) throw FoxyError(ErrorCode.NO_MANGA_COVER, url);
 
   return imageDom.singleNodeValue.getAttribute('src');
@@ -38,49 +38,47 @@ export function getMangaCover(response, url) {
  * @returns {boolean} True if the series is stated as 'Completed' and False otherwise.
  */
 export function getMangaStatus(response, url) {
-  const imageDom = response.evaluate('//div[@id="series_info"]/div[@class="data"][1]/span', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+  const imageDom = response.evaluate('//div[@id="mangaproperties"]//tr[4]/td[2]', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
   if (!imageDom.singleNodeValue) throw FoxyError(ErrorCode.NO_MANGA_STATUS, url);
 
-  const statusStr = /(\w+)/.exec(imageDom.singleNodeValue.textContent);
+  const statusStr = imageDom.singleNodeValue.textContent;
   if (!statusStr) throw FoxyError(ErrorCode.NO_MANGA_STATUS, url);
 
-  return (statusStr[0] === 'Completed');
+  return (statusStr === 'Completed');
 }
 
 /**
  * Returns the manga chapter list
- * @param {object} manga The manga to retrieve its chapters
- * @param {array} chapterList A default chapterList array to start from. Defaults to an empty array
+ * @param {object} mangaUrl The manga URL to retrieve its chapters.
+ * @param {array} dom The document DOM to parse (if any).
  * @returns {array} The array of chapter objects.
  */
-function getChapterList(mangaUrl, dom, chapterList = []) {
+function getChapterList(reference, mangaUrl, dom, chapterList = []) {
   const parseFn = (doc) => {
-    const rowIterator = doc.evaluate('//div[@id="chapters"]/ul[@class="chlist"]//h3|//h4', doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const rowIterator = doc.evaluate('//div[@id="chapterlist"]//tr/td[1]', doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
     try {
       let rowNode = rowIterator.iterateNext();
       if (!rowNode) return chapterList;
 
       while (rowNode) {
-        const [linkNode] = rowNode.getElementsByTagName('a');
-
-        const [, url] = linkNode.href.split('//');
-        const { id } = getChapterReference(url);
-        const name = rowNode.textContent.trim().replace(/(\r\n|\n|\r)/, ': ');
+        const linkNode = rowNode.getElementsByTagName('a')[0];
+        const linkParts = linkNode.href.split('/');
+        const id = linkParts.pop() || linkParts.pop(); // Handle potential trailing slash
 
         chapterList.push({
           id,
-          name: name.replace(/\s{2,}/, ' '), // Remove any double space left
-          url: `http://${url}`,
+          name: rowNode.textContent.trim(),
+          url: new URL(id, `${mangaUrl}/`).toString(),
         });
 
         rowNode = rowIterator.iterateNext();
       }
+
+      return chapterList;
     } catch (err) {
       throw Error(`Document tree modified during iteration: ${err}`);
     }
-
-    return chapterList.reverse();
   };
 
   if (dom) return Promise.resolve(parseFn(dom));
@@ -104,11 +102,12 @@ export function getMangaInfo(url) {
   if (!url) return Promise.reject(new TypeError('getMangaInfo() argument is null'));
 
   // Get information from url
-  let m = urlRegex.exec(url);
+  const m = urlRegex.exec(url);
   if (!m) return Promise.reject(FoxyError(ErrorCode.UNPARSE_URL, url));
 
   const mangaUrl = m[0];
   const mangaReference = m[2];
+  const sid = mangaReference;
 
   // Return a promise which resolves to the manga data
   return HttpFetch(mangaUrl, async (response) => {
@@ -116,32 +115,25 @@ export function getMangaInfo(url) {
       throw FoxyError(ErrorCode.RESPONSE_NOT_HTML, mangaUrl);
     }
 
-    const headerDom = response.getElementsByTagName('head')[0];
-
     // Get manga name from response
-    const titleDom = response.evaluate('//meta[@property="og:title"]', headerDom, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    const titleDom = response.evaluate('//div[@id="mangaproperties"]/table/tbody/tr[1]/td[2]/h2', response, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     if (!titleDom.singleNodeValue) throw FoxyError(ErrorCode.NO_MANGA_NAME, mangaUrl);
 
-    const name = /([\w\s]+) (?:[\d.]+ Page \d+|Manga)/.exec(titleDom.singleNodeValue.getAttribute('content'))[1];
+    const name = titleDom.singleNodeValue.textContent;
 
     // Get image URL and status from response
     const imageUrl = getMangaCover(response, mangaUrl);
     const status = getMangaStatus(response, mangaUrl);
 
-    m = /\S+\/manga\/(\d+)\S+/.exec(imageUrl);
-    if (!m) throw FoxyError(ErrorCode.NO_MANGA_SID, mangaUrl);
-
-    const sid = m[1];
-
     // Get chapter list and return
     try {
-      const chapterList = await getChapterList(mangaUrl, response);
+      const chapterList = await getChapterList(mangaReference, mangaUrl, response);
 
       // Create the manga object
       const manga = {
         sid,
         name,
-        source: 'fanfox',
+        source: 'mangareader',
         reference: mangaReference,
         url: mangaUrl,
         cover: imageUrl,
@@ -168,7 +160,7 @@ export async function updateChapters(manga) {
   }
 
   try {
-    const chapterList = await getChapterList(manga.url);
+    const chapterList = await getChapterList(manga.sid, manga.url);
 
     const data = {
       count: chapterList.length - manga.chapter_list.length,

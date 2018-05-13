@@ -2,12 +2,14 @@ import * as Mangafox from './mangafox';
 import * as MangaEden from './mangaeden';
 import * as MangaHere from './mangahere';
 import * as KissManga from './kissmanga';
+import * as MangaReader from './mangareader';
 
 const providersMap = new Map([
   ['fanfox', Mangafox],
   ['mangaeden', MangaEden],
   ['mangahere', MangaHere],
   ['kissmanga', KissManga],
+  ['mangareader', MangaReader],
 ]);
 
 export const regexList = [
@@ -15,6 +17,7 @@ export const regexList = [
   MangaEden.urlRegex,
   MangaHere.urlRegex,
   KissManga.urlRegex,
+  MangaReader.urlRegex,
 ];
 
 /**
