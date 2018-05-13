@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - New source: [MangaReader](https://www.mangareader.net).
 
+### Changed
+
+- Prevent cache during manga background updates.
+
 ### Fixed
 
 - Kissmanga background updates. The updates were not working due to a change to the cloudflare code.

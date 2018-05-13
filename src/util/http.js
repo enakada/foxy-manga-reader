@@ -50,7 +50,11 @@ export default async function fetch(url, onSuccess, options) {
   return new Promise((resolve, reject) => {
     const fetchAndRetry = async (n) => {
       try {
-        const res = await window.fetch(url, { credentials: 'include' });
+        const res = await window.fetch(url, {
+          credentials: 'include',
+          cache: 'no-cache',
+        });
+
         if (res.ok) {
           const body = await res.text();
 
