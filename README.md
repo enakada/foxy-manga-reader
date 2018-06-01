@@ -27,6 +27,8 @@ A manga tracker and reader add-on for Mozilla Firefox. Lets you track your manga
 
 - Support for other sources:
   - MangaPark
+  - Mangakakalot
+  - Manganelo
 
 ## Known Issues
 

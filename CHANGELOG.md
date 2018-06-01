@@ -6,13 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
-## [0.7.1] - 2018-05-13
 ### Fixed
 
-- Changed how chapters are retrieved on Fanfox source. Fanfox is slowly removing the auxiliar javascript file with the chapter list and that change was breaking Foxy.
+- Warning being triggered due to invalid badge color.
 
-## [0.7.0] - 2018-05-12
+## [0.7.1] - 2018-05-12
 ### Added
 
 - New source: [MangaReader](https://www.mangareader.net).
@@ -24,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Kissmanga background updates. The updates were not working due to a change to the cloudflare code.
+- Changed how chapters are retrieved from Fanfox source. Fanfox is slowly removing the auxiliar javascript file with the chapter list and that change was breaking Foxy.
 
 ## [0.6.2] - 2018-03-12
 ### Added
@@ -183,5 +182,4 @@ This only affects users using the sync storage.
 [0.6.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.5.2...v0.6.0
 [0.6.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.0...v0.6.1
 [0.6.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.1...v0.6.2
-[0.7.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.2...v0.7.0
-[0.7.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.0...v0.7.1
+[0.7.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.2...v0.7.1
