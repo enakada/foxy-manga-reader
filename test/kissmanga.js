@@ -171,6 +171,13 @@ describe('KissManga', () => {
       chapter.should.be.an('object');
       chapter.should.have.property('id').equal('One---782-005?id=320499');
     });
+
+    it('should return { id: Vol-037-Ch-404--L%C3%BCshi-Chunqiu?id=320499 } on http://kissmanga.com/Manga/Kingdom/Vol-037-Ch-404--L%C3%BCshi-Chunqiu?id=318686', () => {
+      const chapter = KissManga.getChapterReference('http://kissmanga.com/Manga/Kingdom/Vol-037-Ch-404--L%C3%BCshi-Chunqiu?id=318686', 'default');
+
+      chapter.should.be.an('object');
+      chapter.should.have.property('id').equal('Vol-037-Ch-404--L%C3%BCshi-Chunqiu?id=318686');
+    });
   });
 
   // Test for #getMangaInfo()

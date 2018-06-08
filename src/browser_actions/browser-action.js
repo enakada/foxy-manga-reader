@@ -220,7 +220,6 @@ window.onload = async () => {
 
     // Update badge_count
     if (storage.badge_count > 0) {
-      browser.browserAction.setBadgeBackgroundColor({ color: '' });
       browser.browserAction.setBadgeText({ text: '' });
 
       storage.badge_count = 0;

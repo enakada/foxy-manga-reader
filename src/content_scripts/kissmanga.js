@@ -1,6 +1,6 @@
 import * as Util from './util';
 
-const pageRegex = /(((?:http\w*:\/\/)*[\w.]*kissmanga\.\w{2,3}\/Manga\/([\w-]+)\/)([\w-]+\?id=\d+))(?:#(\d+))*/;
+const pageRegex = /(((?:http\w*:\/\/)*[\w.]*kissmanga\.\w{2,3}\/Manga\/([\S]+)\/)([\S]+\?id=\d+))(?:#(\d+))*/;
 
 
 // Page Utils
