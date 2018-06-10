@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.7.3] - 2018-06-09
 ### Fixed
 
 - MangaHere updates. Request was being cached by the browser, preventing chapter updates. (Issue #15)
@@ -177,7 +179,7 @@ This only affects users using the sync storage.
 - Settings page with Backup/Restore options.
 - License file.
 
-[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.3...HEAD
 [0.2.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
@@ -190,3 +192,4 @@ This only affects users using the sync storage.
 [0.6.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.1...v0.6.2
 [0.7.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.2...v0.7.1
 [0.7.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.1...v0.7.2
+[0.7.3]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.2...v0.7.3
