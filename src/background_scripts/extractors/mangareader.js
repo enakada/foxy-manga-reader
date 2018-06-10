@@ -77,7 +77,7 @@ function getChapterList(reference, mangaUrl, dom, chapterList = []) {
 
       return chapterList;
     } catch (err) {
-      throw Error(`Document tree modified during iteration: ${err}`);
+      throw Error(`Document tree modified during iteration (${mangaUrl}): ${err}`);
     }
   };
 

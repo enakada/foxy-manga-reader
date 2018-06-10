@@ -80,7 +80,7 @@ function getChapterList(mangaUrl, dom, chapterList = []) {
         rowNode = rowIterator.iterateNext();
       }
     } catch (err) {
-      throw Error(`Document tree modified during iteration: ${err}`);
+      throw Error(`Document tree modified during iteration (${mangaUrl}): ${err}`);
     }
 
     return chapterList.reverse();

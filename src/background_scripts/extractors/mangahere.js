@@ -54,7 +54,7 @@ export function getMangaStatus(response, url) {
  * @returns {array} The array of chapter objects.
  */
 function getChapterList(mangaSid, mangaUrl, chapterList = []) {
-  const url = `http://www.mangahere.cc/get_chapters${mangaSid}.js`;
+  const url = `http://www.mangahere.cc/get_chapters${mangaSid}.js?${Math.random()}`;
 
   return HttpFetch(url, (response) => {
     const regex = /\["(.+)","[\w./"+]+"\/([vc/\d.]+)\/"\]/g;

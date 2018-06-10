@@ -6,12 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+
+- MangaHere updates. Request was being cached by the browser, preventing chapter updates. (Issue #15)
 
 ## [0.7.2] - 2018-06-07
 ### Fixed
 
 - Warning being triggered due to invalid badge color.
-- Fixed Kissmanga url regex which was failing due to special characters like `%`. (Issue #16)
+- Kissmanga url regex which was failing due to special characters like `%`. (Issue #16)
 
 ## [0.7.1] - 2018-05-12
 ### Added
