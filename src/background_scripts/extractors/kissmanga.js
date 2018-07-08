@@ -4,7 +4,7 @@ import HttpFetch from '../../util/http';
 /**
  * Matches the URL of a manga page.
  */
-export const urlRegex = /(?:https*:\/\/[\w.]*)*(kissmanga)\.\w{2,3}\/Manga\/([\w-]+)/;
+export const urlRegex = /(?:https*:\/\/[\w.]*)*(kissmanga)\.\w{2,3}\/Manga\/([\w-%]+)/;
 
 /**
  * Returns the chapter reference extracted from the URL or the defaultValue.
@@ -13,7 +13,7 @@ export const urlRegex = /(?:https*:\/\/[\w.]*)*(kissmanga)\.\w{2,3}\/Manga\/([\w
  * @returns A string representing the chapter reference extracted from the URL or the defaultValue.
  */
 export function getChapterReference(url, defaultValue) {
-  const m = /[\w:/.]+\/Manga\/[\w-]+\/([\S]+\?id=\d+)/.exec(url);
+  const m = /[\w:/.]+\/Manga\/[\w-%]+\/([\S]+\?id=\d+)/.exec(url);
   return (m) ? { id: m[1] } : defaultValue;
 }
 
@@ -65,7 +65,7 @@ function getChapterList(mangaUrl, dom, chapterList = []) {
 
       while (rowNode) {
         const { href } = rowNode;
-        const id = /Manga\/[\w-]+\/(.+\?id=\d+)/.exec(href)[1];
+        const id = /Manga\/[\w-%]+\/(.+\?id=\d+)/.exec(href)[1];
 
         chapterList.push({
           id,
