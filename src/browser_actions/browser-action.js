@@ -22,6 +22,9 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
   try {
     if (!bookmarkList) throw FoxyError(ErrorCode.NO_STORAGE_BOOKMARK, 'Empty Storage');
 
+    // Clear div if bookmarkList is not empty
+    if (bookmarkList.length > 0) mangaListDom.innerHTML = '';
+
     // Get the correct method to call
     let fn;
     switch (viewMode) {
@@ -67,9 +70,6 @@ async function listViewModeListener(e) {
 
     storage.view_mode.list = e.target.id;
     await browser.storage.sync.set({ view_mode: storage.view_mode });
-
-    // Clear previous list
-    mangaListDom.innerHTML = '';
 
     // Get the bookmarkList
     const bookmarkList = await browser.runtime.sendMessage({
