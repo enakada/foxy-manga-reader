@@ -50,6 +50,7 @@ async function bookmarkManga(url, bookmark, options = {}) {
         source: manga.source,
         reference: manga.reference,
         url: manga.url,
+        lastUpdate: Date.now(), // Set last update to current time. Included on v0.7.4.
         last_read: {
           date: new Date(),
           chapter: {
@@ -217,7 +218,7 @@ async function updateMangaChapterList(alarm) {
   if (alarm.name !== 'background_update') return;
 
   try {
-    const storage = await browser.storage.sync.get('badge_count');
+    const storage = await browser.storage.sync.get(['badge_count', 'lastUpdate']);
     if (!storage.badge_count) storage.badge_count = 0;
 
     const keys = await FoxyStorage.DataStorage.keys();
@@ -266,6 +267,9 @@ async function updateMangaChapterList(alarm) {
       storage.badge_count += count;
       browser.browserAction.setBadgeBackgroundColor({ color: 'red' });
       browser.browserAction.setBadgeText({ text: storage.badge_count.toString() });
+
+      // Update the lastUpdate value
+      storage.lastUpdate = Date.now();
 
       // Send message to update chapter list
       browser.runtime.sendMessage({

@@ -121,7 +121,7 @@ async function migrateDB(previousVersion, bookmarkList, updateDb = true) {
 
 /**
  * Redesigns the bookmark list. Converts a single list with all bookmarks into multiple entries
- * indexed by the key: source/reference.
+ * indexed by the key: source/reference. Transition to v0.3.1.
  * @param {object~array} bookmarkList The old bookmark list to redesign.
  * @return {object~Promise} A promise which resolves if the redesign was successfull.
  */

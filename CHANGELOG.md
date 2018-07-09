@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - Simple Foxy tutorial for new users. Explains how to start tracking manga using Foxy.
+- New ordering feature. Users can order their list by latest updates.
 
 ### Fixed
 

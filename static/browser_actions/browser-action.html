@@ -63,6 +63,14 @@
 
       <section id="right-panel" class="col-8 px-0">
         <div id="manga-list-nav" class="d-flex">
+          <form class="form-inline ml-2">
+            <label class="my-1 mr-2" for="order-select">Order by:</label>
+            <select id="order-select" class="custom-select custom-select-sm p-0" style="width: 100px; -moz-appearance: none;">
+              <option value="alphabetical" selected>Name</option>
+              <option value="latest-updates">Latest Updates</option>
+            </select>
+          </form>
+
           <div id="list-view-mode-container" class="btn-group btn-group-toggle ml-auto" data-toggle="buttons">
             <label class="btn btn-link btn-inverted mb-0 px-2">
               <input type="radio" name="listViewMode" id="list" autocomplete="off">
