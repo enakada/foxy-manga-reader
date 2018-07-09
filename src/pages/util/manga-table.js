@@ -144,6 +144,13 @@ export function createRow(bookmark, manga) {
   lastReadCell.innerText = moment(bookmark.last_read.date).format('LL');
   row.appendChild(lastReadCell);
 
+  // Last Update
+  const lastUpdateCell = document.createElement('td');
+  lastUpdateCell.innerText = bookmark.lastUpdate
+    ? moment(bookmark.lastUpdate).format('LLL')
+    : '-';
+  row.appendChild(lastUpdateCell);
+
   // Progress
   const progressCell = document.createElement('td');
   const chLength = (manga) ? manga.chapter_list.length : '-';

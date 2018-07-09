@@ -14,6 +14,14 @@ async function initTable(table) {
       type: 'get-bookmark-data',
     });
 
+    bookmarkList.sort((a, b) => {
+      const refA = a.reference.toUpperCase();
+      const refB = b.reference.toUpperCase();
+      if (refA < refB) return -1;
+      if (refA > refB) return 1;
+      return 0;
+    });
+
     const promises = [];
     bookmarkList.forEach(async (bookmark) => {
       const mangaPromise = browser.runtime.sendMessage({

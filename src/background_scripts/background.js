@@ -50,7 +50,6 @@ async function bookmarkManga(url, bookmark, options = {}) {
         source: manga.source,
         reference: manga.reference,
         url: manga.url,
-        lastUpdate: Date.now(), // Set last update to current time. Included on v0.7.4.
         last_read: {
           date: new Date(),
           chapter: {
@@ -60,6 +59,9 @@ async function bookmarkManga(url, bookmark, options = {}) {
         },
       };
     }
+
+    // Set last update to current time. Included on v0.7.4.
+    bookmarkEntry.lastUpdate = Date.now();
 
     // Save bookmark to FoxyStorage
     if (!options.skipSave) await FoxyStorage.setMetadata(info.key, bookmarkEntry);
