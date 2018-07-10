@@ -36,6 +36,15 @@ describe('KissManga', () => {
       result[1].should.equal('kissmanga');
       result[2].should.equal('I-Can-t-Sleep-Alone');
     });
+
+    it('regex should pass for http://kissmanga.com/Manga/Skeleton-Soldier-Skeleton-Soldier-Couldn%E2%80%99t-Protect-the-Dungeon', () => {
+      const result = KissManga.urlRegex.exec('http://kissmanga.com/Manga/Skeleton-Soldier-Skeleton-Soldier-Couldn%E2%80%99t-Protect-the-Dungeon');
+
+      should.exist(result);
+      result.should.have.lengthOf(3);
+      result[1].should.equal('kissmanga');
+      result[2].should.equal('Skeleton-Soldier-Skeleton-Soldier-Couldn%E2%80%99t-Protect-the-Dungeon');
+    });
   });
 
   // Test for #getMangaCover()

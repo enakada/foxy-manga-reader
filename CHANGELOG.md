@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.4] - 2018-07-09
+### Added
+
+- Simple Foxy tutorial for new users. Explains how to start tracking manga using Foxy.
+- New ordering feature. Users can order their list by latest updates.
+
+### Fixed
+
+- Kissmanga url regex validation which was failing due to special characters like `%`. This was a complementary fix to what was applied in Issue #16. (Issue #17)
+
 ## [0.7.3] - 2018-06-09
 ### Fixed
 
@@ -179,7 +189,7 @@ This only affects users using the sync storage.
 - Settings page with Backup/Restore options.
 - License file.
 
-[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.3...HEAD
+[Unreleased]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.4...HEAD
 [0.2.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/enakada/foxy-manga-reader/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.3.0...v0.3.1
@@ -193,3 +203,4 @@ This only affects users using the sync storage.
 [0.7.1]: https://github.com/enakada/foxy-manga-reader/compare/v0.6.2...v0.7.1
 [0.7.2]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.1...v0.7.2
 [0.7.3]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.2...v0.7.3
+[0.7.4]: https://github.com/enakada/foxy-manga-reader/compare/v0.7.3...v0.7.4

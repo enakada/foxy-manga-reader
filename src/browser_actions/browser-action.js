@@ -22,6 +22,9 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
   try {
     if (!bookmarkList) throw FoxyError(ErrorCode.NO_STORAGE_BOOKMARK, 'Empty Storage');
 
+    // Clear div if bookmarkList is not empty
+    if (bookmarkList.length > 0) mangaListDom.innerHTML = '';
+
     // Get the correct method to call
     let fn;
     switch (viewMode) {
@@ -60,7 +63,7 @@ async function setListViewMode(viewMode, bookmarkList, shouldUpdateChart = true)
 
 async function listViewModeListener(e) {
   try {
-    const storage = await browser.storage.sync.get('view_mode');
+    const storage = await browser.storage.sync.get(['view_mode', 'ordering']);
 
     // Initializes the view_mode and bookmark_list
     if (!storage.view_mode) storage.view_mode = {};
@@ -68,20 +71,11 @@ async function listViewModeListener(e) {
     storage.view_mode.list = e.target.id;
     await browser.storage.sync.set({ view_mode: storage.view_mode });
 
-    // Clear previous list
-    mangaListDom.innerHTML = '';
-
     // Get the bookmarkList
     const bookmarkList = await browser.runtime.sendMessage({
       type: 'get-bookmark-data',
     });
-    bookmarkList.sort((a, b) => {
-      const refA = a.reference.toUpperCase();
-      const refB = b.reference.toUpperCase();
-      if (refA < refB) return -1;
-      if (refA > refB) return 1;
-      return 0;
-    });
+    bookmarkList.sort((a, b) => MangaList.sort(a, b, storage.ordering));
 
     // Append new list
     await setListViewMode(storage.view_mode.list, bookmarkList, false);
@@ -92,6 +86,30 @@ async function listViewModeListener(e) {
     if (previousActive) previousActive.classList.remove('active');
 
     e.target.parentNode.classList.add('active');
+  } catch (err) {
+    console.error(err); // eslint-disable-line no-console
+
+    // Notify user that an error occurred
+    Notification.error({
+      title: (err.code) ? err.message : FoxyError().message,
+      message: browser.i18n.getMessage('errorMessage', (err.code) ? JSON.stringify(err.params) : err.message),
+    });
+  }
+}
+
+async function handleOrderChanges(e) {
+  try {
+    const newOrdering = e.target.value;
+    await browser.storage.sync.set({ ordering: newOrdering });
+
+    // Get the bookmarkList
+    const bookmarkList = await browser.runtime.sendMessage({
+      type: 'get-bookmark-data',
+    });
+    bookmarkList.sort((a, b) => MangaList.sort(a, b, newOrdering));
+
+    const newChildren = MangaList.reorderList(mangaListDom.childNodes, bookmarkList);
+    mangaListDom.innerHTML = newChildren;
   } catch (err) {
     console.error(err); // eslint-disable-line no-console
 
@@ -226,17 +244,14 @@ window.onload = async () => {
       await browser.storage.sync.set({ badge_count: storage.badge_count });
     }
 
+    // Get ordering method
+    const { ordering } = storage;
+
     // Get the bookmarkList
     const bookmarkList = await browser.runtime.sendMessage({
       type: 'get-bookmark-data',
     });
-    bookmarkList.sort((a, b) => {
-      const refA = a.reference.toUpperCase();
-      const refB = b.reference.toUpperCase();
-      if (refA < refB) return -1;
-      if (refA > refB) return 1;
-      return 0;
-    });
+    bookmarkList.sort((a, b) => MangaList.sort(a, b, ordering));
 
     // Append manga list
     if (bookmarkList) {
@@ -246,6 +261,11 @@ window.onload = async () => {
     // Add listener to list view radio button
     const listViewMode = document.getElementById('list-view-mode-container');
     listViewMode.onchange = listViewModeListener;
+
+    // Add listener to changes to order select
+    const orderSelect = document.getElementById('order-select');
+    orderSelect.value = storage.ordering || 'alphabetical';
+    orderSelect.onchange = handleOrderChanges;
   } catch (err) {
     console.error(err); // eslint-disable-line no-console
 

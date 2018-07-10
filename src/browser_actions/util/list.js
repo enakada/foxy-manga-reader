@@ -65,6 +65,52 @@ async function unbookmarkButtonListener(e) {
 // ////////////////////////////////////////////////////////////////
 
 /**
+ * Compares two elements based on a defined comparison method.
+ * @param {object} a The first element to compare.
+ * @param {object} b The second element to compare.
+ * @param {string} method A string defining the comparison method. Can be either 'alphabetical' (the default) or 'latest-updates'.
+ */
+export function sort(a, b, method = 'alphabetical') {
+  switch (method) {
+    case 'alphabetical': {
+      const refA = a.reference.toUpperCase();
+      const refB = b.reference.toUpperCase();
+      if (refA < refB) return -1;
+      if (refA > refB) return 1;
+      return 0;
+    }
+
+    case 'latest-updates': {
+      const uptA = a.lastUpdate || 0;
+      const uptB = b.lastUpdate || 0;
+      if (uptA < uptB) return 1;
+      if (uptA > uptB) return -1;
+      return 0;
+    }
+
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Reorders the manga list based on a new ordered bookmark list.
+ * @param {array} oldList The NodeList of children elements.
+ * @param {array} newOrder The bookmark list in the new correct order.
+ */
+export function reorderList(oldList, newOrder) {
+  const newDiv = document.createElement('div');
+
+  const oldChildrenArr = Array.from(oldList.values());
+  newOrder.forEach((elem) => {
+    const child = oldChildrenArr.find(el => el.id === `${elem.source}-${elem.reference}`);
+    if (child) newDiv.appendChild(child);
+  });
+
+  return newDiv.innerHTML;
+}
+
+/**
  * Creates and returns an Unbookmark button.
  * @param {object} options The options to apply to the button.
  */
