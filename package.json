@@ -58,7 +58,7 @@
     "rollup-stream": "^1.19.0",
     "sinon": "^4.1.3",
     "vinyl-source-stream": "^1.1.0",
-    "web-ext": "^2.4.0",
+    "web-ext": "^2.9.1",
     "whatwg-fetch": "^2.0.3"
   },
   "babel": {

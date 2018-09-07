@@ -63,7 +63,7 @@ export default async function fetch(url, onSuccess, options) {
           const parsedResponse = (resType.indexOf('text/html') !== -1) ? parser.parseFromString(body, 'text/html') : String(body);
 
           resolve(onSuccess(parsedResponse));
-        } else if (res.status === 503 && res.headers.get('Server') === 'cloudflare') { // Cloudscrapper
+        } else if (res.status === 503 && (res.headers.get('Server') === 'cloudflare' || url.includes('kissmanga'))) { // Cloudscrapper
           const body = await res.text();
           const answer = Cloudscrapper(res, body);
 
@@ -71,7 +71,7 @@ export default async function fetch(url, onSuccess, options) {
           setTimeout(async () => {
             try {
               const resBody = await solveChallenge(answer, { Referer: res.url });
-              resolve(onSuccess(resBody));
+              if (resBody) fetchAndRetry(n);
             } catch (err) {
               reject(FoxyError(ErrorCode.SOURCE_CLIENT_ERROR, `${res.status} ${res.statusText}`));
             }
