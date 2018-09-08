@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Foxy Manga Reader",
-    "version": "0.7.4",
+    "version": "0.7.5",
 
     "description": "__MSG_extensionDescription__",
 	  "homepage_url": "https://github.com/enakada/foxy-manga-reader",
