@@ -86,10 +86,15 @@
       <div id="alerts"></div>
 
       <!-- Additional options-->
-      <div class="btn-toolbar mb-2 ml-3" role="toolbar" aria-label="Additional options">
-        <div class="btn-group btn-group-sm mr-2" role="group" aria-label="Export and Import">
-          <button type="button" id="export-btn" class="btn btn-outline-info">Export</button>
-          <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#import-modal">Import</button>
+      <div class="btn-toolbar mb-2" role="toolbar" aria-label="Additional options">
+        <button type="button" id="db-refresh-btn" class="btn btn-sm btn-outline-secondary mr-2">
+          <span class="oi oi-loop-circular" title="List View" aria-hidden="true"></span>
+          Refresh Database
+        </button>
+
+        <div class="btn-group btn-group-sm" role="group" aria-label="Export and Import">
+          <button type="button" id="export-btn" class="btn btn-info">Export</button>
+          <button type="button" class="btn btn-info" data-toggle="modal" data-target="#import-modal">Import</button>
         </div>
       </div>
 
