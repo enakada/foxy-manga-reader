@@ -223,66 +223,83 @@ async function updateMangaChapterList(alarm) {
     const storage = await browser.storage.sync.get(['badge_count', 'lastUpdate']);
     if (!storage.badge_count) storage.badge_count = 0;
 
-    const keys = await FoxyStorage.DataStorage.keys();
-    if (!keys) return; // no manga to track
+    const bookmarkList = await FoxyStorage.getMetadata();
+    if (!bookmarkList) return; // no manga to track
 
-    keys.forEach(async (key) => {
-      const manga = await FoxyStorage.DataStorage.getItem(key);
+    const promises = [];
 
-      const bookmark = await FoxyStorage.getMetadata(key);
-      if (!bookmark) throw FoxyError(ErrorCode.NO_BOOKMARK_ERROR, manga.name);
+    bookmarkList.forEach(async (bookmark) => {
+      const promise = new Promise(async (resolve) => {
+        const key = `${bookmark.source}/${bookmark.reference}`;
 
-      console.log(`Checking updates for '${manga.name}'`);
+        let manga = await FoxyStorage.DataStorage.getItem(key);
+        if (!manga) {
+          manga = await bookmarkManga(bookmark.url, bookmark);
+          if (!manga) throw FoxyError(ErrorCode.NO_BOOKMARK_ERROR, bookmark.reference);
 
-      const info = Extractor.parseUrl(manga.url);
-      if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, manga.url);
+          return resolve();
+        }
 
-      const { count, chapterList } = await info.extractor.updateChapters(manga);
+        console.log(`Checking updates for '${manga.name}'`);
 
-      const lastReadCh = bookmark.last_read.chapter;
-      const lastReadIndex = chapterList.findIndex(elem => elem.id === lastReadCh.id);
-      if (lastReadIndex < 0) {
-        bookmark.last_read.chapter.id = chapterList[lastReadCh.index].id;
-      } else if (lastReadIndex !== lastReadCh.index) {
-        bookmark.last_read.chapter.index = lastReadIndex;
-      }
+        const info = Extractor.parseUrl(manga.url);
+        if (!info) throw FoxyError(ErrorCode.UNPARSE_URL, manga.url);
 
-      // Save metadata
-      await FoxyStorage.setMetadata(key, bookmark);
+        const { count, chapterList } = await info.extractor.updateChapters(manga);
 
-      // Update manga metadata
-      const metadata = await info.extractor.updateMetadata(manga);
+        const updatedBookmark = Object.assign({}, bookmark);
 
-      // Update db
-      const mangaCopy = Object.assign(manga, { chapter_list: chapterList }, metadata);
-      await FoxyStorage.DataStorage.setItem(info.key, mangaCopy);
+        const lastReadCh = bookmark.last_read.chapter;
+        const lastReadIndex = chapterList.findIndex(elem => elem.id === lastReadCh.id);
+        if (lastReadIndex < 0) {
+          updatedBookmark.last_read.chapter.id = chapterList[lastReadCh.index].id;
+        } else if (lastReadIndex !== lastReadCh.index) {
+          updatedBookmark.last_read.chapter.index = lastReadIndex;
+        }
 
-      if (count <= 0) return; // no new chapters
+        // Save metadata
+        await FoxyStorage.setMetadata(key, updatedBookmark);
 
-      // Trigger notifications
-      Notification.inform({
-        title: browser.i18n.getMessage('mangaChapterUpdateNotificationTitle'),
-        message: browser.i18n.getMessage('mangaChapterUpdateNotificationMessage', [count, manga.name]),
+        // Update manga metadata
+        const metadata = await info.extractor.updateMetadata(manga);
+
+        // Update db
+        const mangaCopy = Object.assign(manga, { chapter_list: chapterList }, metadata);
+        await FoxyStorage.DataStorage.setItem(info.key, mangaCopy);
+
+        if (count <= 0) return resolve(); // no new chapters
+
+        // Trigger notifications
+        Notification.inform({
+          title: browser.i18n.getMessage('mangaChapterUpdateNotificationTitle'),
+          message: browser.i18n.getMessage('mangaChapterUpdateNotificationMessage', [count, manga.name]),
+        });
+
+        // Update badge count
+        storage.badge_count += count;
+        browser.browserAction.setBadgeBackgroundColor({ color: 'red' });
+        browser.browserAction.setBadgeText({ text: storage.badge_count.toString() });
+
+        // Update the lastUpdate value
+        storage.lastUpdate = Date.now();
+
+        // Send message to update chapter list
+        browser.runtime.sendMessage({
+          type: 'update-chapter-list',
+          updatedBookmark,
+          chapterList,
+        });
+
+        // Update storage
+        await browser.storage.sync.set(storage);
+        return resolve();
       });
 
-      // Update badge count
-      storage.badge_count += count;
-      browser.browserAction.setBadgeBackgroundColor({ color: 'red' });
-      browser.browserAction.setBadgeText({ text: storage.badge_count.toString() });
-
-      // Update the lastUpdate value
-      storage.lastUpdate = Date.now();
-
-      // Send message to update chapter list
-      browser.runtime.sendMessage({
-        type: 'update-chapter-list',
-        bookmark,
-        chapterList,
-      });
-
-      // Update storage
-      await browser.storage.sync.set(storage);
+      promises.push(promise);
     });
+
+    // Wait for all promises to resolve.
+    await Promise.all(promises);
 
     await browser.storage.sync.set({ last_chapter_update: new Date() });
   } catch (err) {
@@ -475,6 +492,8 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       return FoxyStorage.DataStorage.getItem(message.manga_key);
     case 'get-bookmark-data':
       return FoxyStorage.getMetadata(message.key);
+    case 'refresh-database':
+      return updateMangaChapterList({ name: 'background_update' });
     case 'import-single':
       return importManga(message.bookmark);
     case 'switch-storage':

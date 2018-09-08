@@ -4,6 +4,25 @@ import * as MangaTable from './util/manga-table';
 import * as Import from './util/import';
 import Export from './util/export';
 
+async function refreshMangaDatabaseListener(e) {
+  const btn = e.target;
+
+  try {
+    btn.disabled = true;
+
+    await browser.runtime.sendMessage({
+      type: 'refresh-database',
+    });
+
+    btn.disabled = false;
+
+    // Reload the page
+    window.location.reload();
+  } catch (err) {
+    throw err;
+  }
+}
+
 /**
  * Initializes the bookmark table.
  * @param {object~DOMElement} table Required. The table body to append the rows.
@@ -55,6 +74,10 @@ async function initTable(table) {
   // Add listener to export button
   const exportBtn = document.getElementById('export-btn');
   exportBtn.onclick = Export;
+
+  // Add listener to refresh database
+  const refreshBtn = document.getElementById('db-refresh-btn');
+  refreshBtn.onclick = refreshMangaDatabaseListener;
 
   Import.initModal();
 

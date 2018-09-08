@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- `Refresh Database` button in the Dashboard page. This button forces the database to update its data (could be used to manually check for new chapter updates).
+
 ### Fixed
 
 - Kissmanga error #302 and #500 when adding new manga. This was due to proxying when resolving the Cloudflare challenge.
+- Database disappears after Firefox 62.0 update. Firefox changed Foxy's ID which broke the persistent database. Changed the logic when updating chapter list to fix that.
 
 ## [0.7.4] - 2018-07-09
 ### Added
